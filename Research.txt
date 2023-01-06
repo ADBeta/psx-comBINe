@@ -1,0 +1,30 @@
+File type notes:
+.cue
+	Plaintext file containing track information
+	MODEx/sect size(?)
+	Cue Files have tracks and indexes, when combines, the tracks are indexed.
+	
+	
+	
+	
+.bin
+	
+	
+	
+What does cdMage do?
+	Changes cue file to have no files, just indexes. 
+	Somehow keeps track of tine (?) in the cue as the bins get merged.
+
+
+	It seems that the .bin files just get appended ontop of eachother. Mimic this 
+	behaviour and cmp my binary with cdMage binary.
+
+	Tested via cat and this is correct. They are just appended.
+
+	Pull filenames in order from the cue file
+
+
+My code plan
+	First, read bin files until they end, and push the bytes to output file.
+	Append to output file as going. If this prooves to be too slow, pull into
+	a buffer RAM chunk, before pushing out.
