@@ -22,6 +22,8 @@ want to test it out.
 * if a .cue FILE is not recognised, pause and ask for confirm rather than exit.
 * ^^ Add a 'continue y/N' prompt function to call any time
 * make a verbose error handler
+* Parent directory handler may not play nice with windows. make a test for this  
+before full deploy.  
 
 ## Changelog
 * 0.0.1 - Initial base design.  
@@ -30,6 +32,8 @@ want to test it out.
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
 checking  
 * 0.3.2 - Swap char* vect to string, and convert in file open routine
+* 0.4.2 - .cue file skimming complete. Bin files now have paths and filenames  
+stored in the binFile vector ready for append and dump.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  

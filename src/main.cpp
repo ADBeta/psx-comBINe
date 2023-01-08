@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.3.2
+* v0.4.2
 * 08 Jan 2023
 *******************************************************************************/
 
@@ -20,7 +20,7 @@
 TeFiEd *cueFile;
 
 //Vector of filenames pulled from the cueFile.
-std::vector<std::string> binFilename;
+std::vector<std::string> binFile;
 
 int main(int argc, char *argv[]){
 
@@ -36,7 +36,9 @@ int main(int argc, char *argv[]){
 	cueFile = new TeFiEd(argv[1]);
 	if(cueFile->read() != 0) return 1;
 	
-	
+	//Get the parent directory of the .cue file and save to a string.
+	std::string baseDir = cueFile->filename();
+	baseDir = baseDir.substr(0, baseDir.find_last_of('/')+1);
 	
 	//Check each line that has FILE in it
 	size_t matchLineNo;
@@ -46,11 +48,11 @@ int main(int argc, char *argv[]){
 		
 		if(isLineValid(currentLineStr)) {
 			//Push the filename string to the vector.
-			binFilename.push_back(getFilenameFromLine(currentLineStr));
+			binFile.push_back(baseDir + getFilenameFromLine(currentLineStr));
 		}
 	}
 	
-	for (auto i: binFilename)
+	for (auto i: binFile)
 		std::cout << i << std::endl;
 
 	return 0;
