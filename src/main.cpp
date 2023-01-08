@@ -1,3 +1,17 @@
+/*******************************************************************************
+* This file is part of psx-comBINe. Please see the github:
+* https://github.com/ADBeta/psx-comBINe
+*
+* psx-comBINe is a simple program to combine multiple .bin files into a single
+* file, and modified the .cue file indexing, this is ideal for PSX/PS1 CD-ROMs
+* e.g. Rayman to get them ready for cue2pops or some emulators. I also find it 
+* improves reliabilty when buring to a disk to only have one .bin file.
+*
+* (c) ADBeta
+* v0.3.2
+* 08 Jan 2023
+*******************************************************************************/
+
 #include <iostream>
 #include "TeFiEd.h"
 #include "fileHandler.h"
@@ -6,10 +20,9 @@
 TeFiEd *cueFile;
 
 //Vector of filenames pulled from the cueFile.
-std::vector<char*> binFile;
+std::vector<std::string> binFilename;
 
 int main(int argc, char *argv[]){
-	test();
 
 	//Test the user input is correct ** TODO
 	if(argc == 1) {
@@ -17,14 +30,28 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	
-	//Set cueFile object to point to the cue file passed via args.
-	cueFile = new TeFiEd(argv[1]);
 	
-	//Read the cueFile, exit if any errors occur.
+	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
+	//assign it to cueFile, then read cueFile into the vector.
+	cueFile = new TeFiEd(argv[1]);
 	if(cueFile->read() != 0) return 1;
 	
-	//Populate the binFile vector with filenames from the cue file
-	std::cout << cueFile->getLine(1) << std::endl;
 	
+	
+	//Check each line that has FILE in it
+	size_t matchLineNo;
+	while(( matchLineNo = cueFile->findNext("FILE") )) {
+		//Keep the current string rather than keep calling getLine()
+		std::string currentLineStr = cueFile->getLine(matchLineNo);
+		
+		if(isLineValid(currentLineStr)) {
+			//Push the filename string to the vector.
+			binFilename.push_back(getFilenameFromLine(currentLineStr));
+		}
+	}
+	
+	for (auto i: binFilename)
+		std::cout << i << std::endl;
+
 	return 0;
 }

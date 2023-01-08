@@ -7,8 +7,8 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-* v3.0.0
-* Last Modified 26 Nov 2022
+* v3.1.2
+* Last Modified 7 Jan 2023
 */
 
 #include "TeFiEd.h"
@@ -19,6 +19,13 @@
 
 TeFiEd::TeFiEd(const char* ip_filename) {
 	m_filename = ip_filename;
+}
+
+//Destructor cleans up the vector and oher RAM garbage disposal.
+TeFiEd::~TeFiEd() {	
+	if(m_ramfile.size() != 0) {
+		this->flush();
+	}
 }
 
 /** File Metadata getters *****************************************************/
@@ -57,6 +64,28 @@ size_t TeFiEd::lines() {
 }
 
 /** Basic Functions ***********************************************************/
+//Create empty file from filename
+int TeFiEd::create() {
+	//Open file as output, truncate
+	this->m_file.open(m_filename, std::ios::out | std::ios::trunc);
+	
+	//Make sure file is open and exists
+	if(m_file.is_open() == 0) { 
+		errorMsg("create", "Could not create file");
+		return 1;
+	}
+		
+	//Close file and clear flags
+	resetAndClose();
+	
+	//If verbosity is enabled, print a nice message
+	if(this->verbose == true) {
+		std::cout << "Create " << m_filename << " Successful" << std::endl;
+	}
+	
+	return 0;
+}
+
 //Read file into RAM File. Includes byte and line length failsafe
 int TeFiEd::read() {
 	//Flush the vector
@@ -108,8 +137,14 @@ int TeFiEd::read() {
 		  << " bytes, " << this->lines() << " lines." << std::endl;
 	}
 	
+	isOpenFlag = true;
 	//Success
 	return 0;
+}
+
+bool TeFiEd::isOpen() {
+	isOpenFlag = m_file.is_open();	
+	return isOpenFlag;
 }
 
 std::string TeFiEd::getLine(size_t index) {
@@ -118,7 +153,6 @@ std::string TeFiEd::getLine(size_t index) {
 		--index;
 	}
 	
-	//TODO Segfaults if file isn't open. add failsafe
 	if(index > this->m_ramfile.size() - 1) {
 		errorMsg("getLine", "Line", index + 1, "does not exist");
 		
@@ -313,10 +347,66 @@ int TeFiEd::removeLine(size_t index) {
 	return 0;
 }
 
+size_t TeFiEd::findFirst(std::string search) {
+	size_t lineCount = lines() + 1; //Get how many lines there are in the vector
+	
+	//Search through each of them until we match the search string
+	for(size_t cLine = 1; cLine < lineCount; cLine++) {
+		std::string lineStr = getLine(cLine);
+		
+		//When current line contains the search string
+		if(lineStr.find(search) != std::string::npos) {
+			return cLine;//Return the current line number
+		}
+	}
+	
+	//If no line matches, then return 0.
+	return 0;
+}
+
+size_t TeFiEd::findNext(std::string search) {
+	/*** Setup ***/
+	//Last seach string, when new search string is given, reset to beginning
+	static std::string lastSearch;
+	//Current line is retained per call. (Init to 1 to prevent random val)
+	static size_t cLine = 0;
+	
+	//If the current and last search don't match, reset the cLine and lastSearch
+	if(search != lastSearch) {
+		cLine = 1;
+		lastSearch = search;
+	}
+	
+	/*** Runtime ***/
+	//Vector line where search is found. Set to 0 to assume no match.
+	size_t matchLine = 0;
+	
+	size_t lineCount = lines() + 1; //Get how many lines there are in the vector
+	while(cLine < lineCount) {
+		//Get current line string
+		std::string lineStr = getLine(cLine);
+		
+		//When current line contains the search string
+		if(lineStr.find(search) != std::string::npos) {
+			//Match line is this line
+			matchLine = cLine;
+			//Inc past this line for the next loop
+			++cLine;
+			//Break the loop to go to the return section
+			break;
+		}
+		
+		//Inc to next line if no match on this line.
+		++cLine;
+	}
+	
+	//Return matchLine. 0 if no match, cLine if matched.
+	return matchLine;
+}
+
 /** Internal only functions ***************************************************/
 //Checks the validity of a passed string, and if it will exceed the failsafes
 int TeFiEd::checkString(std::string testString) {
-	
 	//Check the number of chars in the input doesn't exceed MAX_STRING_SIZE
 	size_t stringSize = testString.size();
 	
@@ -324,7 +414,7 @@ int TeFiEd::checkString(std::string testString) {
 		errorMsg("Input string exceeds MAX_STRING_SIZE :",
 			MAX_STRING_SIZE);
 		
-		return -1;
+		return 1;
 	}
 	
 	//Check if adding the input string to RAM File will cause a RAM failsafe.
@@ -333,7 +423,7 @@ int TeFiEd::checkString(std::string testString) {
 		errorMsg("String addition causes file to exceed MAX_RAM_BYTES :",
 			MAX_RAM_BYTES);
 		
-		return -2;
+		return 2;
 	}
 	
 	//Otherwise exit with pass
@@ -348,6 +438,8 @@ void TeFiEd::resetAndClose() {
 	m_file.seekg(0, std::ios::beg);
 	//Close file
 	m_file.close();
+	
+	isOpenFlag = false;
 }
 
 /** Error Message *************************************************************/

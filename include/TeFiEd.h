@@ -19,11 +19,13 @@
 class TeFiEd {
 	public:
 	//Object constructor is used to pass the filename.
-	//e.g. TeFiEd file("test.txt");
 	TeFiEd(const char*);
 	
+	//Destructor cleans up RAM.
+	~TeFiEd();
+	
 	/** Configuration Functions ***********************************************/
-	//Sets the verbose flag. See API_USAGE for notes
+	//Sets the verbose flag.
 	void setVerbose(bool verb) { this->verbose = verb; }
 	
 	//Sets the maximum -BYTES- the file can have until failsafe triggers.	
@@ -43,8 +45,15 @@ class TeFiEd {
 	size_t lines();
 	
 	/** Basic Functions *******************************************************/
-	//Reads input file into the RAM file (vector)
+	//Creates an empty file from the filename
+	int create();
+	
+	//Reads input file into the RAM vector
 	int read();
+	
+	//Returns if the file is open correctly. Preferably check return status of 
+	//read(), but this is an okay second option.
+	bool isOpen();
 	
 	//Return the line string at the passed index
 	std::string getLine(size_t);
@@ -52,8 +61,7 @@ class TeFiEd {
 	//Overwrite the original file with the RAM file
 	int overwrite();
 	
-	//Writes the RAM file out to another TeFiEd Object. See API_USAGE for notes.
-	//TODO
+	//Writes the RAM file out to another TeFiEd Object.
 	int writeTo(TeFiEd &);
 	
 	//Deletes all the data in the RAM File, and shrinks the vector to save space
@@ -75,6 +83,13 @@ class TeFiEd {
 	//Remove the specified line from RAM File.
 	int removeLine(size_t line);
 	
+	//Find the first line containing a string. Return 0 when no match is found.
+	size_t findFirst(std::string);
+	
+	//Find the next instance of a line containing string. Returns 0 when no 
+	//match is found.
+	size_t findNext(std::string);
+	
 	private:
 	/** Configuration variables ***********************************************/
 	//All of the configuration variables can be edited, using API calls.
@@ -83,7 +98,7 @@ class TeFiEd {
 	size_t MAX_RAM_BYTES = 8388608; //8MB 	
 	
 	//Maximum length (in chars) of any one line before failsafe triggets.
-	size_t MAX_STRING_SIZE = 1000;
+	size_t MAX_STRING_SIZE = 5000;
 	
 	//If verbosity is enabled, the API will print updates to std::cout.
 	//Error messages are enabled regardless. 
@@ -93,6 +108,9 @@ class TeFiEd {
 	const char* m_filename; //Filename as char array
 	std::fstream m_file; //fsteam object of file
 	std::vector<std::string> m_ramfile; //File RAM vector	
+	
+	//Flag to see if the file is open successfully.
+	bool isOpenFlag = false;
 	
 	/** Internal use functions ************************************************/
 	//Reset flags/bits then close the file
