@@ -7,7 +7,7 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-* v3.1.2
+* v3.2.2
 * Last Modified 7 Jan 2023
 */
 
@@ -32,6 +32,10 @@ TeFiEd::~TeFiEd() {
 std::string TeFiEd::filename() {
 	//Convert the const char to a string
 	return (std::string)m_filename;
+}
+
+const char *TeFiEd::filename_c_str() {
+	return m_filename;
 }
 
 size_t TeFiEd::bytes() {

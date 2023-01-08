@@ -15,7 +15,6 @@ want to test it out.
 ## How To Use
 
 ## TO-DO
-* cue decode to list of files
 * binary file append handler
 * help flag
 * user input protection
@@ -24,6 +23,7 @@ want to test it out.
 * make a verbose error handler
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
+* Add function to create an output directory at parent directory.
 
 ## Changelog
 * 0.0.1 - Initial base design.  
@@ -35,6 +35,7 @@ checking
 * 0.4.2 - .cue file skimming complete. Bin files now have paths and filenames  
 stored in the binFile vector ready for append and dump.
 * 0.4.3 - Moved some variables and types to common.h
+* 0.4.4 - Updated TeFiEd package to be up to date with main.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  

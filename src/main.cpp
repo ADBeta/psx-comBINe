@@ -58,7 +58,8 @@ int main(int argc, char *argv[]){
 	for (auto i: binFile)
 		std::cout << i << std::endl;
 	
-	const char* binOutFile = (cueFile->filename())->replace(".cue", ".bin");
+	
+	std::string binOutFile = cueFile->filename();
 	
 	std::cout << binOutFile << std::endl;
 		

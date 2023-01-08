@@ -38,6 +38,9 @@ class TeFiEd {
 	//Return the filename string (converted from const char* to string)
 	std::string filename();
 	
+	//Return the filename string as a c string
+	const char* filename_c_str();
+	
 	//Scan the vector and return the number of bytes used. (Can be slow)
 	size_t bytes();
 	
