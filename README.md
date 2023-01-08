@@ -14,11 +14,22 @@ want to test it out.
 
 ## How To Use
 
-
-## TO-DO 
+## TO-DO
+* cue decode to list of files
+* binary file append handler
+* help flag
+* user input protection
+* if a .cue FILE is not recognised, pause and ask for confirm rather than exit.
+* ^^ Add a 'continue y/N' prompt function to call any time
+* make a verbose error handler
 
 ## Changelog
 * 0.0.1 - Initial base design.  
+* 0.1.1 - Finished TeFiEd integration
+* 0.2.1 - Added .cue file line detection
+* 0.3.1 - .cue file lines get detected and stripped of file info, with error  
+checking  
+* 0.3.2 - Swap char* vect to string, and convert in file open routine
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
