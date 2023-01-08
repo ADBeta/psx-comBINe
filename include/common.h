@@ -21,4 +21,7 @@
 //Vector of filenames pulled from the cueFile.
 extern std::vector<std::string> binFile;
 
+//External error printing function TODO
+extern void test();
+
 #endif

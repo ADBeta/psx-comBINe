@@ -56,3 +56,15 @@ std::string getFilenameFromLine(std::string line) {
 	
 	return filename;
 }
+
+int dumpBinFiles(const char* outputFilename) {
+	//Create the new output file.
+
+
+	//Return 0 for success
+	return 0;
+}
+
+void test() {
+	std::cout << "this is an extern function test" << std::endl;
+}	

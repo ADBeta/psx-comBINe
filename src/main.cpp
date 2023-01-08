@@ -13,6 +13,7 @@
 *******************************************************************************/
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "common.h"
 #include "TeFiEd.h"
@@ -32,7 +33,6 @@ int main(int argc, char *argv[]){
 		std::cout << "not enough args" << std::endl;
 		return 1;
 	}
-	
 	
 	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
 	//assign it to cueFile, then read cueFile into the vector.
@@ -57,6 +57,10 @@ int main(int argc, char *argv[]){
 	
 	for (auto i: binFile)
 		std::cout << i << std::endl;
-
+	
+	const char* binOutFile = (cueFile->filename())->replace(".cue", ".bin");
+	
+	std::cout << binOutFile << std::endl;
+		
 	return 0;
 }
