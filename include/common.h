@@ -8,22 +8,17 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
+*
+* This file contains extern variables and declarations of types used between 
+* program modules.
 *******************************************************************************/
 #include <iostream>
-#include "common.h"
+#include <vector>
 
-#ifndef fileHandler_H
-#define fileHandler_H
+#ifndef COMMON_H
+#define COMMON_H
 
-//Checks a .cue file line to make sure it follows the rules my program knows
-//FILE "xxx.bin" BINARY 
-//If no .bin and no BINARY, file is not valid
-bool isLineValid(std::string line);
-
-//Pulls the filename out of a valid .cue file line, converts it to char* and 
-//pushes it to the vector array.
-std::string getFilenameFromLine(std::string line);
-
-//Takes the vector of 
+//Vector of filenames pulled from the cueFile.
+extern std::vector<std::string> binFile;
 
 #endif

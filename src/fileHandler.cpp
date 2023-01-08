@@ -9,10 +9,10 @@
 *
 * (c) ADBeta
 *******************************************************************************/
+#include <iostream>
 
 #include "fileHandler.h"
-
-#include <iostream>
+#include "common.h"
 
 bool isLineValid(std::string line) {
 	//Make sure the file extension is .bin

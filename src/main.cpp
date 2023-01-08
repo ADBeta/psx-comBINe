@@ -11,10 +11,13 @@
 * v0.4.2
 * 08 Jan 2023
 *******************************************************************************/
-
 #include <iostream>
+#include <vector>
+
+#include "common.h"
 #include "TeFiEd.h"
 #include "fileHandler.h"
+
 
 //Cue file TeFiEd Object. Gets Set later.
 TeFiEd *cueFile;
