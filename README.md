@@ -34,6 +34,7 @@ checking
 * 0.3.2 - Swap char* vect to string, and convert in file open routine
 * 0.4.2 - .cue file skimming complete. Bin files now have paths and filenames  
 stored in the binFile vector ready for append and dump.
+* 0.4.3 - Moved some variables and types to common.h
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
