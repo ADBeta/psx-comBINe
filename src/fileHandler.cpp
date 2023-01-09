@@ -33,6 +33,26 @@ void errorMsg(unsigned int errLevel, std::string msg) {
 	if(errLevel > 1) exit(EXIT_FAILURE);
 }
 
+//Prompt user if they wish to continue then return their choice
+bool promptContinue() {
+	//Prompt
+	std::cout << "Would you like to continue? y/N  ";
+	
+	//Clear buffer
+	std::cin.clear();
+	
+	//Get input
+	std::string userInput;
+	std::getline(std::cin, userInput);
+	
+	//Return value
+	if(userInput == "y" || userInput == "Y") {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 bool isLineValid(std::string line) {
 	//Make sure the file extension is .bin
 	//TODO add continue option

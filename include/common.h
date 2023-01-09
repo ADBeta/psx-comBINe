@@ -27,6 +27,10 @@
 //errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
 extern void errorMsg(unsigned int errLevel, std::string msg);
 
+//Prompt user if they wish to continue then return a bool value based on their
+//choice
+extern bool promptContinue();
+
 //Input and output .cue file TeFiEd pointers. Both get set and used later. 
 extern TeFiEd *cueFileIn, *cueFileOut;
 

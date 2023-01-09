@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.6.5
+* v0.7.5
 * 09 Jan 2023
 *******************************************************************************/
 #include <iostream>
@@ -67,6 +67,8 @@ int main(int argc, char *argv[]){
 		errorMsg(2, "Could not create output files. Please check privelage levels");
 	}
 	
-		
+	while(true) {
+		std::cout << promptContinue() << std::endl;
+	}
 	return 0;
 }
