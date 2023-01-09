@@ -10,6 +10,8 @@
 * (c) ADBeta
 *******************************************************************************/
 #include <iostream>
+#include<fstream>
+
 #include "common.h"
 
 #ifndef fileHandler_H
@@ -27,7 +29,7 @@ std::string getFilenameFromLine(std::string line);
 //Pass a file suffix and a base directory, and use them to initilize and 
 //set the output .bin and .cue files
 //Return error status. (0 Success, 1 Failure)
-//int setupOutpu
+int setupOutputFiles(std::string baseDirectory, std::string filePrefix);
 
 //Opens all the files in the global binFile vector and dumps them to a single 
 //bin file, and logs the transistion byte of each file in the TODO

@@ -12,10 +12,9 @@
 * 08 Jan 2023
 *******************************************************************************/
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
-
-#include <boost/filesystem.hpp>
 
 #include "common.h"
 #include "TeFiEd.h"
@@ -25,12 +24,13 @@
 //declared in common.h to be global for each module.
 TeFiEd *cueFileIn, *cueFileOut;
 
+//Input and output .bin files. Global to all modules.
+std::ofstream binFileOut, binFileIn;
+
 //Vector of filenames pulled from the cueFile. Global to all modules.
-std::vector<std::string> binFile;
+std::vector<std::string> binFilename;
 
 int main(int argc, char *argv[]){
-	
-	boost::filesystem::create_directory("./test");
 
 	//Test the user input is correct ** TODO
 	if(argc == 1) {
@@ -53,16 +53,17 @@ int main(int argc, char *argv[]){
 		
 		if(isLineValid(cLineStr)) {
 			//Push the filename string to the vector.
-			binFile.push_back(cueFileIn->parentDir()
+			binFilename.push_back(cueFileIn->parentDir()
 			                                  + getFilenameFromLine(cLineStr));
 		}
 	}
 	
 	
 	//TODO
-	for (auto i: binFile)
+	for (auto i: binFilename)
 		std::cout << i << std::endl;
 	
+	setupOutputFiles("./testDir", "test");
 	//Create output directory, and setup .cue and .bin output file objects.
 	
 		

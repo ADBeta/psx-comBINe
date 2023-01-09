@@ -33,8 +33,10 @@ before full deploy.
 * Look into creating a better way to create a new directory that doesn't require  
 C++17  
 * Create user input handler for flags
+* Add some error checking for dots and slashes in a few functions that can take  
+user input - setupOutputFiles  
 
-## Changelog
+## Changelog (Reminder for self)
 * 0.0.1 - Initial base design.  
 * 0.1.1 - Finished TeFiEd integration
 * 0.2.1 - Added .cue file line detection
@@ -46,6 +48,7 @@ stored in the binFile vector ready for append and dump.
 * 0.4.3 - Moved some variables and types to common.h
 * 0.4.4 - Updated TeFiEd package to be up to date with main.
 * 0.4.5 - Included boost in make and src files. 
+* 0.5.5 - Implimented filesystem managment and file creation
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
