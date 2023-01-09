@@ -28,22 +28,16 @@ for directory creation and detection.
 * if a .cue FILE is not recognised, pause and ask for confirm rather than exit.
 * ^^ Add a 'continue y/N' prompt function to call any time
 * make a verbose error handler
+* make sure program can handle .BIN .bin .CUE and .cue files.
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
-* Look into creating a better way to create a new directory that doesn't require  
-C++17  
-* Create user input handler for flags
+* Create user input handler for program args
 * Add some error checking for dots and slashes in a few functions that can take  
 user input - setupOutputFiles  
 
 ## Changelog (Reminder for self)
-* 0.0.1 - Initial base design.  
-* 0.1.1 - Finished TeFiEd integration
-* 0.2.1 - Added .cue file line detection
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
 checking  
-* 0.3.2 - Swap char* vect to string, and convert in file open routine
-* 0.4.2 - .cue file skimming complete. Bin files now have paths and filenames  
 stored in the binFile vector ready for append and dump.
 * 0.4.3 - Moved some variables and types to common.h
 * 0.4.4 - Updated TeFiEd package to be up to date with main.
