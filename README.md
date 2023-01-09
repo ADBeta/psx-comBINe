@@ -27,7 +27,6 @@ for directory creation and detection.
 * user input protection
 * if a .cue FILE is not recognised, pause and ask for confirm rather than exit.
 * ^^ Add a 'continue y/N' prompt function to call any time
-* make a verbose error handler
 * make sure program can handle .BIN .bin .CUE and .cue files.
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
@@ -40,10 +39,10 @@ user input - setupOutputFiles
 checking  
 stored in the binFile vector ready for append and dump.
 * 0.4.3 - Moved some variables and types to common.h
-* 0.4.4 - Updated TeFiEd package to be up to date with main.
 * 0.4.5 - Included boost in make and src files. 
 * 0.5.5 - Implimented filesystem managment and file creation
 * 0.6.5 - Added error message system
+* 0.7.5 - Added continue prompting function.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
