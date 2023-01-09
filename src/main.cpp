@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.5.5
+* v0.6.5
 * 09 Jan 2023
 *******************************************************************************/
 #include <iostream>
@@ -58,13 +58,14 @@ int main(int argc, char *argv[]){
 		}
 	}
 	
-	
 	//TODO
 	for (auto i: binFilename)
 		std::cout << i << std::endl;
 	
-	setupOutputFiles("./testDir", "test");
 	//Create output directory, and setup .cue and .bin output file objects.
+	if(setupOutputFiles("./testDir", "test") != 0) {
+		errorMsg(2, "Could not create output files. Please check privelage levels");
+	}
 	
 		
 	return 0;

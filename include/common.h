@@ -13,6 +13,7 @@
 * program modules.
 *******************************************************************************/
 #include <iostream>
+#include <string>
 #include <vector>
 #include<fstream>
 
@@ -20,6 +21,11 @@
 
 #ifndef COMMON_H
 #define COMMON_H
+
+//Error message handling function. Declared at very top of fileHandler.cpp
+//but want all modules to have access to these functions
+//errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
+extern void errorMsg(unsigned int errLevel, std::string msg);
 
 //Input and output .cue file TeFiEd pointers. Both get set and used later. 
 extern TeFiEd *cueFileIn, *cueFileOut;

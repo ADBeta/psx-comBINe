@@ -17,16 +17,34 @@
 #include "TeFiEd.h"
 #include "common.h"
 
+//Error message handler
+//errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
+void errorMsg(unsigned int errLevel, std::string msg) {
+	if(errLevel == 0) {
+		std::cerr << "Warn: ";
+	} else {
+		std::cerr << "Error: ";
+	}
+	
+	//Print the user message
+	std::cerr << msg << std::endl;
+	
+	//If the errLevel is > 1 then exit the program as a fatal error
+	if(errLevel > 1) exit(EXIT_FAILURE);
+}
+
 bool isLineValid(std::string line) {
 	//Make sure the file extension is .bin
+	//TODO add continue option
+	
 	if(line.find(".bin") == std::string::npos) {
-		std::cout << "Error, file does not have .bin extension" << std::endl;
+		errorMsg(0, "file does not have .bin extension");
 		return false;
 	}
 	
 	//Make sure the file type is BINARY
 	if(line.find("BINARY") == std::string::npos) {
-		std::cout << "Error, file is not of type BINARY" << std::endl;
+		errorMsg(0, "file is not of type BINARY");
 		return false;
 	}
 	
@@ -40,18 +58,12 @@ std::string getFilenameFromLine(std::string line) {
 	//First Quote
 	firstQuote = line.find('"') + 1;
 	
-	if( firstQuote == std::string::npos) {
-		//TODO error message
-		std::cout << "Error, No initial \" found " << std::endl;
-		exit(EXIT_FAILURE); //End execution.
-	}
-	
 	//Last Quote
-	lastQuote = line.find('"', firstQuote);
+	if(firstQuote != std::string::npos) lastQuote = line.find('"', firstQuote);
 	
-	if(lastQuote == std::string::npos) {
-		std::cout << "Error, No Seconds \" found " << std::endl;
-		exit(EXIT_FAILURE); //End execution.
+	if(firstQuote == std::string::npos || lastQuote == std::string::npos) {
+		//Fatal error
+		errorMsg(2, "A file path in the .cue file is corrupted - Missing quotes");	
 	}
 	
 	//Create a new string from that substring - subst(firstQuite, length)
@@ -85,7 +97,8 @@ int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
 	
 	//If cueFileOut can't be created, error
 	if(cueFileOut->create() != 0) {
-		std::cout << "Cannot open cue file!" << std::endl;
+		//Serious error
+		errorMsg(1, "Can not open output .cue file");
 		return 1;
 	}
 	
@@ -94,8 +107,8 @@ int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
 	
 	//If bin file doesn't exist, error
 	if(!binFileOut) {
-		//TODO error handling
-		std::cout << "Cannot open bin file!" << std::endl;
+		//Serious error
+		errorMsg(1, "Can not open output .bin file");
 		return 1;
 	}
 	
