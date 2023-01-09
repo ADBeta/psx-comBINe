@@ -24,6 +24,11 @@ bool isLineValid(std::string line);
 //pushes it to the vector array.
 std::string getFilenameFromLine(std::string line);
 
+//Pass a file suffix and a base directory, and use them to initilize and 
+//set the output .bin and .cue files
+//Return error status. (0 Success, 1 Failure)
+//int setupOutpu
+
 //Opens all the files in the global binFile vector and dumps them to a single 
 //bin file, and logs the transistion byte of each file in the TODO
 //Returns error status (0 success, 1 failure)

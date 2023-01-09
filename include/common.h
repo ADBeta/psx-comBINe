@@ -15,13 +15,15 @@
 #include <iostream>
 #include <vector>
 
+#include "TeFiEd.h"
+
 #ifndef COMMON_H
 #define COMMON_H
 
+//Input and output .cue file TeFiEd pointers. Both get set and used later. 
+extern TeFiEd *cueFileIn, *cueFileOut;
+
 //Vector of filenames pulled from the cueFile.
 extern std::vector<std::string> binFile;
-
-//External error printing function TODO
-extern void test();
 
 #endif

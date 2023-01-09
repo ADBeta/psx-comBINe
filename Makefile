@@ -17,7 +17,7 @@ CC := g++
 #Flags
 CPPFLAGS := -Iinclude -MMD -MP #NOTE. Include path is to /usr/include. this may be arch specific
 CFLAGS   := -Wall
-LDFLAGS  := -Llib
+LDFLAGS  := -Llib -lboost_system -lboost_filesystem
 LDLIBS   := -lm 
 
 .PHONY: all clean

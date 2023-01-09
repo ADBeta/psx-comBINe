@@ -8,25 +8,29 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.4.2
+* v0.4.4
 * 08 Jan 2023
 *******************************************************************************/
 #include <iostream>
 #include <vector>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include "common.h"
 #include "TeFiEd.h"
 #include "fileHandler.h"
 
+//Input and output .cue file TeFiEd pointers. Both get set and used later. 
+//declared in common.h to be global for each module.
+TeFiEd *cueFileIn, *cueFileOut;
 
-//Cue file TeFiEd Object. Gets Set later.
-TeFiEd *cueFile;
-
-//Vector of filenames pulled from the cueFile.
+//Vector of filenames pulled from the cueFile. Global to all modules.
 std::vector<std::string> binFile;
 
 int main(int argc, char *argv[]){
+	
+	boost::filesystem::create_directory("./test");
 
 	//Test the user input is correct ** TODO
 	if(argc == 1) {
@@ -34,34 +38,33 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 	
+	
 	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
 	//assign it to cueFile, then read cueFile into the vector.
-	cueFile = new TeFiEd(argv[1]);
-	if(cueFile->read() != 0) return 1;
+	cueFileIn = new TeFiEd(argv[1]);
+	if(cueFileIn->read() != 0) return 1;
 	
-	//Get the parent directory of the .cue file and save to a string.
-	std::string baseDir = cueFile->filename();
-	baseDir = baseDir.substr(0, baseDir.find_last_of('/')+1);
 	
 	//Check each line that has FILE in it
 	size_t matchLineNo;
-	while(( matchLineNo = cueFile->findNext("FILE") )) {
+	while(( matchLineNo = cueFileIn->findNext("FILE") )) {
 		//Keep the current string rather than keep calling getLine()
-		std::string currentLineStr = cueFile->getLine(matchLineNo);
+		std::string cLineStr = cueFileIn->getLine(matchLineNo);
 		
-		if(isLineValid(currentLineStr)) {
+		if(isLineValid(cLineStr)) {
 			//Push the filename string to the vector.
-			binFile.push_back(baseDir + getFilenameFromLine(currentLineStr));
+			binFile.push_back(cueFileIn->parentDir()
+			                                  + getFilenameFromLine(cLineStr));
 		}
 	}
 	
+	
+	//TODO
 	for (auto i: binFile)
 		std::cout << i << std::endl;
 	
+	//Create output directory, and setup .cue and .bin output file objects.
 	
-	std::string binOutFile = cueFile->filename();
-	
-	std::cout << binOutFile << std::endl;
 		
 	return 0;
 }

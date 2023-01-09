@@ -64,7 +64,3 @@ int dumpBinFiles(const char* outputFilename) {
 	//Return 0 for success
 	return 0;
 }
-
-void test() {
-	std::cout << "this is an extern function test" << std::endl;
-}	

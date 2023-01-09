@@ -7,8 +7,8 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-* v3.2.2
-* Last Modified 7 Jan 2023
+* v3.3.2
+* Last Modified 9 Jan 2023
 */
 
 #include "TeFiEd.h"
@@ -36,6 +36,24 @@ std::string TeFiEd::filename() {
 
 const char *TeFiEd::filename_c_str() {
 	return m_filename;
+}
+
+std::string TeFiEd::parentDir() {
+	//Get the filename into a sting object.
+	std::string dir = (std::string)m_filename;
+	
+	//Get the index of the last / in the filename
+	size_t lastSlash = dir.find_last_of('/');
+	
+	//If one is found, create a substring from 0 to index of /
+	if(lastSlash != std::string::npos) {
+		dir = dir.substr(0, lastSlash + 1);
+	} else {
+		//If no / is found, assume the parent directory to be blank?
+		dir = "";
+	}
+	
+	return dir;
 }
 
 size_t TeFiEd::bytes() {

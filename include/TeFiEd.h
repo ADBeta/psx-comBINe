@@ -41,6 +41,10 @@ class TeFiEd {
 	//Return the filename string as a c string
 	const char* filename_c_str();
 	
+	//Returns the parent directory of the file. 
+	//e.g. /usr/test.txt will return /usr/
+	std::string parentDir();
+	
 	//Scan the vector and return the number of bytes used. (Can be slow)
 	size_t bytes();
 	
