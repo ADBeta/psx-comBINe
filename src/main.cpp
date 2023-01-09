@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.4.4
-* 08 Jan 2023
+* v0.5.5
+* 09 Jan 2023
 *******************************************************************************/
 #include <iostream>
 #include <fstream>
