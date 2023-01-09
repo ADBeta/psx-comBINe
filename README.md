@@ -43,6 +43,7 @@ stored in the binFile vector ready for append and dump.
 * 0.4.4 - Updated TeFiEd package to be up to date with main.
 * 0.4.5 - Included boost in make and src files. 
 * 0.5.5 - Implimented filesystem managment and file creation
+* 0.6.5 - Added error message system
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
