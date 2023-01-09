@@ -12,6 +12,13 @@ This project is just a hobby, and is designed for Linux to begin with. I will
 eventually port it to a Windows exe, feel free to do this with the files if you  
 want to test it out.  
 
+This program depends boost::filesystem, make sure this is installed before use  
+If this causes problems with older systems, feel free to create your own fork,  
+as my code needs to be as universal as possible - fileHandler.cpp uses boost  
+for directory creation and detection.  
+
+## Compilation
+
 ## How To Use
 
 ## TO-DO
@@ -23,7 +30,9 @@ want to test it out.
 * make a verbose error handler
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
-* Add function to create an output directory at parent directory.
+* Look into creating a better way to create a new directory that doesn't require  
+C++17  
+* Create user input handler for flags
 
 ## Changelog
 * 0.0.1 - Initial base design.  
@@ -36,6 +45,7 @@ checking
 stored in the binFile vector ready for append and dump.
 * 0.4.3 - Moved some variables and types to common.h
 * 0.4.4 - Updated TeFiEd package to be up to date with main.
+* 0.4.5 - Included boost in make and src files. 
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
