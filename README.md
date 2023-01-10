@@ -22,21 +22,15 @@ for directory creation and detection.
 ## How To Use
 
 ## TO-DO
-* binary file append handler
 * help flag
 * user input protection
-* if a .cue FILE is not recognised, pause and ask for confirm rather than exit.
 * make sure program can handle .BIN .bin .CUE and .cue files.
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
 * Create user input handler for program args
-* Add some error checking for dots and slashes in a few functions that can take  
-user input - setupOutputFiles  
 * optimize dump more?
 * add cleanup function to close files
 * add try catch return error handling for dump function
-* change most std::string function args to const
-* make getFileName able to handler hidden files (more than 1 . in the name)
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
@@ -50,6 +44,7 @@ stored in the binFile vector ready for append and dump.
 * 0.8.7 - Completed binary dump function (medium optimized)
 * 0.8.8 - Included byte and MiB printing functions
 * 0.9.8 - Complete refactor of most functions
+* 0.10.8 - Testing phase for cue INDEX beings
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
