@@ -46,6 +46,7 @@ stored in the binFile vector ready for append and dump.
 * 0.6.5 - Added error message system
 * 0.7.5 - Added continue prompting function.
 * 0.8.7 - Completed binary dump function (medium optimized)
+* 0.8.8 - Included byte and MiB printing functions
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
