@@ -18,6 +18,10 @@
 #include "TeFiEd.h"
 #include "common.h"
 
+//Each entity is at which byte a file transistion to the next file. This is for
+//.cue output INDEX value (in time format which gets converted later)
+std::vector<size_t> fileChangeByte;
+
 std::string getFileName(const std::string inFn) {	
 	//TODO Windows may not work with this methodology	
 	std::string fileName;
@@ -140,7 +144,8 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 			++readBytes;
 		}
 		
-		//TODO Log the end byte of the current byte to convert to INDEX in .cue
+		//Log the transistion byte of the current file for INDEX in .cue
+		fileChangeByte.push_back(readBytes);
 		
 		//Close the current file for next loop
 		binFileIn.close();

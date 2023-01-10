@@ -28,3 +28,57 @@ My code plan
 	First, read bin files until they end, and push the bytes to output file.
 	Append to output file as going. If this prooves to be too slow, pull into
 	a buffer RAM chunk, before pushing out.
+	
+153.6 kB or 150KiB CD 1x Audio speed
+
+1: 98043120bytes         638 seconds
+2: 100042320bytes         651 seconds
+3: 112291536bytes         731 seconds
+4: 124176192bytes         808 seconds
+5: 135698640bytes         883 seconds
+6: 140689584bytes         915 seconds
+7: 153345696bytes         998 seconds
+8: 164179008bytes         1068 seconds
+9: 174175008bytes         1133 seconds
+10: 185633952bytes         1208 seconds
+11: 200964288bytes         1308 seconds
+12: 211955184bytes         1379 seconds
+13: 224180880bytes         1459 seconds
+14: 235548096bytes         1533 seconds
+15: 247150512bytes         1609 seconds
+16: 259228032bytes         1687 seconds
+17: 267544704bytes         1741 seconds
+18: 277747680bytes         1808 seconds
+19: 287781312bytes         1873 seconds
+20: 299402544bytes         1949 seconds
+21: 311016720bytes         2024 seconds
+22: 324604224bytes         2113 seconds
+23: 330992256bytes         2154 seconds
+24: 337413216bytes         2196 seconds
+25: 349333152bytes         2274 seconds
+26: 361288368bytes         2352 seconds
+27: 373071888bytes         2428 seconds
+28: 385603344bytes         2510 seconds
+29: 387099216bytes         2520 seconds
+30: 388381056bytes         2528 seconds
+31: 402982272bytes         2623 seconds
+32: 414796368bytes         2700 seconds
+33: 425370960bytes         2769 seconds
+34: 437963568bytes         2851 seconds
+35: 450297456bytes         2931 seconds
+36: 461707008bytes         3005 seconds
+37: 473805696bytes         3084 seconds
+38: 485424576bytes         3160 seconds
+39: 495865104bytes         3228 seconds
+40: 504158256bytes         3282 seconds
+41: 517009584bytes         3365 seconds
+42: 528139248bytes         3438 seconds
+43: 539845152bytes         3514 seconds
+44: 551986176bytes         3593 seconds
+45: 563727360bytes         3670 seconds
+46: 574026768bytes         3737 seconds
+47: 585311664bytes         3810 seconds
+48: 596262576bytes         3881 seconds
+49: 603337392bytes         3927 seconds
+50: 610983744bytes         3977 seconds
+51: 617209488bytes         4018 seconds

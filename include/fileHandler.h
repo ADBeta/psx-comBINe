@@ -22,6 +22,9 @@
 #define _def_ARR_SIZE 104857600
 
 /** Variables *****************************************************************/
+//Each entity is at which byte a file transistion to the next file. This is for
+//.cue output INDEX value (in time format which gets converted later)
+extern std::vector<size_t> fileChangeByte;
 
 /** Functions *****************************************************************/
 //Pass input filename string, returns the file name without the extension 

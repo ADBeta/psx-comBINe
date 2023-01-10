@@ -93,6 +93,17 @@ int main(int argc, char *argv[]){
 	std::cout << std::endl;
 	
 	
+	for(size_t indx = 0; indx < fileChangeByte.size(); indx++) {
+		size_t crnt = fileChangeByte.at(indx); 
+		
+		std::cout << indx + 1 << ": " << crnt << "bytes         " <<
+		   crnt/150000 << " seconds"  << std::endl;
+	}
+	
 	//Done :)
+	
+	
+	cueFileIn->flush();
+	cueFileOut->flush();
 	return 0;
 }
