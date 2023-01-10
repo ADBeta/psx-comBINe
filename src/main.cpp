@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.8.8
+* v0.9.8
 * 10 Jan 2023
 *******************************************************************************/
 #include <iostream>
@@ -20,25 +20,26 @@
 #include "TeFiEd.h"
 #include "fileHandler.h"
 
-//Input and output .cue file TeFiEd pointers. Both get set and used later. 
-//declared in common.h to be global for each module.
+//Input and output .cue file TeFiEd pointers. Global to all modules
 TeFiEd *cueFileIn, *cueFileOut;
 
 //Input and output .bin files. Global to all modules.
 std::fstream binFileOut, binFileIn;
 
 //Vector of filenames pulled from the cueFile. Global to all modules.
-std::vector<std::string> binFilename;
+std::vector<std::string> binFilenameVect;
 
 int main(int argc, char *argv[]){
-
+	/** Get user args *********************************************************/
 	//Test the user input is correct ** TODO
 	if(argc == 1) {
 		std::cout << "not enough args" << std::endl;
 		return 1;
 	}
 	
+	/** Setup *****************************************************************/
 	
+	//TODO
 	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
 	//assign it to cueFile
 	cueFileIn = new TeFiEd(argv[1]);
@@ -48,30 +49,50 @@ int main(int argc, char *argv[]){
 	if(cueFileIn->read() != 0) return 1;
 	
 	
+	//Declare Output Directory and Output filenames for the .cue and .bin files.                                            
+	std::string outDir, cueFileOutFilename, binFileOutFilename;
+	//Output directory is input .cue parent directory, with psx-comBine appended
+	outDir = cueFileIn->parentDir() + "psx-comBINe/";
+	//Output cue filename is outDir + file name + .cue
+	cueFileOutFilename = outDir + getFileName(cueFileIn->filename()) + ".cue";
+	//Output bin filename is outDir + file name + .bin
+	binFileOutFilename = outDir + getFileName(cueFileIn->filename()) + ".bin";
+		
+	/** Program execution *****************************************************/
 	//Check each line that has FILE in it
 	size_t matchLineNo;
 	while(( matchLineNo = cueFileIn->findNext("FILE") )) {
 		//Keep the current string rather than keep calling getLine()
 		std::string cLineStr = cueFileIn->getLine(matchLineNo);
 		
-		//TODO add continue prompt?
-		if(isLineValid(cLineStr)) {
-			//Push the filename string to the vector.
-			binFilename.push_back(cueFileIn->parentDir()
-			                                  + getFilenameFromLine(cLineStr));
+		//If the current line isn't valid, prompt with continue message.
+		//Exit if false, continue if true.
+		if(lineIsValid(cLineStr) == false) {
+			if(promptContinue() == false) return 1;
 		}
+		
+		//Push the filename string to the vector.
+		binFilenameVect.push_back(cueFileIn->parentDir() + 
+		                          getFileFromCueLine(cLineStr));
 	}
 	
 	
 	//Create output directory, and setup .cue and .bin output file objects.
-	if(setupOutputFiles("/home/ash/Downloads/psx", "test") != 0) {
-		errorMsg(2, "Could not create output files. Please check privelage levels");
+	if(openOutputFiles(outDir, cueFileOutFilename, binFileOutFilename) != 0) {
+		errorMsg(2, "Exiting - Could not finish output setup. Check privilege");
 	}
+	//Print blank line for readability
+	std::cout << std::endl;
 	
 	
-	if(dumpBinFiles() != 0) {
-		errorMsg(2, "Could not dump bin files to the output bin file");
+	//Dump the binary filename vect to the binOutFile. Very verbose
+	if(dumpBinFiles(binFilenameVect, binFileOutFilename) != 0) {
+		errorMsg(2, "Exiting - Could not dump binary files");
 	}
+	//Print blank line for readability
+	std::cout << std::endl;
 	
+	
+	//Done :)
 	return 0;
 }

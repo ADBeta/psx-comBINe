@@ -39,21 +39,14 @@ const char *TeFiEd::filename_c_str() {
 }
 
 std::string TeFiEd::parentDir() {
-	//Get the filename into a sting object.
-	std::string dir = (std::string)m_filename;
+	std::string fn = this->filename();
+	//TODO Windows may not work with this methodology
 	
-	//Get the index of the last / in the filename
-	size_t lastSlash = dir.find_last_of('/');
+	//If there is no / in the filename, assume the path to be ./
+	if(fn.find('/') == std::string::npos) return "./";
 	
-	//If one is found, create a substring from 0 to index of /
-	if(lastSlash != std::string::npos) {
-		dir = dir.substr(0, lastSlash + 1);
-	} else {
-		//If no / is found, assume the parent directory to be blank?
-		dir = "";
-	}
-	
-	return dir;
+	//Otherwise return a substring of the filename string, from 0 to the last /
+	return fn.substr(0, fn.find_last_of('/') + 1);
 }
 
 size_t TeFiEd::bytes() {

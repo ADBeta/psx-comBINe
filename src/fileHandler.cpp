@@ -10,6 +10,7 @@
 * (c) ADBeta
 *******************************************************************************/
 #include <iostream>
+#include <vector>
 #include <fstream>
 #include <boost/filesystem.hpp>
 
@@ -17,6 +18,152 @@
 #include "TeFiEd.h"
 #include "common.h"
 
+std::string getFileName(const std::string inFn) {	
+	//TODO Windows may not work with this methodology	
+	std::string fileName;
+	//Create fileName from substring of inputFIle - Remove directory informaton
+	fileName = inFn.substr(inFn.find_last_of('/') + 1, inFn.length());
+	
+	//Remove the first . and anything past it in fileName
+	fileName = fileName.substr(0, fileName.find('.'));
+	
+	return fileName;	
+}
+
+bool lineIsValid(const std::string line) {
+	//Make sure the file extension is .bin	
+	if(line.find(".bin") == std::string::npos) {
+		errorMsg(0, "file does not have .bin extension");
+		return false;
+	}
+	
+	//Make sure the file type is BINARY
+	if(line.find("BINARY") == std::string::npos) {
+		errorMsg(0, "file is not of type BINARY");
+		return false;
+	}
+	
+	//File is valid
+	return true;
+}
+
+std::string getFileFromCueLine(const std::string line) {
+	//Find the first and last quote mark, and handle errors if none exist.
+	size_t firstQuote, lastQuote;
+	//First Quote
+	firstQuote = line.find('"') + 1;
+	
+	//Last Quote
+	if(firstQuote != std::string::npos) lastQuote = line.find('"', firstQuote);
+	
+	if(firstQuote == std::string::npos || lastQuote == std::string::npos) {
+		//Fatal error
+		errorMsg(2, "A filename in .cue file is corrupted (Missing quotes)");	
+	}
+	
+	//Create a new string from that substring - subst(firstQuite, length)
+	std::string filename = line.substr(firstQuote, (lastQuote - firstQuote));
+	return filename;
+}
+
+int openOutputFiles(const std::string baseDir, const std::string cueFn, 
+                    const std::string binFn) {
+                    
+	//If the base output directory doesn't exist already, create it
+	if(boost::filesystem::is_directory(baseDir) == false) {
+		//Watch for errors creating output directory
+		if( boost::filesystem::create_directory(baseDir) == false) {
+			errorMsg(1, "Can not create output director. Check privilege");
+			return 1;
+		}
+		
+		//If success print message to let user know directory has been created
+		std::cout << "Created Directory: " << baseDir << std::endl;
+	}
+
+	//Create a TeFiEd object to cueFn
+	cueFileOut = new TeFiEd(cueFn.c_str());
+	
+	//If cueFileOut can't be created, error
+	if(cueFileOut->create() != 0) {
+		//Serious error
+		errorMsg(1, "Can not create output .cue file");
+		return 1;
+	}
+	
+	//Create the output binary file to binFn
+	binFileOut.open(binFn.c_str(), std::ios::out | std::ios::binary);
+	
+	//If bin file doesn't exist, error
+	if(!binFileOut) {
+		//Serious error
+		errorMsg(1, "Can not create output .bin file");
+		return 1;
+	}
+	
+	//Return success
+	return 0;
+}
+
+int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
+	//Current byte in array and overall bytes read followers
+	size_t arrBytes = 0, readBytes = 0;
+	
+	//Create a heap byte array (From defined size in header)
+	char *byteArray = new char[_def_ARR_SIZE];
+	
+	//TODO array creation check
+
+	//Go through all filenames that were in the .cue file
+	for(size_t indx = 0; indx < binVect.size(); indx++) {
+		//Print message about file
+		std::cout << "Dumping: " << binVect.at(indx) << "    ";
+		
+		//Open the current binFilename to binFileIn and reset positions
+		binFileIn.open(binVect[indx].c_str(), std::ios::in | std::ios::binary);
+		binFileIn.seekg(0, std::ios::beg);
+		
+		//Byte pulled fron binary file
+		char cByte;
+		while(binFileIn.get(cByte)) {
+			//Put the read byte into the array
+			byteArray[arrBytes] = cByte;
+			++arrBytes;
+			
+			//If the array is full, dump it to the output file, and reset.
+			if(arrBytes == _def_ARR_SIZE) {
+				binFileOut.write(byteArray, arrBytes);
+				arrBytes = 0;
+			}
+			
+			//Keep track of how many bytes read so far
+			++readBytes;
+		}
+		
+		//TODO Log the end byte of the current byte to convert to INDEX in .cue
+		
+		//Close the current file for next loop
+		binFileIn.close();
+		
+		//Report how many bytes each file is, and that it is done.
+		std::cout << padMiBStr(arrBytes, 3) << "    Done" << std::endl;
+	}
+	
+	//Flush what is left of the byte array to the output file
+	if(arrBytes > 0) binFileOut.write(byteArray, arrBytes);
+
+	//Delete heap byte array
+	delete[] byteArray;
+	
+	//Report completion and bytes written to the output bin file
+	std::cout << std::endl << "Successfully dumped " << padByteStr(readBytes) 
+	          << " to " << outFn << std::endl;
+
+	//Return 0 for success
+	return 0;
+}
+
+/** Helper functions **********************************************************/
 //Error message handler
 //errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
 void errorMsg(unsigned int errLevel, std::string msg) {
@@ -53,151 +200,6 @@ bool promptContinue() {
 	}
 }
 
-bool isLineValid(std::string line) {
-	//Make sure the file extension is .bin
-	//TODO add continue option
-	
-	if(line.find(".bin") == std::string::npos) {
-		errorMsg(0, "file does not have .bin extension");
-		return false;
-	}
-	
-	//Make sure the file type is BINARY
-	if(line.find("BINARY") == std::string::npos) {
-		errorMsg(0, "file is not of type BINARY");
-		return false;
-	}
-	
-	//File is valid
-	return true;
-}
-
-std::string getFilenameFromLine(std::string line) {
-	//Find the first and last quote mark, and handle errors if none exist.
-	size_t firstQuote, lastQuote;
-	//First Quote
-	firstQuote = line.find('"') + 1;
-	
-	//Last Quote
-	if(firstQuote != std::string::npos) lastQuote = line.find('"', firstQuote);
-	
-	if(firstQuote == std::string::npos || lastQuote == std::string::npos) {
-		//Fatal error
-		errorMsg(2, "A file path in the .cue file is corrupted - Missing quotes");	
-	}
-	
-	//Create a new string from that substring - subst(firstQuite, length)
-	std::string filename = line.substr(firstQuote, (lastQuote - firstQuote));
-	
-	return filename;
-}
-
-int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
-	//Always make sure baseDirectory has a / at the end for easier catenation.
-	if(baseDirectory.back() != '/') baseDirectory.push_back('/');
-	
-	//If the fileprefix has / in it, tell user
-	if(filePrefix.find('/') != std::string::npos) {
-		errorMsg(1, "Output filePrefix contains / This should not be a directory");
-	}
-	
-	//If the filePrefix contains .
-	if(filePrefix.find('.') != std::string::npos) {
-		errorMsg(1, "Output filePrefix contains . : Suffix should not be provided");
-	}
-	
-	//If the baseDirectory doesn't exist, make it
-	if(boost::filesystem::is_directory(baseDirectory) == false) {
-		boost::filesystem::create_directory(baseDirectory);
-		//Print message to let user know directory has been created
-		std::cout << "Created Directory: " << baseDirectory << std::endl;
-	}
-
-	//Set the global strings of Output filenames. Will be converted to c_str
-	cueFileOutFilename = baseDirectory + filePrefix + ".cue";
-	binFileOutFilename = baseDirectory + filePrefix + ".bin";
-	
-	//Link TeFiEd object cueFileOut to prefix.cue in the directory
-	cueFileOut = new TeFiEd(cueFileOutFilename.c_str());
-	
-	//If cueFileOut can't be created, error
-	if(cueFileOut->create() != 0) {
-		//Serious error
-		errorMsg(1, "Can not open output .cue file");
-		return 1;
-	}
-	
-	//Set binFileOut filename to prefix.bin in directory
-	binFileOut.open(binFileOutFilename.c_str(), std::ios::out | std::ios::binary);
-	
-	//If bin file doesn't exist, error
-	if(!binFileOut) {
-		//Serious error
-		errorMsg(1, "Can not open output .bin file");
-		return 1;
-	}
-	
-	//Return success
-	return 0;
-}
-
-int dumpBinFiles() {
-	//Current byte in array and overall bytes read followers
-	size_t arrBytes = 0, readBytes = 0;
-	
-	//Create a heap byte array (From defined size in header)
-	char *byteArray = new char[_def_ARR_SIZE];
-
-	//Go through all filenames that were in the .cue file
-	for(size_t indx = 0; indx < binFilename.size(); indx++) {
-		//Print message about file
-		std::cout << "Dumping: " << binFilename.at(indx) << "    ";
-		
-		//Open the current binFilename to binFileIn and reset positions
-		binFileIn.open(binFilename[indx].c_str(), std::ios::in | std::ios::binary);
-		binFileIn.seekg(0, std::ios::beg);
-		
-		//Byte pulled fron binary file
-		char cByte;
-		while(binFileIn.get(cByte)) {
-			//Put the read byte into the array
-			byteArray[arrBytes] = cByte;
-			++arrBytes;
-			
-			//If the array is full, dump it to the output file, and reset.
-			if(arrBytes == _def_ARR_SIZE) {
-				binFileOut.write(byteArray, arrBytes);
-				arrBytes = 0;
-			}
-			
-			//Keep track of how many bytes read so far
-			++readBytes;
-		}
-		
-		//TODO Log the end byte of the current byte to convert to INDEX in .cue
-		
-		//Close the current file for next loop
-		binFileIn.close();
-		
-		//Report how many bytes each file is, and that it is done.
-		std::cout << padMiBStr(arrBytes, 3) << "    Done" << std::endl;
-	}
-	
-	//Flush what is left of the byte array to the output file
-	if(arrBytes > 0) binFileOut.write(byteArray, arrBytes);
-
-	//Delete heap byte array
-	delete[] byteArray;
-	
-	//Report completion and bytes written to the output bin file
-	std::cout << "Successfully dumped " << padByteStr(readBytes) <<
-	  " to " << binFileOutFilename << std::endl;
-
-	//Return 0 for success
-	return 0;
-}
-
-/** Helper functions **********************************************************/
 std::string padByteStr(size_t bytes, unsigned int pad) {
 	//Create the initial string from bytes
 	std::string byteStr = std::to_string((bytes));
