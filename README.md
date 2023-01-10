@@ -26,13 +26,15 @@ for directory creation and detection.
 * help flag
 * user input protection
 * if a .cue FILE is not recognised, pause and ask for confirm rather than exit.
-* ^^ Add a 'continue y/N' prompt function to call any time
 * make sure program can handle .BIN .bin .CUE and .cue files.
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
 * Create user input handler for program args
 * Add some error checking for dots and slashes in a few functions that can take  
 user input - setupOutputFiles  
+* optimize dump more?
+* add cleanup function to close files
+* add try catch return error handling for dump function
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
@@ -43,6 +45,7 @@ stored in the binFile vector ready for append and dump.
 * 0.5.5 - Implimented filesystem managment and file creation
 * 0.6.5 - Added error message system
 * 0.7.5 - Added continue prompting function.
+* 0.8.7 - Completed binary dump function (medium optimized)
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
