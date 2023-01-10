@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.7.5
-* 09 Jan 2023
+* v0.8.8
+* 10 Jan 2023
 *******************************************************************************/
 #include <iostream>
 #include <fstream>
@@ -69,7 +69,9 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	dumpBinFiles();
+	if(dumpBinFiles() != 0) {
+		errorMsg(2, "Could not dump bin files to the output bin file");
+	}
 	
 	return 0;
 }
