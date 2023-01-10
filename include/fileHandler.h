@@ -31,9 +31,9 @@ std::string getFilenameFromLine(std::string line);
 //Return error status. (0 Success, 1 Failure)
 int setupOutputFiles(std::string baseDirectory, std::string filePrefix);
 
-//Opens all the files in the global binFile vector and dumps them to a single 
-//bin file, and logs the transistion byte of each file in the TODO
+//Opens all the files in the global binFilename vector and dumps them to 
+//binFileOut, and logs the transistion byte of each file in the TODO
 //Returns error status (0 success, 1 failure)
-int dumpBinFiles(const char* outputFilename);
+int dumpBinFiles();
 
 #endif

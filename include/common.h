@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include<fstream>
+#include <fstream>
 
 #include "TeFiEd.h"
 
@@ -36,9 +36,9 @@ extern TeFiEd *cueFileIn, *cueFileOut;
 
 //Input and output binary files. Used by fileHandler but keeping things global 
 //helps clarity, and makes sure they are absolutely in RAM when program is execd
-extern std::ofstream binFileOut, binFileIn;
+extern std::fstream binFileOut, binFileIn;
 
 //Vector of filenames pulled from the cueFile.
-extern std::vector<std::string> binFile;
+extern std::vector<std::string> binFilename;
 
 #endif

@@ -25,7 +25,7 @@
 TeFiEd *cueFileIn, *cueFileOut;
 
 //Input and output .bin files. Global to all modules.
-std::ofstream binFileOut, binFileIn;
+std::fstream binFileOut, binFileIn;
 
 //Vector of filenames pulled from the cueFile. Global to all modules.
 std::vector<std::string> binFilename;
@@ -40,8 +40,11 @@ int main(int argc, char *argv[]){
 	
 	
 	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
-	//assign it to cueFile, then read cueFile into the vector.
+	//assign it to cueFile
 	cueFileIn = new TeFiEd(argv[1]);
+	//Set safety flag on the .cue input file. 100KB
+	cueFileIn->setByteLimit(102400);
+	//Read the .cue file in
 	if(cueFileIn->read() != 0) return 1;
 	
 	
@@ -51,6 +54,7 @@ int main(int argc, char *argv[]){
 		//Keep the current string rather than keep calling getLine()
 		std::string cLineStr = cueFileIn->getLine(matchLineNo);
 		
+		//TODO add continue prompt?
 		if(isLineValid(cLineStr)) {
 			//Push the filename string to the vector.
 			binFilename.push_back(cueFileIn->parentDir()
@@ -58,17 +62,14 @@ int main(int argc, char *argv[]){
 		}
 	}
 	
-	//TODO
-	for (auto i: binFilename)
-		std::cout << i << std::endl;
 	
 	//Create output directory, and setup .cue and .bin output file objects.
-	if(setupOutputFiles("./testDir", "test") != 0) {
+	if(setupOutputFiles("/home/ash/Downloads/psx", "test") != 0) {
 		errorMsg(2, "Could not create output files. Please check privelage levels");
 	}
 	
-	while(true) {
-		std::cout << promptContinue() << std::endl;
-	}
+	
+	dumpBinFiles();
+	
 	return 0;
 }

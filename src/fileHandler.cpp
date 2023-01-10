@@ -96,7 +96,15 @@ int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
 	//Always make sure baseDirectory has a / at the end for easier catenation.
 	if(baseDirectory.back() != '/') baseDirectory.push_back('/');
 	
-	//TODO if any stray . or / get into the filenames, error
+	//If the fileprefix has / in it, tell user
+	if(filePrefix.find('/') != std::string::npos) {
+		errorMsg(1, "Output filePrefix contains / This should not be a directory");
+	}
+	
+	//If the filePrefix contains .
+	if(filePrefix.find('.') != std::string::npos) {
+		errorMsg(1, "Output filePrefix contains . : Suffix should not be provided");
+	}
 	
 	//If the baseDirectory doesn't exist, make it
 	if(boost::filesystem::is_directory(baseDirectory) == false) {
@@ -104,16 +112,13 @@ int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
 		//Print message to let user know directory has been created
 		std::cout << "Created Directory: " << baseDirectory << std::endl;
 	}
-	
-	//Create string for baseDirectory + prefix.
-	std::string fileBase = baseDirectory + filePrefix;
-	
+
 	//Create string for both cue and bin outputs. Will be converted to c style
-	std::string cueFilename = fileBase + ".cue";
-	std::string binFilename = fileBase + ".bin";
+	std::string cueFn = baseDirectory + filePrefix + ".cue";
+	std::string binFn = baseDirectory + filePrefix + ".bin";
 	
 	//Link TeFiEd object cueFileOut to prefix.cue in the directory
-	cueFileOut = new TeFiEd(cueFilename.c_str());
+	cueFileOut = new TeFiEd(cueFn.c_str());
 	
 	//If cueFileOut can't be created, error
 	if(cueFileOut->create() != 0) {
@@ -123,7 +128,7 @@ int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
 	}
 	
 	//Set binFileOut filename to prefix.bin in directory
-	binFileOut.open(binFilename.c_str(), std::ios::out | std::ios::binary);
+	binFileOut.open(binFn.c_str(), std::ios::out | std::ios::binary);
 	
 	//If bin file doesn't exist, error
 	if(!binFileOut) {
@@ -136,10 +141,58 @@ int setupOutputFiles(std::string baseDirectory, std::string filePrefix) {
 	return 0;
 }
 
-int dumpBinFiles(const char* outputFilename) {
-	//Create the new output file.
+int dumpBinFiles() {
+	//Current byte in array and overall bytes read followers
+	size_t arrByte = 0, readByte = 0;
+	
+	//Create a heap byte array (100MiB)
+	#define ARR_SIZE 104857600
+	char *byteArray = new char[ARR_SIZE];
 
+	//Go through all filenames in the .cue file
+	for(size_t indx = 0; indx < binFilename.size(); indx++) {
+		//Print message about file
+		std::cout << "Dumping " << binFilename.at(indx);
+		
+		//Open the current binFilename to binFileIn and reset positions
+		binFileIn.open(binFilename[indx].c_str(), std::ios::in | std::ios::binary);
+		binFileIn.seekg(0, std::ios::beg);
+		
+		//Byte pulled fron binary file
+		char cByte;
+		while(binFileIn.get(cByte)) {
+			//Put the read byte into the array
+			byteArray[arrByte] = cByte;
+			++arrByte;
+			
+			//If the array is full, dump it to the output file, and reset.
+			if(arrByte == ARR_SIZE) {
+				binFileOut.write(byteArray, arrByte);
+				arrByte = 0;
+			}
+			
+			//Keep track of how many bytes read so far
+			++readByte;
+		}
+		
+		//TODO Log the end byte of the current byte to convert to INDEX in .cue
+		
+		//Close the current file for next loop
+		binFileIn.close();
+		
+		//Report how many bytes each file is, and that it is done.
+		std::cout << "\t" << arrByte << "\tBytes\t"<< "\tDone" << std::endl;
+	}
 
+	std::cout << "read " << readByte << " bytes" << std::endl;
+
+	//Flush what is left of the byte array to the output file
+	//Write the entire array out to the binFileOut file
+	if(arrByte > 0) binFileOut.write(byteArray, arrByte);
+
+	//Delete heap byte array
+	delete[] byteArray;
+	
 	//Return 0 for success
 	return 0;
 }
