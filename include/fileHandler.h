@@ -23,8 +23,10 @@
 
 /** Variables *****************************************************************/
 //Each entity is at which byte a file transistion to the next file. This is for
-//.cue output INDEX value (in time format which gets converted later)
-extern std::vector<size_t> fileChangeByte;
+//.cue output INDEX value.
+extern std::vector<size_t> fileIndexByte;
+
+//
 
 /** Functions *****************************************************************/
 //Pass input filename string, returns the file name without the extension 
@@ -51,6 +53,10 @@ int openOutputFiles(const std::string baseDir, const std::string cueFn,
 //Returns error status (0 success, 1 failure)
 int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn);
 
+//Takes a byte value and returns a MM:SS:FF timestamp string. This is used for 
+//.cue file INDEX points. Uses CD Audio cue sheet methodology.
+std::string getTimestamp(size_t bytes);
+
 /** Helper functions **********************************************************/
 //Print error message with different error levels:
 //0 warn	1 error		2 fatal
@@ -65,5 +71,8 @@ std::string padByteStr(size_t bytes, unsigned int pad = 0);
 
 //Pads, sizes and returns a string of how many MiBs are in the value passed
 std::string padMiBStr(size_t bytes, unsigned int pad = 0);
+
+//Takes an input variable, zero-pads to -length- then return a string version.
+std::string padIntStr(size_t val, unsigned int pad = 0);
 
 #endif

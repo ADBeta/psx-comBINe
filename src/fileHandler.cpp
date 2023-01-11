@@ -20,7 +20,7 @@
 
 //Each entity is at which byte a file transistion to the next file. This is for
 //.cue output INDEX value (in time format which gets converted later)
-std::vector<size_t> fileChangeByte;
+std::vector<size_t> fileIndexByte;
 
 std::string getFileName(const std::string inFn) {	
 	//TODO Windows may not work with this methodology	
@@ -145,7 +145,7 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 		}
 		
 		//Log the transistion byte of the current file for INDEX in .cue
-		fileChangeByte.push_back(readBytes);
+		fileIndexByte.push_back(readBytes);
 		
 		//Close the current file for next loop
 		binFileIn.close();
@@ -166,6 +166,42 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 
 	//Return 0 for success
 	return 0;
+}
+
+std::string getTimestamp(size_t bytes) {
+	/* The timestamp is in Minute:Second:Frame format.
+	There are 75 sectors per second, 2352 bytes per sector. If the input number 
+	is not divisible by 1 sector, then exit the program.
+	
+	I am trying to use divide then modulo so the compiler stands some chance of
+	optimizing my code to use the remainder of the ASM div operator. */
+	
+	std::string timestamp;	
+	
+	//There are 2352 byte per sector. Calculate how many sectors are in the file
+	size_t sectors = bytes / 2352;
+	
+	//Error check if the input is divisible by a sector. Exit if not
+	if(bytes % 2352 != 0) {
+		errorMsg(2, "A bin file is not divisible by SECTOR size (Corrupt bin file)");
+	}
+	
+	//75 sectors per second. Frames are the left over sectors from a second
+	int seconds = sectors / 75;
+	int rFrames = sectors % 75;
+	
+	//Convert seconds to minutes. Seconds is the remainder of itself after / 60
+	int minutes = seconds / 60;
+	seconds = seconds % 60;
+	
+	//If minutes exceeds 99, there is probably an error due to Audio CD Standard
+	if(minutes > 99) errorMsg(1, "Total bin file size exceeds 99 minutes");
+	
+	//Now the string can be formed from the values. Need to 0 pad each value
+	timestamp.append(padIntStr(minutes, 2) + ":" + padIntStr(seconds, 2) + ":"
+	                           + padIntStr(rFrames, 2));
+	
+	return timestamp;
 }
 
 /** Helper functions **********************************************************/
@@ -240,4 +276,16 @@ std::string padMiBStr(size_t bytes, unsigned int pad) {
 	MiBStr.append(" MiB");
 	
 	return MiBStr;
+}
+
+std::string padIntStr(size_t val, unsigned int pad) {
+	std::string intStr = std::to_string(val);
+	
+	//Pad if selected
+	if(pad != 0 && pad > intStr.length()) {
+		unsigned int padDelta = pad - intStr.length();
+		intStr.insert(0, padDelta, '0');
+	}
+	
+	return intStr;
 }

@@ -45,6 +45,7 @@ stored in the binFile vector ready for append and dump.
 * 0.8.8 - Included byte and MiB printing functions
 * 0.9.8 - Complete refactor of most functions
 * 0.10.8 - Testing phase for cue INDEX beings
+* 0.11.8 - Have .cue timestamp string creation working.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  

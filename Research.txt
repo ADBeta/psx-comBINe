@@ -29,7 +29,42 @@ My code plan
 	Append to output file as going. If this prooves to be too slow, pull into
 	a buffer RAM chunk, before pushing out.
 	
-153.6 kB or 150KiB CD 1x Audio speed
+The CD is played at a speed of 75 frames (or sectors) per second, thus 44,100 samples or 176,400 bytes per second.
+each sector being 2,352 bytes, and with 75 sectors containing 1 second of audio.
+
+calc attempts: By sector
+98043120 / 2352 = 41 685 = sectors
+41,685 / 75 (sectors per sec) = 555.8 (seconds) = 9:15 sec (CORRECT!!!!!)
+
+Need to work out Min Sec Frame timestamp:
+divide with remainder? long division:
+
+Get No of sectors: bytes / 2352 (bytes per sector)
+41,685 sectors
+long division with remainder ---- 
+555 Remainder 60
+555 Seconds = 9min 15sec Remainder 60 ----- INDEX 00 09:15:60 YAY
+
+
+100042320 / 2352 = 42535 Sectors = 567 Remainder 10
+9:27:10 CORRECT
+
+get divded, round down int
+then % modulo for remainder
+
+
+byte = 98043120
+
+**  NOTE try to divide first then use module, gives the compiler a chance to
+use the divide remainder (if it's smart enough)
+
+(remainder after division is the frames left over
+frames = byte % 42535 (bytes per sector)
+
+(round down division)
+min = (byte / 42535) / 60
+sec = (byte / 42535) % 60
+
 
 1: 98043120bytes         638 seconds
 2: 100042320bytes         651 seconds

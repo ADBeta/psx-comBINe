@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.9.8
-* 10 Jan 2023
+* v0.11.8
+* 11 Jan 2023
 *******************************************************************************/
 #include <iostream>
 #include <fstream>
@@ -93,11 +93,10 @@ int main(int argc, char *argv[]){
 	std::cout << std::endl;
 	
 	
-	for(size_t indx = 0; indx < fileChangeByte.size(); indx++) {
-		size_t crnt = fileChangeByte.at(indx); 
+	for(size_t indx = 0; indx < fileIndexByte.size(); indx++) {
+		size_t crnt = fileIndexByte.at(indx); 
 		
-		std::cout << indx + 1 << ": " << crnt << "bytes         " <<
-		   crnt/150000 << " seconds"  << std::endl;
+		std::cout << getTimestamp(crnt) << std::endl;	
 	}
 	
 	//Done :)
