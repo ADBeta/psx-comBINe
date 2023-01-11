@@ -4,20 +4,29 @@
 psx-comBINe is a program to combine/merge multiple .bin files from a psx .cue  
 .bin CD-ROM dump, into a single .cue and .bin file.  
 
-This function is commonly done via CDMage, or other tools in the PSX community,  
-but having a purpose built tools seems like a useful addition to the community  
-I love so much.  
+This operation is commonly done via CDMage, or other tools in the PSX community,  
+but having a purpose built tool seems like a useful addition to the community.  
 
 This project is just a hobby, and is designed for Linux to begin with. I will  
 eventually port it to a Windows exe, feel free to do this with the files if you  
 want to test it out.  
 
-This program depends boost::filesystem, make sure this is installed before use  
+This program depends boost::filesystem, make sure this is installed before use.  
 If this causes problems with older systems, feel free to create your own fork,  
-as my code needs to be as universal as possible - fileHandler.cpp uses boost  
+as this program shouldbe as universal as possible - fileHandler.cpp uses boost  
 for directory creation and detection.  
 
 ## Compilation
+#### Linux
+- change directory into the dowloaded parent directory
+- run `make`
+- an executable called 'psx-comBINe' should be in the bin directory
+
+```
+$ cd ./psx-comBINe-main
+./psx-comBINe $ make
+./psx-comBINe $ ./bin/psx-comBINe --help
+```
 
 ## How To Use
 
