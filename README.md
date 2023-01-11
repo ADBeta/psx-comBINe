@@ -2,7 +2,10 @@
 <b> (c) ADBeta 2023 </b>  
 
 psx-comBINe is a program to combine/merge multiple .bin files from a psx .cue  
-.bin CD-ROM dump, into a single .cue and .bin file.  
+.bin CD-ROM dump, and produces a single .bin file and .cue sheet.  
+This is specifically useful for certain emulators, conversion softwares such as  
+cue2pops, and I find it faster and less error prone when writing to cheap, low  
+quality CD's.
 
 This operation is commonly done via CDMage, or other tools in the PSX community,  
 but having a purpose built tool seems like a useful addition to the community.  
