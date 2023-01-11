@@ -45,6 +45,8 @@ int main(int argc, char *argv[]){
 	cueFileIn = new TeFiEd(argv[1]);
 	//Set safety flag on the .cue input file. 100KB
 	cueFileIn->setByteLimit(102400);
+	
+	cueFileIn->setVerbose(true);
 	//Read the .cue file in
 	if(cueFileIn->read() != 0) return 1;
 	
