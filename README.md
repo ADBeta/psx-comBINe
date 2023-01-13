@@ -27,8 +27,8 @@ for directory creation and detection.
 
 ```
 $ cd ./psx-comBINe-main
-./psx-comBINe $ make
-./psx-comBINe $ ./bin/psx-comBINe --help
+./psx-comBINe-main $ make
+./psx-comBINe-main $ ./bin/psx-comBINe --help
 ```
 
 ## How To Use
@@ -42,22 +42,25 @@ before full deploy.
 * Create user input handler for program args
 * optimize dump more?
 * add cleanup function to close files
-* add try catch return error handling for dump function
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
 checking  
 stored in the binFile vector ready for append and dump.
-* 0.4.3 - Moved some variables and types to common.h
 * 0.4.5 - Included boost in make and src files. 
 * 0.5.5 - Implimented filesystem managment and file creation
 * 0.6.5 - Added error message system
 * 0.7.5 - Added continue prompting function.
 * 0.8.7 - Completed binary dump function (medium optimized)
 * 0.8.8 - Included byte and MiB printing functions
-* 0.9.8 - Complete refactor of most functions
 * 0.10.8 - Testing phase for cue INDEX beings
 * 0.11.8 - Have .cue timestamp string creation working.
+* 0.11.9 - Sanity check for output buffer array creation
+* 0.12.10 - Changed fileHandler to binHander, and added a library solely for  
+cue handling
+* 0.12.11 - Removed common.h header and made code easier to understand
+* 0.12.12 - Moved helper functions into their own header so all modules can
+use them  
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
