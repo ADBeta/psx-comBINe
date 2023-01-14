@@ -33,7 +33,4 @@ std::string padByteStr(size_t bytes, unsigned int pad = 0);
 //Pads, sizes and returns a string of how many MiBs are in the value passed
 std::string padMiBStr(size_t bytes, unsigned int pad = 0);
 
-//Takes an input variable, zero-pads to -pad- then return a string version.
-std::string padIntStr(size_t val, unsigned int pad = 0);
-
 #endif

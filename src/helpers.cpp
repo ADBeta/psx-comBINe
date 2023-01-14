@@ -91,15 +91,3 @@ std::string padMiBStr(size_t bytes, unsigned int pad) {
 	
 	return MiBStr;
 }
-
-std::string padIntStr(size_t val, unsigned int pad) {
-	std::string intStr = std::to_string(val);
-	
-	//Pad if selected
-	if(pad != 0 && pad > intStr.length()) {
-		unsigned int padDelta = pad - intStr.length();
-		intStr.insert(0, padDelta, '0');
-	}
-	
-	return intStr;
-}

@@ -8,16 +8,11 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.12.12
-* 13 Jan 2023
+* v0.13.12
+* 14 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
-
-
-#include <fstream>
-
-
 #include <vector>
 #include <string>
 
@@ -26,14 +21,8 @@
 #include "binHandler.h"
 #include "cueHandler.h"
 
-//Input and output .cue file TeFiEd pointers. Global to all modules
-TeFiEd *cueFileIn, *cueFileOut;
-
-
-//Vector of filenames pulled from the cueFile. Global to all modules.
+//Vector of filenames pulled from the cueFile.
 std::vector<std::string> binFilenameVect;
-
-
 
 //Strings used for input/output file system and directory management
 std::string baseDirStr, baseFileStr, outDirStr;
@@ -56,6 +45,7 @@ void genFSStrings(const std::string inFile) {
 	baseFileStr = baseFileStr.substr(0, baseFileStr.find('.'));	
 }
 
+/*** Main *********************************************************************/
 int main(int argc, char *argv[]){
 	/** Get user args *********************************************************/
 	//Test the user input is correct ** TODO
@@ -68,20 +58,16 @@ int main(int argc, char *argv[]){
 	
 	//TODO validate if argv[1] is a filename
 	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
-	//assign it to cueFile
-	cueFileIn = new TeFiEd(argv[1]);
-	//Set safety flag on the .cue input file. 100KB
-	cueFileIn->setByteLimit(102400);
 	
-	cueFileIn->setVerbose(true);
+	
+	//Open a new cueHandler object for the input file
+	CueHandler cueIn(argv[1]);
 	//Read the .cue file in
-	if(cueFileIn->read() != 0) return 1;
+	cueIn.read();
 	
 	//Generate the file system strings for use later TODO Make this default behavious with overwrite
-	genFSStrings((std::string)argv[1]);
-	
-	
-	
+	genFSStrings(std::string(argv[1]));
+		
 	/** Program execution *****************************************************/
 	//If the output directory doesn't exist already, create it.
 	if(boost::filesystem::is_directory(outDirStr) == false) {
@@ -95,27 +81,23 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	//TODO open cue file in cueHandler
+	//Get all the FILE strings from the input cue file
+	cueIn.pushFILEToVector(binFilenameVect);
 	
-	//Check each line that has FILE in it
-	size_t matchLineNo;
-	while(( matchLineNo = cueFileIn->findNext("FILE") )) {
-		//Keep the current string rather than keep calling getLine()
-		std::string cLineStr = cueFileIn->getLine(matchLineNo);
-		
-		//If the current line isn't valid, prompt with continue message.
-		//Exit if false, continue if true.
-		if(lineIsValid(cLineStr) == false) {
-			if(promptContinue() == false) return 1;
-		}
-		
-		//Push the filename string to the vector.
-		binFilenameVect.push_back(cueFileIn->parentDir() + 
-		                          getFileFromCueLine(cLineStr));
+	
+	for(size_t idx = 0; idx < binFilenameVect.size(); idx++ ) {
+		std::cout << binFilenameVect.at(idx) << std::endl;
 	}
 	
 	
 	
+	
+	//Check each line that has FILE in it
+	//TODO fix this
+
+	
+	
+	/*
 	
 	//Dump the binary filename vect to the output binary file.
 	if(dumpBinFiles(binFilenameVect, (outDirStr + baseFileStr + ".bin")) != 0) {
@@ -133,7 +115,7 @@ int main(int argc, char *argv[]){
 	
 	
 	//std::cout << "FILE \"" << baseFilename << ".bin" << "\" BINARY" << std::endl;
-	
+	*/
 	//Done :)
 	
 	return 0;

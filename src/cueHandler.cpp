@@ -17,50 +17,36 @@
 #include "cueHandler.h"
 
 #include <iostream>
+#include <vector>
 
 #include "helpers.h"
 #include "TeFiEd.h"
 
 CueHandler::CueHandler(const char* filename) {
 	//Open the cue file passed
-	this->cueFile = new TeFiEd(filename);
+	cueFile = new TeFiEd(filename);
 	
-	this->cueFile->setVerbose(true);
+	//Set safety flag on the .cue input file. 100KB
+	cueFile->setByteLimit(102400);
 	
-	std::cout << "opened cue file" << std::endl;
-
+	cueFile->setVerbose(true);
 }
 
-std::string getFileName(const std::string inFn) {	
-	//TODO Windows may not work with this methodology	
-	std::string fileName;
-	//Create fileName from substring of inputFIle - Remove directory informaton
-	fileName = inFn.substr(inFn.find_last_of('/') + 1, inFn.length());
-	
-	//Remove the first . and anything past it in fileName
-	fileName = fileName.substr(0, fileName.find('.'));
-	
-	return fileName;	
-}
-
-bool lineIsValid(const std::string line) {
-	//Make sure the file extension is .bin	
-	if(line.find(".bin") == std::string::npos) {
-		errorMsg(0, "file does not have .bin extension");
-		return false;
+/** File Managment ************************************************************/
+void CueHandler::read() {
+	if(cueFile->read() != 0) {
+		exit(EXIT_FAILURE); 
 	}
-	
-	//Make sure the file type is BINARY
-	if(line.find("BINARY") == std::string::npos) {
-		errorMsg(0, "file is not of type BINARY");
-		return false;
-	}
-	
-	//File is valid
-	return true;
 }
 
-std::string getFileFromCueLine(const std::string line) {
+void CueHandler::create() {
+	if(cueFile->create() != 0) {
+		exit(EXIT_FAILURE);
+	}
+}
+
+/** Reading functions *********************************************************/
+std::string CueHandler::getFILE(const std::string line) {
 	//Find the first and last quote mark, and handle errors if none exist.
 	size_t firstQuote, lastQuote;
 	//First Quote
@@ -79,10 +65,43 @@ std::string getFileFromCueLine(const std::string line) {
 	return filename;
 }
 
+void CueHandler::pushFILEToVector(std::vector<std::string> &vect) {
+	size_t matchLineNo;
+	while(( matchLineNo = cueFile->findNext("FILE") )) {
+		//If the current line isn't valid, prompt with continue message.
+		//Exit if false, continue if true.
+		if(lineIsValid(matchLineNo) == false) {
+			if(promptContinue() == false) return;
+		}
+		
+		//Push the filename string to the vector.
+		vect.push_back(cueFile->parentDir() + 
+		                getFILE(cueFile->getLine(matchLineNo)));
+	}
+}
 
+/** Writing functions *********************************************************/
+bool CueHandler::lineIsValid(const size_t lineNo) {
+	std::string lineStr = cueFile->getLine(lineNo);
+	
+	//Make sure the file extension is .bin	
+	if(lineStr.find(".bin") == std::string::npos) {
+		errorMsg(0, "file does not have .bin extension");
+		return false;
+	}
+	
+	//Make sure the file type is BINARY
+	if(lineStr.find("BINARY") == std::string::npos) {
+		errorMsg(0, "file is not of type BINARY");
+		return false;
+	}
+	
+	//File is valid
+	return true;
+}
 
-
-std::string getTimestamp(size_t bytes) {
+/** AUX functions *************************************************************/
+std::string CueHandler::bytesToTimestamp(const size_t bytes) {
 	/* The timestamp is in Minute:Second:Frame format.
 	There are 75 sectors per second, 2352 bytes per sector. If the input number 
 	is not divisible by 1 sector, then exit the program.
@@ -97,7 +116,7 @@ std::string getTimestamp(size_t bytes) {
 	
 	//Error check if the input is divisible by a sector. Exit if not
 	if(bytes % 2352 != 0) {
-		errorMsg(2, "A bin file is not divisible by SECTOR size (Corrupt bin file)");
+		errorMsg(2, "bin file is not divisible by SECTOR size (Corrupt bin)");
 	}
 	
 	//75 sectors per second. Frames are the left over sectors from a second
@@ -117,3 +136,24 @@ std::string getTimestamp(size_t bytes) {
 	
 	return timestamp;
 }
+
+
+
+
+
+/** Private *******************************************************************/
+std::string CueHandler::padIntStr(const unsigned long val, unsigned int pad) {
+	std::string intStr = std::to_string(val);
+	
+	//Pad if selected
+	if(pad != 0 && pad > intStr.length()) {
+		unsigned int padDelta = pad - intStr.length();
+		intStr.insert(0, padDelta, '0');
+	}
+	
+	return intStr;
+}
+
+
+
+

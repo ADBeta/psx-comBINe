@@ -29,6 +29,4 @@ extern std::vector<size_t> fileIndexByte;
 //Returns error status (0 success, 1 failure)
 int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn);
 
-
-
 #endif
