@@ -46,14 +46,9 @@ before full deploy.
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
 checking  
-stored in the binFile vector ready for append and dump.
 * 0.4.5 - Included boost in make and src files. 
 * 0.5.5 - Implimented filesystem managment and file creation
 * 0.6.5 - Added error message system
-* 0.7.5 - Added continue prompting function.
-* 0.8.7 - Completed binary dump function (medium optimized)
-* 0.8.8 - Included byte and MiB printing functions
-* 0.10.8 - Testing phase for cue INDEX beings
 * 0.11.8 - Have .cue timestamp string creation working.
 * 0.11.9 - Sanity check for output buffer array creation
 * 0.12.10 - Changed fileHandler to binHander, and added a library solely for  
@@ -61,6 +56,7 @@ cue handling
 * 0.12.11 - Removed common.h header and made code easier to understand
 * 0.12.12 - Moved helper functions into their own header so all modules can
 use them  
+* 0.13.12 - Began CueHandler migration.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
