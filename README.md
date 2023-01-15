@@ -42,6 +42,8 @@ before full deploy.
 * Create user input handler for program args
 * optimize dump more?
 * add cleanup function to close files
+* check INDEX function 00, since it is optional for pregap. Is this always a thing  
+for ps1 games?
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
@@ -57,6 +59,7 @@ cue handling
 * 0.12.12 - Moved helper functions into their own header so all modules can
 use them  
 * 0.13.12 - Began CueHandler migration.
+* 0.14.12 - Improved cue handler functionality
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  

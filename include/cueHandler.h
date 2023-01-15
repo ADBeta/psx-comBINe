@@ -43,21 +43,38 @@ class CueHandler {
 	//Pulls the filename string out of a valid .cue FILE command and returns it
 	std::string getFILE(const std::string line);
 
-	//TODO describe 
+	//Finds all lines with FILE in them, then pushed the filename on that line,
+	//appended with the parent directory to a vector, (for dumping bin files)
 	void pushFILEToVector(std::vector<std::string> &vect);
 
 	/**** Writing Functions ****/
+	//Output (overwrite) the TeFiEd object RAM into the file.
+	void write();
+	
+	void newFILE(std::string fileName, std::string type);
+	
+	void newTRACK(std::string type);
+	
+	void newINDEX(std::string indexStr);
 
 	
 	/** AUX Functions *********************************************************/
-	//Converts a number of bytes into a Audio CD timestamp.
-	std::string bytesToTimestamp(const size_t bytes);
+	//Converts a number of bytes into an Audio CD timestamp.
+	std::string bytesToTimestamp(const unsigned long bytes);
 	
+	//Converts an Audio CD timestamp into number of bytes
+	unsigned long timestampToBytes(std::string timestamp);
 	
 
 	//private:
-	TeFiEd *cueFile;
+	/** Variables **/
+	TeFiEd *cueFile; //TeFiEd text file object
 	
+	unsigned int cValTRACK = 1; //Current TRACK overall (start from 1)
+	unsigned int cValINDEX = 0; //Current INDEX intager resets on new FILE
+	std::string  cStrINDEX; //Current INDEX string. 
+	
+	/** Functions **/
 	//Takes an input uint32_t, zero-pads to -pad- then return a string
 	std::string padIntStr(const unsigned long val, unsigned int pad = 0);
 

@@ -80,7 +80,6 @@ void CueHandler::pushFILEToVector(std::vector<std::string> &vect) {
 	}
 }
 
-/** Writing functions *********************************************************/
 bool CueHandler::lineIsValid(const size_t lineNo) {
 	std::string lineStr = cueFile->getLine(lineNo);
 	
@@ -100,8 +99,35 @@ bool CueHandler::lineIsValid(const size_t lineNo) {
 	return true;
 }
 
+/** Writing functions *********************************************************/
+void CueHandler::write() {
+	cueFile->overwrite();
+}
+
+void CueHandler::newFILE(std::string fileName, std::string type) {
+	cueFile->appendString("FILE \"" + fileName + "\" " + type);
+	
+	//When a new file is made reset the INDEX value
+	cValINDEX = 0;
+}
+
+void CueHandler::newTRACK(std::string type) {
+	cueFile->appendString("  TRACK " + padIntStr(cValTRACK, 2) + " " + type);
+	
+	//Increment track val to max of 99
+	++cValTRACK;
+	
+	if(cValTRACK == 99) {
+		std::cerr << "Max track number reached (99)" << std::endl;
+	}
+}
+
+void CueHandler::newINDEX(std::string indexStr) {
+
+}
+
 /** AUX functions *************************************************************/
-std::string CueHandler::bytesToTimestamp(const size_t bytes) {
+std::string CueHandler::bytesToTimestamp(const unsigned long bytes) {
 	/* The timestamp is in Minute:Second:Frame format.
 	There are 75 sectors per second, 2352 bytes per sector. If the input number 
 	is not divisible by 1 sector, then exit the program.
@@ -112,7 +138,7 @@ std::string CueHandler::bytesToTimestamp(const size_t bytes) {
 	std::string timestamp;	
 	
 	//There are 2352 byte per sector. Calculate how many sectors are in the file
-	size_t sectors = bytes / 2352;
+	unsigned long sectors = bytes / 2352;
 	
 	//Error check if the input is divisible by a sector. Exit if not
 	if(bytes % 2352 != 0) {
@@ -120,11 +146,11 @@ std::string CueHandler::bytesToTimestamp(const size_t bytes) {
 	}
 	
 	//75 sectors per second. Frames are the left over sectors from a second
-	int seconds = sectors / 75;
-	int rFrames = sectors % 75;
+	unsigned short seconds = sectors / 75;
+	unsigned short rFrames = sectors % 75;
 	
 	//Convert seconds to minutes. Seconds is the remainder of itself after / 60
-	int minutes = seconds / 60;
+	unsigned short minutes = seconds / 60;
 	seconds = seconds % 60;
 	
 	//If minutes exceeds 99, there is probably an error due to Audio CD Standard
@@ -137,6 +163,31 @@ std::string CueHandler::bytesToTimestamp(const size_t bytes) {
 	return timestamp;
 }
 
+unsigned long CueHandler::timestampToBytes(std::string timestamp) {
+	//Strip values from the timestamp. "MM:SS:ff" ff = sectors
+	unsigned short minutes = std::stoi(timestamp.substr(0, 2));
+	unsigned short seconds = std::stoi(timestamp.substr(3, 2));
+	unsigned short frames  = std::stoi(timestamp.substr(6, 2));
+	
+	
+	std::cout << minutes << "  " << seconds << "  " << frames << std::endl;
+	
+	//Add minutes to the seconds for sector calculation
+	seconds += (minutes * 60);
+	
+	//75 sectors per second, plus frames left over in the timestamp	
+	unsigned long sectors = (seconds * 75) + frames;
+	
+	//There are 2352 bytes per sector.
+	unsigned long bytes = sectors * 2352;
+	
+	//Error check if the input is divisible by a sector. Exit if not
+	if(bytes % 2352 != 0) {
+		errorMsg(2, "timestamp is not aligned to SECTOR size (Corrupt timestamp)");
+	}
+	
+	return bytes;
+} 
 
 
 

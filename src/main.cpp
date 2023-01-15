@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.13.12
-* 14 Jan 2023
+* v0.14.12
+* 15 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -85,18 +85,25 @@ int main(int argc, char *argv[]){
 	cueIn.pushFILEToVector(binFilenameVect);
 	
 	
-	for(size_t idx = 0; idx < binFilenameVect.size(); idx++ ) {
-		std::cout << binFilenameVect.at(idx) << std::endl;
-	}
+	std::cout << cueIn.timestampToBytes(cueIn.bytesToTimestamp(112291536)) << std::endl;
+	//std::cout << cueIn.timestampToBytes("10:36:43") << std::endl;
 	
 	
 	
+	CueHandler cueOut("./test.cue");
+	cueOut.create();
 	
-	//Check each line that has FILE in it
-	//TODO fix this
+	cueOut.newFILE("test.bin", "BINARY");
+	
+	cueOut.newTRACK("AUDIO");
+	cueOut.newTRACK("AUDIO");
+	cueOut.newTRACK("AUDIO");
+	cueOut.newTRACK("AUDIO");
+	
+	
+	cueOut.write();
 
-	
-	
+
 	/*
 	
 	//Dump the binary filename vect to the output binary file.
@@ -105,7 +112,6 @@ int main(int argc, char *argv[]){
 	}
 	//Print blank line for readability
 	std::cout <<std::endl;
-	
 	
 	for(size_t indx = 0; indx < fileIndexByte.size(); indx++) {
 		size_t crnt = fileIndexByte.at(indx); 
