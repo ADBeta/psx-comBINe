@@ -60,6 +60,8 @@ cue handling
 use them  
 * 0.13.12 - Began CueHandler migration.
 * 0.14.12 - Improved cue handler functionality
+* 0.15.12 - Completed base cue handler functions. Need to integrate it with read  
+functions
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
