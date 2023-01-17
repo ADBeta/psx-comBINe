@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.14.12
-* 15 Jan 2023
+* v0.15.12
+* 17 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -93,12 +93,11 @@ int main(int argc, char *argv[]){
 	CueHandler cueOut("./test.cue");
 	cueOut.create();
 	
-	cueOut.newFILE("test.bin", "BINARY");
 	
-	cueOut.newTRACK("AUDIO");
-	cueOut.newTRACK("AUDIO");
-	cueOut.newTRACK("AUDIO");
-	cueOut.newTRACK("AUDIO");
+	cueOut.newTRACK(1,"AUDIO");
+	cueOut.newTRACK(2,"AUDIO");
+	cueOut.newTRACK(3,"AUDIO");
+	cueOut.newTRACK(4,"AUDIO");
 	
 	
 	cueOut.write();

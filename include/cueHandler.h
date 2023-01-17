@@ -51,11 +51,14 @@ class CueHandler {
 	//Output (overwrite) the TeFiEd object RAM into the file.
 	void write();
 	
-	void newFILE(std::string fileName, std::string type);
+	//Adds a FILE command entry to the cueFile. type can be BINARY or AUDIO etc
+	void newFILE(const std::string fileName, const std::string type);
 	
-	void newTRACK(std::string type);
+	//Adds a TRACK, Numbered as num, to the cueFile. Type should be AUDIO etc
+	void newTRACK(const unsigned int num, const std::string type);
 	
-	void newINDEX(std::string indexStr);
+	//Adds a new INDEX, numbered as num, and the timestamp to the cueFile
+	void newINDEX(const unsigned int num, const std::string indexStr);
 
 	
 	/** AUX Functions *********************************************************/
@@ -65,14 +68,13 @@ class CueHandler {
 	//Converts an Audio CD timestamp into number of bytes
 	unsigned long timestampToBytes(std::string timestamp);
 	
+	//Adds two INDEX strings together and returns a timestamp string.
+	std::string addTimestamps(const std::string ts1, const std::string ts2);
+	
 
 	//private:
 	/** Variables **/
 	TeFiEd *cueFile; //TeFiEd text file object
-	
-	unsigned int cValTRACK = 1; //Current TRACK overall (start from 1)
-	unsigned int cValINDEX = 0; //Current INDEX intager resets on new FILE
-	std::string  cStrINDEX; //Current INDEX string. 
 	
 	/** Functions **/
 	//Takes an input uint32_t, zero-pads to -pad- then return a string

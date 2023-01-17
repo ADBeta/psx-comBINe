@@ -104,26 +104,27 @@ void CueHandler::write() {
 	cueFile->overwrite();
 }
 
-void CueHandler::newFILE(std::string fileName, std::string type) {
+void CueHandler::newFILE(const std::string fileName, const std::string type) {
 	cueFile->appendString("FILE \"" + fileName + "\" " + type);
-	
-	//When a new file is made reset the INDEX value
-	cValINDEX = 0;
 }
 
-void CueHandler::newTRACK(std::string type) {
-	cueFile->appendString("  TRACK " + padIntStr(cValTRACK, 2) + " " + type);
-	
-	//Increment track val to max of 99
-	++cValTRACK;
-	
-	if(cValTRACK == 99) {
-		std::cerr << "Max track number reached (99)" << std::endl;
+void CueHandler::newTRACK(const unsigned int num, const std::string type) {
+	if(num == 99) {
+		std::cerr << "Max TRACK number reached (99)" << std::endl;
+		return;
 	}
+	
+	cueFile->appendString("  TRACK " + padIntStr(num, 2) + " " + type);
 }
 
-void CueHandler::newINDEX(std::string indexStr) {
-
+void CueHandler::newINDEX(const unsigned int num, const std::string indexStr) {
+	if(num == 99) {
+		std::cerr << "Max INDEX number reached (99)" << std::endl;
+		return;
+	}
+	
+	//Otherwise, just append the string to the file as it is
+	cueFile->appendString("    INDEX " + padIntStr(num, 2) + " " + indexStr);
 }
 
 /** AUX functions *************************************************************/
@@ -188,6 +189,15 @@ unsigned long CueHandler::timestampToBytes(std::string timestamp) {
 	
 	return bytes;
 } 
+
+std::string CueHandler::addTimestamps(const std::string ts1, const std::string ts2) {
+	//total bytes from both timestamps
+	size_t totalBytes = timestampToBytes(ts1) + timestampToBytes(ts2);
+
+	//Convert the bytes to a timestamp again and reutn it
+	return bytesToTimestamp(totalBytes);
+}
+
 
 
 
