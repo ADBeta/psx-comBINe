@@ -26,18 +26,99 @@
 class CueHandler {
 	public:
 	//Constructor takes a filename (char *) and passes it to the TeFiEd cueFile
+	//Also creates the metadata handler structures
 	CueHandler(const char* filename);
 	
-	/** File Management *******************************************************/
+	//Destructor, deletes metadata array and cleans up TeFiEd object
+	~CueHandler();
+	
+	
+	/*** Enums and data structs ***********************************************/
+	//Valid .cue line types. FILE, TRACK and INDEX, with safeties for a blank
+	//or invalid line string
+	enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltINVALID };
+	
+	//Valid FILE formats. (only binary is supported for now)
+	enum t_FILE { ftBINARY };
+	
+	//Valid TRACK types  
+	/*	AUDIO		Audio/Music (2352 — 588 samples)
+		CDG			Karaoke CD+G (2448)
+		MODE1/2048	CD-ROM Mode 1 Data (cooked)
+		MODE1/2352	CD-ROM Mode 1 Data (raw)
+		MODE2/2336	CD-ROM XA Mode 2 Data (form mix)
+		MODE2/2352	CD-ROM XA Mode 2 Data (raw)
+		CDI/2336	CDI Mode 2 Data
+		CDI/2352	CDI Mode 2 Data                                           */
+	enum t_TRACK { AUDIO, CDG, MODE1_2048, MODE1_2352, MODE2_2336, MODE2_2352,
+	               CDI_2336, CDI_2352 };
+	
+	/*** CUE file data handler ************************************************/
+	//Parent FILE (Top level) object
+	struct FileData {
+		//FILE data
+		std::string FILENAME;
+		t_FILE TYPE;
+	
+		//99 TRACKs. Child (2nd level) object
+		struct TrackData {
+			//Track Object type
+			t_TRACK TYPE;
+			
+			//Does this track have a pregap?
+			bool PREGAP;
+			
+			//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX
+			std::vector <unsigned long> INDEX_BYTE;
+		}; //struct TrackData
+		
+		//Vector of TRACKs for each FILE
+		std::vector <TrackData> TRACK;
+	}; //struct FileData
+	
+	
+	//Vector of FILEs
+	std::vector <FileData> FILE;
+	
+	//TODO clear function for any FileData struct object
+	
+	/*** **********************************************************************/
 	//Read in an existing cue file
 	void read();
 	
 	//Create a new cue file
 	void create();
 	
-	/**** Reading Functions ****/	
-	//Checks a .cue file line to make sure it matches the model from research
-	//FILE "xxx.bin" BINARY. If no .bin and no BINARY, file is not valid 
+	
+	
+	/*** Reading Functions ****************************************************/	
+	//Returns the t_LINE the line at -number-'s string contains.
+	t_LINE getLineType(std::string lineStr);
+
+	//Gets all the data from a .cue file and populates the FILE vector.
+	//Returns error status TODO
+	int getCueData();
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//TODO NONE OF THIS IS CORRECT
+	
+	//
 	bool lineIsValid(const size_t lineNo);
 	
 	//Pulls the filename string out of a valid .cue FILE command and returns it
@@ -47,7 +128,11 @@ class CueHandler {
 	//appended with the parent directory to a vector, (for dumping bin files)
 	void pushFILEToVector(std::vector<std::string> &vect);
 
-	/**** Writing Functions ****/
+
+
+
+
+	/*** Writing Functions ****************************************************/
 	//Output (overwrite) the TeFiEd object RAM into the file.
 	void write();
 	
@@ -60,7 +145,12 @@ class CueHandler {
 	//Adds a new INDEX, numbered as num, and the timestamp to the cueFile
 	void newINDEX(const unsigned int num, const std::string indexStr);
 
-	
+
+
+
+
+
+
 	/** AUX Functions *********************************************************/
 	//Converts a number of bytes into an Audio CD timestamp.
 	std::string bytesToTimestamp(const unsigned long bytes);
@@ -71,7 +161,13 @@ class CueHandler {
 	//Adds two INDEX strings together and returns a timestamp string.
 	std::string addTimestamps(const std::string ts1, const std::string ts2);
 	
-
+	
+	
+	
+	
+	
+	
+	/*** Private functions and variables **************************************/
 	//private:
 	/** Variables **/
 	TeFiEd *cueFile; //TeFiEd text file object

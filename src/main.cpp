@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.15.12
-* 17 Jan 2023
+* v0.18.14
+* 21 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
 	//Read the .cue file in
 	cueIn.read();
 	
-	//Generate the file system strings for use later TODO Make this default behavious with overwrite
+	//Generate the file system strings for use later TODO Make this default behaviour with overwrite
 	genFSStrings(std::string(argv[1]));
 		
 	/** Program execution *****************************************************/
@@ -81,17 +81,21 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	//Get all the FILE strings from the input cue file
-	cueIn.pushFILEToVector(binFilenameVect);
+	//Get the FILE strings from the input cue file and store them in a vector
+	//cueIn.pushFILEToVector(binFilenameVect);
+	
+	cueIn.getCueData();
 	
 	
-	std::cout << cueIn.timestampToBytes(cueIn.bytesToTimestamp(112291536)) << std::endl;
-	//std::cout << cueIn.timestampToBytes("10:36:43") << std::endl;
+	//Open the output cue file and create the file. Exits on failure
+	//CueHandler cueOut("./test.cue");
+	//cueOut.create();
 	
+	//cueOut.TrackData[0].indexByte[0] = 69;
 	
+	//std::cout << cueOut.TrackData[0].indexByte[0] << std::endl;
+	/*
 	
-	CueHandler cueOut("./test.cue");
-	cueOut.create();
 	
 	
 	cueOut.newTRACK(1,"AUDIO");
@@ -102,7 +106,7 @@ int main(int argc, char *argv[]){
 	
 	cueOut.write();
 
-
+	*/
 	/*
 	
 	//Dump the binary filename vect to the output binary file.

@@ -32,6 +32,15 @@ CueHandler::CueHandler(const char* filename) {
 	cueFile->setVerbose(true);
 }
 
+CueHandler::~CueHandler() {
+	std::cout << "destruct cuehandler" << std::endl;
+	//Delete the TeFiEd object
+	delete cueFile;
+	
+	//Clear the FILE vector
+	FILE.clear();
+}
+
 /** File Managment ************************************************************/
 void CueHandler::read() {
 	if(cueFile->read() != 0) {
@@ -46,6 +55,94 @@ void CueHandler::create() {
 }
 
 /** Reading functions *********************************************************/
+CueHandler::t_LINE CueHandler::getLineType(std::string lineStr) {	
+	//If line is empty return EMPTY
+	if(lineStr.length() == 0) return ltEMPTY;
+
+	//Check against known strings for types
+	if(lineStr.find("FILE \"") != std::string::npos) return ltFILE;
+	
+	if(lineStr.find("  TRACK") != std::string::npos) return ltTRACK;
+	
+	if(lineStr.find("    INDEX") != std::string::npos) return ltINDEX;
+	
+	//Failure to find any known string means it's an invalid line
+	return ltINVALID;
+}
+
+int CueHandler::getCueData() {
+	//Placeholder FileData object to push to the vector
+	FileData cFILE;
+	
+	//Go through all the lines in the cue file.
+	for(size_t lineNo = 1; lineNo <= cueFile->lines(); lineNo++) {
+	
+		//Copy the current line to a new string
+		std::string cLineStr = cueFile->getLine(lineNo);
+		
+		//Get the type of the current line and exec based on that
+		t_LINE cLineType = getLineType(cLineStr);
+		
+		//Invalid line TODO
+		if(cLineType == ltINVALID) errorMsg(2, "Cue file contains invalid line");
+		
+		//FILE line type
+		if(cLineType == ltFILE) {
+			//If the cFILE struct already has some information in it, push that
+			//then continue to reset. TODO detect a push event better
+			if(cFILE.FILENAME != "") FILE.push_back(cFILE);
+			
+			//TODO clear the object variables
+			
+			//Make sure the FILE TYPE is known
+			if(cLineStr.find("BINARY") != std::string::npos) {
+				cFILE.TYPE = ftBINARY;
+			} else {
+				errorMsg(0, "File is not of type BINARY");
+			}
+			
+			//Set the FILENAME
+			//First and second quote marks
+			size_t fQuote = cLineStr.find('\"') + 1;
+			size_t lQuote = cLineStr.find('\"', fQuote);
+			
+			cFILE.FILENAME = cLineStr.substr(fQuote, lQuote - fQuote);
+		}
+		
+		
+		//TRACK line type
+		if(cLineType == ltTRACK) {
+			//TODO pushback to the the TRACK vector
+		}
+		
+		
+	}
+	
+	//After the last line of the file, push the remaining information to the
+	//FILE vector
+	FILE.push_back(cFILE);
+	
+	for(int x = 0; x < FILE.size(); x++) {
+		std::cout << FILE[x].FILENAME << std::endl;
+	}
+	
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 std::string CueHandler::getFILE(const std::string line) {
 	//Find the first and last quote mark, and handle errors if none exist.
 	size_t firstQuote, lastQuote;
@@ -169,9 +266,6 @@ unsigned long CueHandler::timestampToBytes(std::string timestamp) {
 	unsigned short minutes = std::stoi(timestamp.substr(0, 2));
 	unsigned short seconds = std::stoi(timestamp.substr(3, 2));
 	unsigned short frames  = std::stoi(timestamp.substr(6, 2));
-	
-	
-	std::cout << minutes << "  " << seconds << "  " << frames << std::endl;
 	
 	//Add minutes to the seconds for sector calculation
 	seconds += (minutes * 60);
