@@ -38,12 +38,14 @@ $ cd ./psx-comBINe-main
 * user input protection
 * make sure program can handle .BIN .bin .CUE and .cue files.
 * Parent directory handler may not play nice with windows. make a test for this  
-before full deploy.  
+before full deploy.
 * Create user input handler for program args
+* Make cueRead function work
+* improve printCue function, print TYPE variables.
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
-checking  
+checking
 * 0.4.5 - Included boost in make and src files. 
 * 0.5.5 - Implimented filesystem managment and file creation
 * 0.11.9 - Sanity check for output buffer array creation
@@ -53,6 +55,7 @@ cue handling
 dependance
 * 0.17.14 - Started rework of CueHandler
 * 0.18.14 - Testing struct vector managment
+* 0.18.15 - Cue data struct printing finished. Debug assist
 
 ## Licence
-This software is under the GPL (GPL3.0), please see LICENCE for information  
+This software is under the GPL (GPL3.0), please see LICENCE for information
