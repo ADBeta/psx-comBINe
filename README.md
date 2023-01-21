@@ -40,28 +40,19 @@ $ cd ./psx-comBINe-main
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.  
 * Create user input handler for program args
-* optimize dump more?
-* add cleanup function to close files
-* check INDEX function 00, since it is optional for pregap. Is this always a thing  
-for ps1 games?
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
 checking  
 * 0.4.5 - Included boost in make and src files. 
 * 0.5.5 - Implimented filesystem managment and file creation
-* 0.6.5 - Added error message system
-* 0.11.8 - Have .cue timestamp string creation working.
 * 0.11.9 - Sanity check for output buffer array creation
 * 0.12.10 - Changed fileHandler to binHander, and added a library solely for  
 cue handling
-* 0.12.11 - Removed common.h header and made code easier to understand
-* 0.12.12 - Moved helper functions into their own header so all modules can
-use them  
-* 0.13.12 - Began CueHandler migration.
-* 0.14.12 - Improved cue handler functionality
-* 0.15.12 - Completed base cue handler functions. Need to integrate it with read  
-functions
+* 0.12.12 - Moved functions from common.h to helpers.h, and removed extern  
+dependance
+* 0.17.14 - Started rework of CueHandler
+* 0.18.14 - Testing struct vector managment
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information  
