@@ -70,6 +70,75 @@ CueHandler::t_LINE CueHandler::getLineType(std::string lineStr) {
 	return ltINVALID;
 }
 
+void CueHandler::testVect() {
+	FileData cFILE;
+	
+	TrackData cTRACK;
+	
+	cFILE.FILENAME = "Test";
+
+	cTRACK.TYPE = AUDIO;
+	
+	cTRACK.INDEX_BYTE.push_back(6969);
+	cTRACK.INDEX_BYTE.push_back(420);
+	cTRACK.INDEX_BYTE.push_back(2121);
+	cTRACK.INDEX_BYTE.push_back(10);
+	
+	cFILE.TRACK.push_back(cTRACK);
+	cTRACK.INDEX_BYTE.clear();
+	
+	
+	cTRACK.TYPE = AUDIO;
+	
+	cTRACK.INDEX_BYTE.push_back(12);
+	cTRACK.INDEX_BYTE.push_back(13);
+	cTRACK.INDEX_BYTE.push_back(14);
+	cTRACK.INDEX_BYTE.push_back(15);
+	
+	cFILE.TRACK.push_back(cTRACK);
+	
+	FILE.push_back(cFILE);
+	
+	
+}
+
+
+void CueHandler::printVect(FileData & pFILE) {
+	//Print filename and data
+	std::cout << pFILE.FILENAME << std::endl;
+
+
+	//Print all TRACKs in vector held by FILE
+	for(size_t trackIndex = 0; trackIndex < pFILE.TRACK.size(); trackIndex++) {
+		//Set TrackData object to point to current TRACK
+		TrackData pTRACK = pFILE.TRACK[trackIndex];
+		
+		//Print track number and Metadata TODO +1 to get track 01. does track 00 ever happen?
+		std::cout << "**Track " << padIntStr(trackIndex + 1, 2) << "\tPREGAP: ";
+		
+		if(pTRACK.PREGAP == true) { std::cout << "Yes";
+		} else { std::cout << "No"; }
+		
+		//TODO
+		std::cout << "\tTYPE: " << std::endl;
+		
+		//Print all INDEXs
+		for(size_t indexIndex  = 0; indexIndex < pTRACK.INDEX_BYTE.size(); indexIndex++) {
+			unsigned int cBYTE =  pTRACK.INDEX_BYTE[indexIndex];
+			
+			std::cout << "****INDEX " << padIntStr(indexIndex, 2) <<
+			             ": " << cBYTE << std::endl; //TODO to timestamp cBYTE
+		}
+		
+		//Print a blank line to split the TRACK fields
+		std::cout << std::endl;
+		
+	}
+	
+}
+
+
+//NEXT ON THE TODO LIST
 int CueHandler::getCueData() {
 	//Placeholder FileData object to push to the vector
 	FileData cFILE;
@@ -121,10 +190,6 @@ int CueHandler::getCueData() {
 	//After the last line of the file, push the remaining information to the
 	//FILE vector
 	FILE.push_back(cFILE);
-	
-	for(int x = 0; x < FILE.size(); x++) {
-		std::cout << FILE[x].FILENAME << std::endl;
-	}
 	
 	return 0;
 }

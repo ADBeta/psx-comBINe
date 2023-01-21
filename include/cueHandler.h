@@ -54,31 +54,35 @@ class CueHandler {
 	               CDI_2336, CDI_2352 };
 	
 	/*** CUE file data handler ************************************************/
+	//Child TRACK (2nd level) object. Max 99
+	struct TrackData {
+		//Track Object type
+		t_TRACK TYPE;
+		
+		//Does this track have a pregap?
+		bool PREGAP;
+		
+		//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX bytes
+		std::vector <unsigned long> INDEX_BYTE;
+	}; //struct TrackData
+	
 	//Parent FILE (Top level) object
 	struct FileData {
 		//FILE data
 		std::string FILENAME;
 		t_FILE TYPE;
-	
-		//99 TRACKs. Child (2nd level) object
-		struct TrackData {
-			//Track Object type
-			t_TRACK TYPE;
-			
-			//Does this track have a pregap?
-			bool PREGAP;
-			
-			//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX
-			std::vector <unsigned long> INDEX_BYTE;
-		}; //struct TrackData
 		
 		//Vector of TRACKs for each FILE
 		std::vector <TrackData> TRACK;
 	}; //struct FileData
 	
 	
+	
 	//Vector of FILEs
 	std::vector <FileData> FILE;
+	
+	
+	
 	
 	//TODO clear function for any FileData struct object
 	
@@ -94,6 +98,11 @@ class CueHandler {
 	/*** Reading Functions ****************************************************/	
 	//Returns the t_LINE the line at -number-'s string contains.
 	t_LINE getLineType(std::string lineStr);
+
+	void testVect();
+	
+	
+	void printVect(FileData &);
 
 	//Gets all the data from a .cue file and populates the FILE vector.
 	//Returns error status TODO

@@ -84,8 +84,10 @@ int main(int argc, char *argv[]){
 	//Get the FILE strings from the input cue file and store them in a vector
 	//cueIn.pushFILEToVector(binFilenameVect);
 	
-	cueIn.getCueData();
+	//cueIn.getCueData();
+	cueIn.testVect();
 	
+	cueIn.printVect(cueIn.FILE[0]);
 	
 	//Open the output cue file and create the file. Exits on failure
 	//CueHandler cueOut("./test.cue");
