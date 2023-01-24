@@ -9,7 +9,7 @@
 *
 * (c) ADBeta
 * v0.18.14
-* 21 Jan 2023
+* 24 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 	
 	//Open a new cueHandler object for the input file
 	CueHandler cueIn(argv[1]);
-	//Read the .cue file in
+	//Read the .cue file in TODO
 	cueIn.read();
 	
 	//Generate the file system strings for use later TODO Make this default behaviour with overwrite
@@ -84,10 +84,11 @@ int main(int argc, char *argv[]){
 	//Get the FILE strings from the input cue file and store them in a vector
 	//cueIn.pushFILEToVector(binFilenameVect);
 	
-	//cueIn.getCueData();
-	cueIn.testVect();
+	cueIn.getCueData();
 	
-	cueIn.printVect(cueIn.FILE[0]);
+	for(size_t x = 0; x < cueIn.FILE.size(); x++) {
+		cueIn.printFILE(cueIn.FILE[x]);
+	}
 	
 	//Open the output cue file and create the file. Exits on failure
 	//CueHandler cueOut("./test.cue");

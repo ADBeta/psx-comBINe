@@ -23,6 +23,29 @@
 #ifndef CUE_HANDLER_H
 #define CUE_HANDLER_H
 
+/*** Enums and strings of enums ***********************************************/
+//Valid CUE line types, including INVALID and EMPTY string types.
+enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltINVALID };
+
+//Valid FILE formats. (only binary is supported for now)
+enum t_FILE { ftUNKNOWN, ftBINARY};
+//String of LINE types mapped to enum
+extern const char* t_FILE_str[];
+
+//Valid TRACK types  
+/*	AUDIO		Audio/Music (2352 — 588 samples)
+	CDG			Karaoke CD+G (2448)
+	MODE1/2048	CD-ROM Mode 1 Data (cooked)
+	MODE1/2352	CD-ROM Mode 1 Data (raw)
+	MODE2/2336	CD-ROM XA Mode 2 Data (form mix)
+	MODE2/2352	CD-ROM XA Mode 2 Data (raw)
+	CDI/2336	CDI Mode 2 Data
+	CDI/2352	CDI Mode 2 Data                                           */
+enum t_TRACK {AUDIO, CDG, MODE1_2048, MODE1_2352, MODE2_2336, 
+              MODE2_2352, CDI_2336, CDI_2352 };
+extern const char* t_TRACK_str[];
+
+/*** CueHandler Class *********************************************************/
 class CueHandler {
 	public:
 	//Constructor takes a filename (char *) and passes it to the TeFiEd cueFile
@@ -32,35 +55,17 @@ class CueHandler {
 	//Destructor, deletes metadata array and cleans up TeFiEd object
 	~CueHandler();
 	
-	
-	/*** Enums and data structs ***********************************************/
-	//Valid .cue line types. FILE, TRACK and INDEX, with safeties for a blank
-	//or invalid line string
-	enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltINVALID };
-	
-	//Valid FILE formats. (only binary is supported for now)
-	enum t_FILE { ftBINARY };
-	
-	//Valid TRACK types  
-	/*	AUDIO		Audio/Music (2352 — 588 samples)
-		CDG			Karaoke CD+G (2448)
-		MODE1/2048	CD-ROM Mode 1 Data (cooked)
-		MODE1/2352	CD-ROM Mode 1 Data (raw)
-		MODE2/2336	CD-ROM XA Mode 2 Data (form mix)
-		MODE2/2352	CD-ROM XA Mode 2 Data (raw)
-		CDI/2336	CDI Mode 2 Data
-		CDI/2352	CDI Mode 2 Data                                           */
-	enum t_TRACK { AUDIO, CDG, MODE1_2048, MODE1_2352, MODE2_2336, MODE2_2352,
-	               CDI_2336, CDI_2352 };
-	
 	/*** CUE file data handler ************************************************/
 	//Child TRACK (2nd level) object. Max 99
 	struct TrackData {
+		//Track ID
+		unsigned int ID;
+	
 		//Track Object type
-		t_TRACK TYPE;
+		t_TRACK TYPE = AUDIO;
 		
 		//Does this track have a pregap?
-		bool PREGAP;
+		bool PREGAP = false;
 		
 		//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX bytes
 		std::vector <unsigned long> INDEX_BYTE;
@@ -68,23 +73,36 @@ class CueHandler {
 	
 	//Parent FILE (Top level) object
 	struct FileData {
-		//FILE data
+		//FILE data - Default values
 		std::string FILENAME;
-		t_FILE TYPE;
+		t_FILE TYPE = ftUNKNOWN;
 		
 		//Vector of TRACKs for each FILE
 		std::vector <TrackData> TRACK;
 	}; //struct FileData
 	
-	
-	
 	//Vector of FILEs
 	std::vector <FileData> FILE;
 	
-	
-	
-	
+	/*** FILE Vector Functions ************************************************/
 	//TODO clear function for any FileData struct object
+	
+	//Returns the t_LINE the line at -number-'s string contains.
+	t_LINE getLineType(std::string lineStr);
+
+
+
+	void testVect();
+	
+	
+	void printFILE(FileData &);
+
+	//Gets all the data from a .cue file and populates the FILE vector.
+	//Returns error status TODO
+	int getCueData();
+	
+	
+	
 	
 	/*** **********************************************************************/
 	//Read in an existing cue file
@@ -96,17 +114,6 @@ class CueHandler {
 	
 	
 	/*** Reading Functions ****************************************************/	
-	//Returns the t_LINE the line at -number-'s string contains.
-	t_LINE getLineType(std::string lineStr);
-
-	void testVect();
-	
-	
-	void printVect(FileData &);
-
-	//Gets all the data from a .cue file and populates the FILE vector.
-	//Returns error status TODO
-	int getCueData();
 	
 	
 	
@@ -183,7 +190,8 @@ class CueHandler {
 	
 	/** Functions **/
 	//Takes an input uint32_t, zero-pads to -pad- then return a string
-	std::string padIntStr(const unsigned long val, unsigned int pad = 0);
+	std::string padIntStr(const unsigned long val, const unsigned int len = 0,
+	                      const char pad = '0');
 
 }; //class CueHandler
 #endif

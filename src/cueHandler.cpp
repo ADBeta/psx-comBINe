@@ -22,6 +22,14 @@
 #include "helpers.h"
 #include "TeFiEd.h"
 
+/*** Enum mapped strings (only for printFILE) *********************************/
+const char* t_FILE_str[] = {"UNKNOWN", "BINARY"};   
+const char* t_TRACK_str[] = {
+	"AUDIO", "CDG", "MODE1/2048", "MODE1/2352", "MODE2/2336", "MODE2/2352", 
+	"CDI/2336", "CDI/2352"
+};
+
+/*** CueHandler Functions *****************************************************/
 CueHandler::CueHandler(const char* filename) {
 	//Open the cue file passed
 	cueFile = new TeFiEd(filename);
@@ -54,8 +62,8 @@ void CueHandler::create() {
 	}
 }
 
-/** Reading functions *********************************************************/
-CueHandler::t_LINE CueHandler::getLineType(std::string lineStr) {	
+/*** FILE Vector Functions ****************************************************/
+t_LINE CueHandler::getLineType(std::string lineStr) {	
 	//If line is empty return EMPTY
 	if(lineStr.length() == 0) return ltEMPTY;
 
@@ -96,72 +104,113 @@ void CueHandler::testVect() {
 	cTRACK.INDEX_BYTE.push_back(15);
 	
 	cFILE.TRACK.push_back(cTRACK);
+	FILE.push_back(cFILE);
 	
+	
+	
+	
+	cFILE.TRACK.clear();
+	cTRACK.INDEX_BYTE.clear();
+	
+	
+	cFILE.FILENAME = "Test 2";
+
+	cTRACK.TYPE = AUDIO;
+	
+	cTRACK.INDEX_BYTE.push_back(20);
+	cTRACK.INDEX_BYTE.push_back(21);
+	cTRACK.INDEX_BYTE.push_back(22);
+	cTRACK.INDEX_BYTE.push_back(23);
+	
+	cFILE.TRACK.push_back(cTRACK);
 	FILE.push_back(cFILE);
 	
 	
 }
 
 
-void CueHandler::printVect(FileData & pFILE) {
-	//Print filename and data
-	std::cout << pFILE.FILENAME << std::endl;
+void CueHandler::printFILE(FileData & pFILE) {
+	//Check if pFILE is empty 
+	if(pFILE.FILENAME == "") {
+		errorMsg(1, "Selected FILE element is not valid.");
+		return;
+	}
 
+	//Print filename and data
+	std::cout << "FILENAME: " << pFILE.FILENAME;
+	std::cout << "\t\tTYPE: " << t_FILE_str[(int)pFILE.TYPE] << std::endl;
+	//Seperator
+	std::cout << "-----------------------------------------------" << std::endl;
 
 	//Print all TRACKs in vector held by FILE
-	for(size_t trackIndex = 0; trackIndex < pFILE.TRACK.size(); trackIndex++) {
+	for(size_t tIdx = 0; tIdx < pFILE.TRACK.size(); tIdx++) {
 		//Set TrackData object to point to current TRACK
-		TrackData pTRACK = pFILE.TRACK[trackIndex];
+		TrackData pTRACK = pFILE.TRACK[tIdx];
 		
-		//Print track number and Metadata TODO +1 to get track 01. does track 00 ever happen?
-		std::cout << "**Track " << padIntStr(trackIndex + 1, 2) << "\tPREGAP: ";
+		//Print track number (TrackIndex + 1 to not have 00 track) and PREGAP:
+		std::cout << "TRACK " << padIntStr(pTRACK.ID, 2) << "        PREGAP: ";
 		
+		//Print PREGAP as human readable Yes/No
 		if(pTRACK.PREGAP == true) { std::cout << "Yes";
 		} else { std::cout << "No"; }
 		
-		//TODO
-		std::cout << "\tTYPE: " << std::endl;
+		//Print TYPE variable
+		std::cout << "        TYPE: " << t_TRACK_str[pTRACK.TYPE] << std::endl;
 		
-		//Print all INDEXs
-		for(size_t indexIndex  = 0; indexIndex < pTRACK.INDEX_BYTE.size(); indexIndex++) {
-			unsigned int cBYTE =  pTRACK.INDEX_BYTE[indexIndex];
+		//Print all INDEXs contained in that TRACK
+		for(size_t iIdx  = 0; iIdx < pTRACK.INDEX_BYTE.size(); iIdx++) {
+			unsigned int cBYTE =  pTRACK.INDEX_BYTE[iIdx];
 			
-			std::cout << "****INDEX " << padIntStr(indexIndex, 2) <<
-			             ": " << cBYTE << std::endl; //TODO to timestamp cBYTE
+			//Print the index number
+			std::cout << "  INDEX " << padIntStr(iIdx, 2)
+			//Print the raw BYTES format 
+			<< "    BYTES: " << padIntStr(cBYTE, 6, ' ')
+			//Print the timestamp version
+			<< "    TIMESTAMP: " << bytesToTimestamp(cBYTE) << std::endl;
 		}
 		
 		//Print a blank line to split the TRACK fields
 		std::cout << std::endl;
-		
 	}
-	
 }
 
 
-//NEXT ON THE TODO LIST
+
 int CueHandler::getCueData() {
-	//Placeholder FileData object to push to the vector
+	//Placeholder FileData and TrackData objects to push to their vectors
 	FileData cFILE;
+	TrackData cTRACK;
 	
 	//Go through all the lines in the cue file.
 	for(size_t lineNo = 1; lineNo <= cueFile->lines(); lineNo++) {
-	
 		//Copy the current line to a new string
 		std::string cLineStr = cueFile->getLine(lineNo);
-		
 		//Get the type of the current line and exec based on that
 		t_LINE cLineType = getLineType(cLineStr);
 		
-		//Invalid line TODO
-		if(cLineType == ltINVALID) errorMsg(2, "Cue file contains invalid line");
+		/*** Line Type state execution ****************************************/
+		//Invalid line cleans up then exits
+		if(cLineType == ltINVALID) {
+			errorMsg(2, "Cue file contains invalid line");
+		}
 		
 		//FILE line type
 		if(cLineType == ltFILE) {
-			//If the cFILE struct already has some information in it, push that
-			//then continue to reset. TODO detect a push event better
-			if(cFILE.FILENAME != "") FILE.push_back(cFILE);
-			
-			//TODO clear the object variables
+			/*******************************************************************
+			If the current line is a FILE line, and we were previously editing
+			cFILE and cTRACK data - then we need to push the TRACK and FILE
+			information to their respective vectors, clean up and go again.			
+			*******************************************************************/
+			if(cFILE.FILENAME != "") {
+				cFILE.TRACK.push_back(cTRACK); //Track push
+				FILE.push_back(cFILE); //File push
+				
+				//Clear the values stored in the current FILE and TRACK
+				//TODO Move this to a new function?
+				cTRACK.INDEX_BYTE.clear();
+				cFILE.TRACK.clear();
+				cFILE.FILENAME = "";
+			}
 			
 			//Make sure the FILE TYPE is known
 			if(cLineStr.find("BINARY") != std::string::npos) {
@@ -171,25 +220,49 @@ int CueHandler::getCueData() {
 			}
 			
 			//Set the FILENAME
-			//First and second quote marks
 			size_t fQuote = cLineStr.find('\"') + 1;
 			size_t lQuote = cLineStr.find('\"', fQuote);
-			
 			cFILE.FILENAME = cLineStr.substr(fQuote, lQuote - fQuote);
 		}
 		
 		
 		//TRACK line type
 		if(cLineType == ltTRACK) {
-			//TODO pushback to the the TRACK vector
+			cTRACK.ID = std::stoi(cLineStr.substr(8, 2));
+			
+			//Check the validity of track number
+			if(cTRACK.ID < 1 || cTRACK.ID > 99) {
+				errorMsg(2, "TRACK in cue file is out of range (1-99)");
+			}
+			
+			//TODO get track type
 		}
 		
+		
+		if(cLineType == ltINDEX) {
+			cTRACK.INDEX_BYTE.push_back(timestampToBytes(cLineStr.substr(13, 8)));
+			//    INDEX 00 00:00:00
+		}
+			/* //Track ID
+		unsigned int ID;
+	
+		//Track Object type
+		t_TRACK TYPE = AUDIO;
+		
+		//Does this track have a pregap?
+		bool PREGAP = false;
+		
+		//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX bytes
+		std::vector <unsigned long> INDEX_BYTE;
+		*/	
+			//Set the ID from the line string
 		
 	}
 	
 	//After the last line of the file, push the remaining information to the
 	//FILE vector
-	FILE.push_back(cFILE);
+	cFILE.TRACK.push_back(cTRACK); //Track push
+	FILE.push_back(cFILE); //File push
 	
 	return 0;
 }
@@ -362,13 +435,14 @@ std::string CueHandler::addTimestamps(const std::string ts1, const std::string t
 
 
 /** Private *******************************************************************/
-std::string CueHandler::padIntStr(const unsigned long val, unsigned int pad) {
+std::string CueHandler::padIntStr(const unsigned long val, 
+                                  const unsigned int len, const char pad) {
 	std::string intStr = std::to_string(val);
 	
 	//Pad if selected
-	if(pad != 0 && pad > intStr.length()) {
-		unsigned int padDelta = pad - intStr.length();
-		intStr.insert(0, padDelta, '0');
+	if(len != 0 && len > intStr.length()) {
+		unsigned int padDelta = len - intStr.length();
+		intStr.insert(0, padDelta, pad);
 	}
 	
 	return intStr;

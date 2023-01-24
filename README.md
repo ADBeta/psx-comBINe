@@ -41,7 +41,7 @@ $ cd ./psx-comBINe-main
 before full deploy.
 * Create user input handler for program args
 * Make cueRead function work
-* improve printCue function, print TYPE variables.
+* Ensure printFILE detects a request for non-existent vector ID. causes segfault
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
