@@ -45,7 +45,7 @@ CueHandler::~CueHandler() {
 	//Delete the TeFiEd object
 	delete cueFile;
 	
-	//Clear the FILE vector
+	//Clear the FILE vector TODO make this clean everything up
 	FILE.clear();
 }
 
@@ -63,6 +63,48 @@ void CueHandler::create() {
 }
 
 /*** FILE Vector Functions ****************************************************/
+void CueHandler::pushFILE(const std::string FN, const t_FILE TYPE) {
+	//Temporary FILE object
+	FileData tempFILE;
+	//Set the FILE Parameters
+	tempFILE.FILENAME = FN;
+	tempFILE.TYPE = TYPE;
+	
+	//Push tempFILE to the FILE vect
+	FILE.push_back(tempFILE);
+}
+
+void CueHandler::pushTRACK(const unsigned int ID, const t_TRACK TYPE) {
+	//TODO 99 MAX detection
+	
+	//Temporary TRACK object
+	TrackData tempTRACK;
+	//Set the TRACK Parameters
+	tempTRACK.ID = ID;
+	tempTRACK.TYPE = TYPE;
+	
+	//Get a pointer to the last entry in the FILE object
+	FileData *pointerFILE = &FILE.back();
+	//Push the tempTRACK to the back of the pointer 
+	pointerFILE->TRACK.push_back(tempTRACK);
+}
+
+void CueHandler::pushINDEX(const unsigned int ID, const unsigned long BYTES) {
+	//TODO 99 end detect
+	
+	//Temporary INDEX object
+	IndexData tempINDEX;
+	//Set INDEX parameters
+	tempINDEX.ID = ID;
+	tempINDEX.BYTES = BYTES;
+	
+	//Get a pointer to the last FILE and TRACK Object
+	TrackData *pointerTRACK = &FILE.back().TRACK.back();
+	//Push the INDEX to the end of current file
+	pointerTRACK->INDEX.push_back(tempINDEX);
+}
+
+
 t_LINE CueHandler::getLineType(std::string lineStr) {	
 	//If line is empty return EMPTY
 	if(lineStr.length() == 0) return ltEMPTY;
@@ -79,55 +121,30 @@ t_LINE CueHandler::getLineType(std::string lineStr) {
 }
 
 void CueHandler::testVect() {
-	FileData cFILE;
+	pushFILE("Test 1", ftBINARY);
 	
-	TrackData cTRACK;
+	pushTRACK(1, AUDIO);
 	
-	cFILE.FILENAME = "Test";
-
-	cTRACK.TYPE = AUDIO;
+	pushINDEX(1, 6969);
 	
-	cTRACK.INDEX_BYTE.push_back(6969);
-	cTRACK.INDEX_BYTE.push_back(420);
-	cTRACK.INDEX_BYTE.push_back(2121);
-	cTRACK.INDEX_BYTE.push_back(10);
+	pushINDEX(2, 2121);
 	
-	cFILE.TRACK.push_back(cTRACK);
-	cTRACK.INDEX_BYTE.clear();
-	
-	
-	cTRACK.TYPE = AUDIO;
-	
-	cTRACK.INDEX_BYTE.push_back(12);
-	cTRACK.INDEX_BYTE.push_back(13);
-	cTRACK.INDEX_BYTE.push_back(14);
-	cTRACK.INDEX_BYTE.push_back(15);
-	
-	cFILE.TRACK.push_back(cTRACK);
-	FILE.push_back(cFILE);
+	pushINDEX(3, 10);
 	
 	
 	
 	
-	cFILE.TRACK.clear();
-	cTRACK.INDEX_BYTE.clear();
+	pushFILE("Test the second", ftBINARY);
 	
+	pushTRACK(2, CDG);
 	
-	cFILE.FILENAME = "Test 2";
-
-	cTRACK.TYPE = AUDIO;
+	pushINDEX(1, 222);
 	
-	cTRACK.INDEX_BYTE.push_back(20);
-	cTRACK.INDEX_BYTE.push_back(21);
-	cTRACK.INDEX_BYTE.push_back(22);
-	cTRACK.INDEX_BYTE.push_back(23);
+	pushINDEX(2, 420);
 	
-	cFILE.TRACK.push_back(cTRACK);
-	FILE.push_back(cFILE);
-	
+	pushINDEX(3, 3);
 	
 }
-
 
 void CueHandler::printFILE(FileData & pFILE) {
 	//Check if pFILE is empty 
@@ -148,25 +165,22 @@ void CueHandler::printFILE(FileData & pFILE) {
 		TrackData pTRACK = pFILE.TRACK[tIdx];
 		
 		//Print track number (TrackIndex + 1 to not have 00 track) and PREGAP:
-		std::cout << "TRACK " << padIntStr(pTRACK.ID, 2) << "        PREGAP: ";
-		
-		//Print PREGAP as human readable Yes/No
-		if(pTRACK.PREGAP == true) { std::cout << "Yes";
-		} else { std::cout << "No"; }
+		std::cout << "TRACK " << padIntStr(pTRACK.ID, 2);
 		
 		//Print TYPE variable
 		std::cout << "        TYPE: " << t_TRACK_str[pTRACK.TYPE] << std::endl;
 		
 		//Print all INDEXs contained in that TRACK
-		for(size_t iIdx  = 0; iIdx < pTRACK.INDEX_BYTE.size(); iIdx++) {
-			unsigned int cBYTE =  pTRACK.INDEX_BYTE[iIdx];
+		for(size_t iIdx  = 0; iIdx < pTRACK.INDEX.size(); iIdx++) {
+			IndexData pINDEX = pFILE.TRACK[tIdx].INDEX[iIdx];
 			
 			//Print the index number
-			std::cout << "  INDEX " << padIntStr(iIdx, 2)
+			std::cout << "  INDEX " << padIntStr(pINDEX.ID, 2)
 			//Print the raw BYTES format 
-			<< "    BYTES: " << padIntStr(cBYTE, 6, ' ')
+			<< "    BYTES: " << padIntStr(pINDEX.BYTES, 6, ' ')
 			//Print the timestamp version
-			<< "    TIMESTAMP: " << bytesToTimestamp(cBYTE) << std::endl;
+			//<< "    TIMESTAMP: " << bytesToTimestamp(cBYTE) << std::endl;
+			<< std::endl;
 		}
 		
 		//Print a blank line to split the TRACK fields
@@ -207,7 +221,7 @@ int CueHandler::getCueData() {
 				
 				//Clear the values stored in the current FILE and TRACK
 				//TODO Move this to a new function?
-				cTRACK.INDEX_BYTE.clear();
+				//cTRACK.INDEX_BYTE.clear();
 				cFILE.TRACK.clear();
 				cFILE.FILENAME = "";
 			}
@@ -240,8 +254,10 @@ int CueHandler::getCueData() {
 		
 		
 		if(cLineType == ltINDEX) {
-			cTRACK.INDEX_BYTE.push_back(timestampToBytes(cLineStr.substr(13, 8)));
-			//    INDEX 00 00:00:00
+			
+			
+			//cTRACK.INDEX_BYTE.push_back(timestampToBytes(cLineStr.substr(13, 8)));
+			
 		}
 			/* //Track ID
 		unsigned int ID;

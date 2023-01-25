@@ -56,19 +56,23 @@ class CueHandler {
 	~CueHandler();
 	
 	/*** CUE file data handler ************************************************/
+	//INDEXs. Grandchild (3rd level) value. Max 99
+	struct IndexData {
+		unsigned int ID;
+		
+		//Number of bytes the current index holds
+		unsigned long BYTES = 0;
+	}; //struct IndexData
+	
 	//Child TRACK (2nd level) object. Max 99
 	struct TrackData {
 		//Track ID
-		unsigned int ID;
+		unsigned int ID = 0;
 	
 		//Track Object type
 		t_TRACK TYPE = AUDIO;
 		
-		//Does this track have a pregap?
-		bool PREGAP = false;
-		
-		//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX bytes
-		std::vector <unsigned long> INDEX_BYTE;
+		std::vector <IndexData> INDEX;
 	}; //struct TrackData
 	
 	//Parent FILE (Top level) object
@@ -86,6 +90,15 @@ class CueHandler {
 	
 	/*** FILE Vector Functions ************************************************/
 	//TODO clear function for any FileData struct object
+	
+	//Push a new FILE to FILE[]
+	void pushFILE(const std::string FN, const t_FILE TYPE);
+	
+	//Push a new TRACK to the last entry in FILE[]
+	void pushTRACK(const unsigned int ID, const t_TRACK TYPE);
+	
+	//Push a new INDEX to the last entry in FILE[].TRACK[]
+	void pushINDEX(const unsigned int ID, const unsigned long BYTES);
 	
 	//Returns the t_LINE the line at -number-'s string contains.
 	t_LINE getLineType(std::string lineStr);
