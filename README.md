@@ -56,6 +56,7 @@ dependance
 * 0.17.14 - Started rework of CueHandler
 * 0.18.14 - Testing struct vector managment
 * 0.18.15 - Cue data struct printing finished. Debug assist
+* 0.20.15 - Cue File Track and Index push functions finished.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information
