@@ -57,6 +57,7 @@ dependance
 * 0.18.14 - Testing struct vector managment
 * 0.18.15 - Cue data struct printing finished. Debug assist
 * 0.20.15 - Cue File Track and Index push functions finished.
+* 0.21.15 - Have getCueData and printFILE setup to a basic extent.
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information
