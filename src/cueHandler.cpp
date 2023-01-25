@@ -177,10 +177,9 @@ void CueHandler::printFILE(FileData & pFILE) {
 			//Print the index number
 			std::cout << "  INDEX " << padIntStr(pINDEX.ID, 2)
 			//Print the raw BYTES format 
-			<< "    BYTES: " << padIntStr(pINDEX.BYTES, 6, ' ')
+			<< "    BYTES: " << padIntStr(pINDEX.BYTES, 9, ' ')
 			//Print the timestamp version
-			//<< "    TIMESTAMP: " << bytesToTimestamp(cBYTE) << std::endl;
-			<< std::endl;
+			<< "    TIMESTAMP: " << bytesToTimestamp(pINDEX.BYTES) << std::endl;
 		}
 		
 		//Print a blank line to split the TRACK fields
@@ -188,17 +187,12 @@ void CueHandler::printFILE(FileData & pFILE) {
 	}
 }
 
-
-
-int CueHandler::getCueData() {
-	//Placeholder FileData and TrackData objects to push to their vectors
-	FileData cFILE;
-	TrackData cTRACK;
-	
+int CueHandler::getCueData() {	
 	//Go through all the lines in the cue file.
 	for(size_t lineNo = 1; lineNo <= cueFile->lines(); lineNo++) {
 		//Copy the current line to a new string
 		std::string cLineStr = cueFile->getLine(lineNo);
+		
 		//Get the type of the current line and exec based on that
 		t_LINE cLineType = getLineType(cLineStr);
 		
@@ -210,76 +204,36 @@ int CueHandler::getCueData() {
 		
 		//FILE line type
 		if(cLineType == ltFILE) {
-			/*******************************************************************
-			If the current line is a FILE line, and we were previously editing
-			cFILE and cTRACK data - then we need to push the TRACK and FILE
-			information to their respective vectors, clean up and go again.			
-			*******************************************************************/
-			if(cFILE.FILENAME != "") {
-				cFILE.TRACK.push_back(cTRACK); //Track push
-				FILE.push_back(cFILE); //File push
-				
-				//Clear the values stored in the current FILE and TRACK
-				//TODO Move this to a new function?
-				//cTRACK.INDEX_BYTE.clear();
-				cFILE.TRACK.clear();
-				cFILE.FILENAME = "";
-			}
+			//TODO BINARY detection stuff
+			//std::string fTypeStr = cLineStr.substr(
 			
 			//Make sure the FILE TYPE is known
-			if(cLineStr.find("BINARY") != std::string::npos) {
-				cFILE.TYPE = ftBINARY;
-			} else {
+			if(cLineStr.find("BINARY") == std::string::npos) {
 				errorMsg(0, "File is not of type BINARY");
 			}
 			
 			//Set the FILENAME
 			size_t fQuote = cLineStr.find('\"') + 1;
 			size_t lQuote = cLineStr.find('\"', fQuote);
-			cFILE.FILENAME = cLineStr.substr(fQuote, lQuote - fQuote);
+			//push new FILE to the stack
+			pushFILE(cLineStr.substr(fQuote, lQuote - fQuote), ftBINARY);
 		}
-		
 		
 		//TRACK line type
 		if(cLineType == ltTRACK) {
-			cTRACK.ID = std::stoi(cLineStr.substr(8, 2));
-			
-			//Check the validity of track number
-			if(cTRACK.ID < 1 || cTRACK.ID > 99) {
-				errorMsg(2, "TRACK in cue file is out of range (1-99)");
-			}
+			unsigned int lineID = std::stoi(cLineStr.substr(8, 2));
 			
 			//TODO get track type
+			pushTRACK(lineID, AUDIO);
 		}
 		
-		
+		//INDEX line type	
 		if(cLineType == ltINDEX) {
-			
-			
-			//cTRACK.INDEX_BYTE.push_back(timestampToBytes(cLineStr.substr(13, 8)));
-			
+			unsigned int lineID = std::stoi(cLineStr.substr(10, 2));
+			unsigned long lineBytes = timestampToBytes(cLineStr.substr(13, 8));
+			pushINDEX(lineID, lineBytes);
 		}
-			/* //Track ID
-		unsigned int ID;
-	
-		//Track Object type
-		t_TRACK TYPE = AUDIO;
-		
-		//Does this track have a pregap?
-		bool PREGAP = false;
-		
-		//INDEXs. Grandchild (3rd level) value. Maximum 99 INDEX bytes
-		std::vector <unsigned long> INDEX_BYTE;
-		*/	
-			//Set the ID from the line string
-		
 	}
-	
-	//After the last line of the file, push the remaining information to the
-	//FILE vector
-	cFILE.TRACK.push_back(cTRACK); //Track push
-	FILE.push_back(cFILE); //File push
-	
 	return 0;
 }
 

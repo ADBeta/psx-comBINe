@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.20.15
+* v0.21.15
 * 25 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
@@ -84,8 +84,8 @@ int main(int argc, char *argv[]){
 	//Get the FILE strings from the input cue file and store them in a vector
 	//cueIn.pushFILEToVector(binFilenameVect);
 	
-	cueIn.testVect();
-	//cueIn.getCueData();
+	//cueIn.testVect();
+	cueIn.getCueData();
 	
 	for(size_t x = 0; x < cueIn.FILE.size(); x++) {
 		cueIn.printFILE(cueIn.FILE[x]);
