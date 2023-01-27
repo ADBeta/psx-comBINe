@@ -30,7 +30,7 @@ enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltINVALID };
 //Valid FILE formats. (only binary is supported for now)
 enum t_FILE { ftUNKNOWN, ftBINARY};
 //String of LINE types mapped to enum
-extern const char* t_FILE_str[];
+extern const std::string t_FILE_str[];
 
 //Valid TRACK types  
 /*	AUDIO		Audio/Music (2352 — 588 samples)
@@ -41,9 +41,9 @@ extern const char* t_FILE_str[];
 	MODE2/2352	CD-ROM XA Mode 2 Data (raw)
 	CDI/2336	CDI Mode 2 Data
 	CDI/2352	CDI Mode 2 Data                                           */
-enum t_TRACK {AUDIO, CDG, MODE1_2048, MODE1_2352, MODE2_2336, 
-              MODE2_2352, CDI_2336, CDI_2352 };
-extern const char* t_TRACK_str[];
+enum t_TRACK {ttUNKNOWN, ttAUDIO, ttCDG, ttMODE1_2048, ttMODE1_2352,
+              ttMODE2_2336, ttMODE2_2352, ttCDI_2336, ttCDI_2352 };
+extern const std::string t_TRACK_str[];
 
 /*** CueHandler Class *********************************************************/
 class CueHandler {
@@ -55,41 +55,40 @@ class CueHandler {
 	//Destructor, deletes metadata array and cleans up TeFiEd object
 	~CueHandler();
 	
-	/*** CUE file data handler ************************************************/
+	/*** Cue file data structs ************************************************/
 	//INDEXs. Grandchild (3rd level) value. Max 99
 	struct IndexData {
-		unsigned int ID;
-		
+		unsigned int ID = 0;		
 		//Number of bytes the current index holds
 		unsigned long BYTES = 0;
-	}; //struct IndexData
+	};
 	
 	//Child TRACK (2nd level) object. Max 99
 	struct TrackData {
-		//Track ID
 		unsigned int ID = 0;
-	
-		//Track Object type
-		t_TRACK TYPE = AUDIO;
-		
+		t_TRACK TYPE = ttUNKNOWN;
+		//Vector of INDEXs
 		std::vector <IndexData> INDEX;
-	}; //struct TrackData
+	};
 	
 	//Parent FILE (Top level) object
 	struct FileData {
 		//FILE data - Default values
 		std::string FILENAME;
 		t_FILE TYPE = ftUNKNOWN;
-		
 		//Vector of TRACKs for each FILE
 		std::vector <TrackData> TRACK;
-	}; //struct FileData
+	};
 	
-	//Vector of FILEs
+	//Vector of FILEs (Cue Data is stored in this nested vector)
 	std::vector <FileData> FILE;
 	
-	/*** FILE Vector Functions ************************************************/
-	//TODO clear function for any FileData struct object
+	/*** Cue file data functions **********************************************/
+	//Returns the t_LINE of the string passed (cue file line)
+	t_LINE getLINEType(const std::string lineStr);
+	
+	//Returns the t_TRACK of the string passed
+	t_TRACK getTRACKType(const std::string trackStr); 
 	
 	//Push a new FILE to FILE[]
 	void pushFILE(const std::string FN, const t_FILE TYPE);
@@ -100,16 +99,16 @@ class CueHandler {
 	//Push a new INDEX to the last entry in FILE[].TRACK[]
 	void pushINDEX(const unsigned int ID, const unsigned long BYTES);
 	
-	//Returns the t_LINE the line at -number-'s string contains.
-	t_LINE getLineType(std::string lineStr);
-
-
-
-	void testVect();
-	
-	
+	//Prints a passed FileData Object to the cli
 	void printFILE(FileData &);
 
+	
+	
+	
+	
+	
+	
+	
 	//Gets all the data from a .cue file and populates the FILE vector.
 	//Returns error status TODO
 	int getCueData();

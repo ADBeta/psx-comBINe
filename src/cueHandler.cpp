@@ -23,10 +23,10 @@
 #include "TeFiEd.h"
 
 /*** Enum mapped strings (only for printFILE) *********************************/
-const char* t_FILE_str[] = {"UNKNOWN", "BINARY"};   
-const char* t_TRACK_str[] = {
-	"AUDIO", "CDG", "MODE1/2048", "MODE1/2352", "MODE2/2336", "MODE2/2352", 
-	"CDI/2336", "CDI/2352"
+const std::string t_FILE_str[] = {"UNKNOWN", "BINARY"};   
+const std::string t_TRACK_str[] = {
+	"UNKNOWN", "AUDIO", "CDG", "MODE1/2048", "MODE1/2352", "MODE2/2336", 
+	"MODE2/2352", "CDI/2336", "CDI/2352"
 };
 
 /*** CueHandler Functions *****************************************************/
@@ -42,18 +42,23 @@ CueHandler::CueHandler(const char* filename) {
 
 CueHandler::~CueHandler() {
 	std::cout << "destruct cuehandler" << std::endl;
+	
 	//Delete the TeFiEd object
 	delete cueFile;
 	
-	//Clear the FILE vector TODO make this clean everything up
+	//Clear the FILE vector and de-allocate its RAM
 	FILE.clear();
+	FILE.shrink_to_fit();
 }
 
-/** File Managment ************************************************************/
 void CueHandler::read() {
+	//Read the cueFile TeFiEd Obj into RAM
 	if(cueFile->read() != 0) {
 		exit(EXIT_FAILURE); 
 	}
+	
+	//Make sure the Line Ending type is Unix
+	cueFile->convertLineEnding(le_Unix);	
 }
 
 void CueHandler::create() {
@@ -62,50 +67,9 @@ void CueHandler::create() {
 	}
 }
 
+
 /*** FILE Vector Functions ****************************************************/
-void CueHandler::pushFILE(const std::string FN, const t_FILE TYPE) {
-	//Temporary FILE object
-	FileData tempFILE;
-	//Set the FILE Parameters
-	tempFILE.FILENAME = FN;
-	tempFILE.TYPE = TYPE;
-	
-	//Push tempFILE to the FILE vect
-	FILE.push_back(tempFILE);
-}
-
-void CueHandler::pushTRACK(const unsigned int ID, const t_TRACK TYPE) {
-	//TODO 99 MAX detection
-	
-	//Temporary TRACK object
-	TrackData tempTRACK;
-	//Set the TRACK Parameters
-	tempTRACK.ID = ID;
-	tempTRACK.TYPE = TYPE;
-	
-	//Get a pointer to the last entry in the FILE object
-	FileData *pointerFILE = &FILE.back();
-	//Push the tempTRACK to the back of the pointer 
-	pointerFILE->TRACK.push_back(tempTRACK);
-}
-
-void CueHandler::pushINDEX(const unsigned int ID, const unsigned long BYTES) {
-	//TODO 99 end detect
-	
-	//Temporary INDEX object
-	IndexData tempINDEX;
-	//Set INDEX parameters
-	tempINDEX.ID = ID;
-	tempINDEX.BYTES = BYTES;
-	
-	//Get a pointer to the last FILE and TRACK Object
-	TrackData *pointerTRACK = &FILE.back().TRACK.back();
-	//Push the INDEX to the end of current file
-	pointerTRACK->INDEX.push_back(tempINDEX);
-}
-
-
-t_LINE CueHandler::getLineType(std::string lineStr) {	
+t_LINE CueHandler::getLINEType(const std::string lineStr) {	
 	//If line is empty return EMPTY
 	if(lineStr.length() == 0) return ltEMPTY;
 
@@ -120,31 +84,76 @@ t_LINE CueHandler::getLineType(std::string lineStr) {
 	return ltINVALID;
 }
 
-void CueHandler::testVect() {
-	pushFILE("Test 1", ftBINARY);
+//Returns the t_TRACK of the string passed
+t_TRACK CueHandler::getTRACKType(const std::string trackStr) {
+	//Get the TYPE string out of the line (last ' ' to the last char)
+	unsigned int lastSpace = trackStr.find_last_of(' ') + 1;
+	std::string typeStr = trackStr.substr(lastSpace, std::string::npos);
 	
-	pushTRACK(1, AUDIO);
+	//Get number of strings in t_TRACK_str array.
+	unsigned int TRACKTypes = sizeof(t_TRACK_str)/sizeof(t_TRACK_str[0]);
 	
-	pushINDEX(1, 6969);
+	//Go through all elements in t_TRACK_str (current track string)
+	for(unsigned int cts = 0; cts < TRACKTypes; cts++) {
+		//If the string from line and the TRACKType string match, return that
+		//index as enum variables
+		if(typeStr.compare(t_TRACK_str[cts]) == 0) {
+			//Return the matched type in enum
+			return (t_TRACK)cts;
+		}
+	}
 	
-	pushINDEX(2, 2121);
-	
-	pushINDEX(3, 10);
-	
-	
-	
-	
-	pushFILE("Test the second", ftBINARY);
-	
-	pushTRACK(2, CDG);
-	
-	pushINDEX(1, 222);
-	
-	pushINDEX(2, 420);
-	
-	pushINDEX(3, 3);
-	
+	//If nothing matches, return UNKNOWN
+	return ttUNKNOWN;
 }
+
+void CueHandler::pushFILE(const std::string FN, const t_FILE TYPE) {
+	//Temporary FILE object
+	FileData tempFILE;
+	//Set the FILE Parameters
+	tempFILE.FILENAME = FN;
+	tempFILE.TYPE = TYPE;
+	
+	//Push tempFILE to the FILE vect
+	FILE.push_back(tempFILE);
+}
+
+void CueHandler::pushTRACK(const unsigned int ID, const t_TRACK TYPE) {
+	if(ID > 99) {
+		errorMsg(2, "pushTRACK: TRACK ID Greater than 99. Ignoring this push");
+		return;
+	}
+	
+	//Temporary TRACK object
+	TrackData tempTRACK;
+	//Set the TRACK Parameters
+	tempTRACK.ID = ID;
+	tempTRACK.TYPE = TYPE;
+	
+	//Get a pointer to the last entry in the FILE object
+	FileData *pointerFILE = &FILE.back();
+	//Push the tempTRACK to the back of the pointer 
+	pointerFILE->TRACK.push_back(tempTRACK);
+}
+
+void CueHandler::pushINDEX(const unsigned int ID, const unsigned long BYTES) {
+	if(ID > 99) {
+		errorMsg(2, "pushINDEX: INDEX ID Greater than 99. Ignoring this push");
+		return;
+	}
+	
+	//Temporary INDEX object
+	IndexData tempINDEX;
+	//Set INDEX parameters
+	tempINDEX.ID = ID;
+	tempINDEX.BYTES = BYTES;
+	
+	//Get a pointer to the last FILE and TRACK Object
+	TrackData *pointerTRACK = &FILE.back().TRACK.back();
+	//Push the INDEX to the end of current file
+	pointerTRACK->INDEX.push_back(tempINDEX);
+}
+
 
 void CueHandler::printFILE(FileData & pFILE) {
 	//Check if pFILE is empty 
@@ -167,7 +176,7 @@ void CueHandler::printFILE(FileData & pFILE) {
 		//Print track number (TrackIndex + 1 to not have 00 track) and PREGAP:
 		std::cout << "TRACK " << padIntStr(pTRACK.ID, 2);
 		
-		//Print TYPE variable
+		//Print TRACK TYPE variable
 		std::cout << "        TYPE: " << t_TRACK_str[pTRACK.TYPE] << std::endl;
 		
 		//Print all INDEXs contained in that TRACK
@@ -194,7 +203,7 @@ int CueHandler::getCueData() {
 		std::string cLineStr = cueFile->getLine(lineNo);
 		
 		//Get the type of the current line and exec based on that
-		t_LINE cLineType = getLineType(cLineStr);
+		t_LINE cLineType = getLINEType(cLineStr);
 		
 		/*** Line Type state execution ****************************************/
 		//Invalid line cleans up then exits
@@ -222,9 +231,8 @@ int CueHandler::getCueData() {
 		//TRACK line type
 		if(cLineType == ltTRACK) {
 			unsigned int lineID = std::stoi(cLineStr.substr(8, 2));
-			
-			//TODO get track type
-			pushTRACK(lineID, AUDIO);
+			t_TRACK lineTYPE = getTRACKType(cLineStr);
+			pushTRACK(lineID, lineTYPE);
 		}
 		
 		//INDEX line type	
@@ -248,61 +256,6 @@ int CueHandler::getCueData() {
 
 
 
-
-
-//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-std::string CueHandler::getFILE(const std::string line) {
-	//Find the first and last quote mark, and handle errors if none exist.
-	size_t firstQuote, lastQuote;
-	//First Quote
-	firstQuote = line.find('"') + 1;
-	
-	//Last Quote
-	if(firstQuote != std::string::npos) lastQuote = line.find('"', firstQuote);
-	
-	if(firstQuote == std::string::npos || lastQuote == std::string::npos) {
-		//Fatal error
-		errorMsg(2, "A filename in .cue file is corrupted (Missing quotes)");	
-	}
-	
-	//Create a new string from that substring - subst(firstQuite, length)
-	std::string filename = line.substr(firstQuote, (lastQuote - firstQuote));
-	return filename;
-}
-
-void CueHandler::pushFILEToVector(std::vector<std::string> &vect) {
-	size_t matchLineNo;
-	while(( matchLineNo = cueFile->findNext("FILE") )) {
-		//If the current line isn't valid, prompt with continue message.
-		//Exit if false, continue if true.
-		if(lineIsValid(matchLineNo) == false) {
-			if(promptContinue() == false) return;
-		}
-		
-		//Push the filename string to the vector.
-		vect.push_back(cueFile->parentDir() + 
-		                getFILE(cueFile->getLine(matchLineNo)));
-	}
-}
-
-bool CueHandler::lineIsValid(const size_t lineNo) {
-	std::string lineStr = cueFile->getLine(lineNo);
-	
-	//Make sure the file extension is .bin	
-	if(lineStr.find(".bin") == std::string::npos) {
-		errorMsg(0, "file does not have .bin extension");
-		return false;
-	}
-	
-	//Make sure the file type is BINARY
-	if(lineStr.find("BINARY") == std::string::npos) {
-		errorMsg(0, "file is not of type BINARY");
-		return false;
-	}
-	
-	//File is valid
-	return true;
-}
 
 /** Writing functions *********************************************************/
 void CueHandler::write() {

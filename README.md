@@ -42,6 +42,7 @@ before full deploy.
 * Create user input handler for program args
 * Make cueRead function work
 * Ensure printFILE detects a request for non-existent vector ID. causes segfault
+* Convert code to use TeFiEd getWord() functionality
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  

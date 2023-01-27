@@ -7,8 +7,8 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-* v3.3.2
-* Last Modified 9 Jan 2023
+* v4.2.1
+* Last Modified 27 Jan 2023
 */
 
 #include "TeFiEd.h"
@@ -104,7 +104,7 @@ int TeFiEd::create() {
 //Read file into RAM File. Includes byte and line length failsafe
 int TeFiEd::read() {
 	//Flush the vector
-	this->flush();
+	flush();
 
 	//Open file as read
 	m_file.open(m_filename, std::ios::in);
@@ -246,6 +246,51 @@ void TeFiEd::flush() {
 }
 
 /** File Edit Functions *******************************************************/
+void TeFiEd::convertLineEnding(t_LINE_END type) {
+	//Keep track of how many lines were not the correct type for verbose prints
+	size_t wrongLines = 0;
+	
+	//Go through every line in the RAM file
+	size_t cLine = 0;
+	while(cLine < m_ramfile.size()) {
+		//Get the last char in this line
+		char lastChar = m_ramfile[cLine].back();
+		
+		//In Unix convert mode, remove any 0x0D (\r or CR) chars
+		if(type == le_Unix) {
+			if(lastChar == 0x0D) {
+				//Remove the last char
+				m_ramfile[cLine].pop_back();		
+				//Incriment wrongLines
+				++wrongLines;
+			}
+		//In DOS mode, if a line does not have 0x0D (\r CR) then add one,
+		} else if (type == le_DOS) {
+			if(lastChar != 0x0D) {
+				//Add the \r to the end of line
+				m_ramfile[cLine].push_back(0x0D);
+				//Incriment wrongLines
+				++wrongLines;
+			}
+		}
+		
+		++cLine;
+	}
+	
+	//Output verbose message about status and results
+	if(this->verbose == true) {
+		if(type == le_Unix) {
+			std::cout << "Unix ";
+		} else if(type == le_DOS) {
+			std::cout << "DOS ";
+		}
+	
+		std::cout << "Line Ending Conversion done. " << wrongLines 
+		          << " lines changed. " << std::endl;
+	}
+}
+
+
 //Append string to the end of the RAM File
 int TeFiEd::appendString(const std::string inStr) {
 	//Sanity check string and RAM size
@@ -362,7 +407,68 @@ int TeFiEd::removeLine(size_t index) {
 	return 0;
 }
 
-size_t TeFiEd::findFirst(std::string search) {
+std::string TeFiEd::getWord(const size_t line, unsigned int index) {
+	//If index is 0, set it to 1. always 1 indexed
+	if(index == 0) index = 1;
+	
+	//Set the delim string 
+	const std::string delim = ".,:; ";
+	
+	//Get the curent line string
+	std::string input, output;
+	input = this->getLine(line);
+	
+	size_t wordStart = 0, wordEnd = 0, wordIndex = 0;
+	
+	//Find the start and end of a word
+	do {
+		//Get the start and end of a word, detected by delim
+		wordStart = input.find_first_not_of(delim, wordEnd);	
+		wordEnd = input.find_first_of(delim, wordStart);
+		
+		//wordEnd can be allowed to overflow, but wordStart cannot.
+		if(wordStart != std::string::npos) {
+			//Incriment word index.
+			++wordIndex;
+			
+			//If this index is the one requested, set output
+			if(wordIndex == index) {
+				output = input.substr(wordStart, wordEnd - wordStart);
+				break;
+			}
+		}
+	
+	} while(wordStart < input.size());	
+	
+	//If the index could not be found, return an empty string
+	if(wordIndex < index) {
+		output = "";
+	}
+	
+	return output;
+}
+
+size_t TeFiEd::findLine(std::string search, size_t offset) {
+	//Force offset to be 1 if 0 is passed
+	if(offset < 1) offset = 1;
+	
+	size_t lineCount = lines() + 1; //Get how many lines there are in the vector
+	
+	//Search through each of them until we match the search string
+	for(size_t cLine = offset; cLine < lineCount; cLine++) {
+		std::string lineStr = getLine(cLine);
+		
+		//When current line contains the search string
+		if(lineStr.find(search) != std::string::npos) {
+			return cLine;//Return the current line number
+		}
+	}
+	
+	//If no line matches, then return 0.
+	return 0;
+}
+
+size_t TeFiEd::findFirstLine(std::string search) {
 	size_t lineCount = lines() + 1; //Get how many lines there are in the vector
 	
 	//Search through each of them until we match the search string
@@ -379,7 +485,7 @@ size_t TeFiEd::findFirst(std::string search) {
 	return 0;
 }
 
-size_t TeFiEd::findNext(std::string search) {
+size_t TeFiEd::findNextLine(std::string search) {
 	/*** Setup ***/
 	//Last seach string, when new search string is given, reset to beginning
 	static std::string lastSearch;
