@@ -31,13 +31,13 @@ class TeFiEd {
 	
 	/** Configuration Functions ***********************************************/
 	//Sets the verbose flag.
-	void setVerbose(bool verb) { this->verbose = verb; }
+	void setVerbose(const bool verb) { this->verbose = verb; }
 	
 	//Sets the maximum -BYTES- the file can have until failsafe triggers.	
-	void setByteLimit(size_t bytes) { this->MAX_RAM_BYTES = bytes; }
+	void setByteLimit(const size_t bytes) { this->MAX_RAM_BYTES = bytes; }
 	
 	//Sets the maximum number of -CHARS- a line can have before failsafe.
-	void setStringLimit(size_t chars) { this->MAX_STRING_SIZE = chars; }
+	void setStringLimit(const size_t chars) { this->MAX_STRING_SIZE = chars; }
 	
 	/** File Metadata getters *************************************************/
 	//Return the filename string (converted from const char* to string)
@@ -67,8 +67,9 @@ class TeFiEd {
 	//read(), but this is an okay second option.
 	bool isOpen();
 	
-	//Return the line string at the passed index
-	std::string getLine(size_t);
+	//Return the line string at the passed index. Request for line 0 will return
+	//A blank string. This is intended
+	std::string getLine(const size_t);
 	
 	//Overwrite the original file with the RAM file
 	int overwrite();
@@ -98,9 +99,11 @@ class TeFiEd {
 	//Remove the specified line from RAM File.
 	int removeLine(size_t line);
 	
-	//Gets a word at index, from line number and returns it. Indexed from 1, 
-	//and returns an empty string on failure
+	//Gets -index- word in a string. Overloaded with 2 methods:
+	//Pass line No & index, return string - blank when no match.
+	//Pass string & index, return string - blank when no match.
 	std::string getWord(const size_t line, unsigned int index);
+	std::string getWord(const std::string, unsigned int index);
 	
 	//Find the first line containing a string, Pass an offset int, to start from
 	//that line instead of the first line (default first line)

@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "TeFiEd.h"
+#include "TeFiEd.hpp"
 
 #ifndef CUE_HANDLER_H
 #define CUE_HANDLER_H

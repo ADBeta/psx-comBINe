@@ -7,11 +7,11 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-* v4.2.1
-* Last Modified 27 Jan 2023
+* v4.3.4
+* Last Modified 28 Jan 2023
 */
 
-#include "TeFiEd.h"
+#include "TeFiEd.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -162,15 +162,12 @@ bool TeFiEd::isOpen() {
 	return isOpenFlag;
 }
 
-std::string TeFiEd::getLine(size_t index) {
-	//Decriment index if above 0, RAM File is indexed +1 from 'normal' notation
-	if(index > 0) {
-		--index;
-	}
+std::string TeFiEd::getLine(const size_t index) {
+	//If the index is 0, return a blank string
+	if(index == 0) return "";
 	
 	if(index > this->m_ramfile.size() - 1) {
 		errorMsg("getLine", "Line", index + 1, "does not exist");
-		
 		return "";
 	}
 	
@@ -408,16 +405,25 @@ int TeFiEd::removeLine(size_t index) {
 }
 
 std::string TeFiEd::getWord(const size_t line, unsigned int index) {
+	//Get line string 
+	std::string input = getLine(line);
+	
+	//Send input to getWord string version and retrun it
+	return getWord(input, index);
+}
+
+//Overloaded version of getWord (string and index)
+std::string TeFiEd::getWord(const std::string input, unsigned int index) {
 	//If index is 0, set it to 1. always 1 indexed
 	if(index == 0) index = 1;
 	
-	//Set the delim string 
-	const std::string delim = ".,:; ";
+	//Create output string object
+	std::string output;
+
+	//Set the delim string -- Regular delims, and Tab, Carriage Return (Windows)
+	const std::string delim = " .,:;\t\r";
 	
-	//Get the curent line string
-	std::string input, output;
-	input = this->getLine(line);
-	
+	//Start and end of word, and current word found.
 	size_t wordStart = 0, wordEnd = 0, wordIndex = 0;
 	
 	//Find the start and end of a word

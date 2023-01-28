@@ -14,13 +14,13 @@
 *
 * (c) ADBeta
 *******************************************************************************/
-#include "cueHandler.h"
+#include "cueHandler.hpp"
 
 #include <iostream>
 #include <vector>
 
-#include "helpers.h"
-#include "TeFiEd.h"
+#include "helpers.hpp"
+#include "TeFiEd.hpp"
 
 /*** Enum mapped strings (only for printFILE) *********************************/
 const std::string t_FILE_str[] = {"UNKNOWN", "BINARY"};   

@@ -16,10 +16,10 @@
 #include <vector>
 #include <string>
 
-#include "helpers.h"
-#include "TeFiEd.h"
-#include "binHandler.h"
-#include "cueHandler.h"
+#include "helpers.hpp"
+#include "TeFiEd.hpp"
+#include "binHandler.hpp"
+#include "cueHandler.hpp"
 
 //Vector of filenames pulled from the cueFile.
 std::vector<std::string> binFilenameVect;
