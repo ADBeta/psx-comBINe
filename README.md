@@ -32,6 +32,8 @@ $ cd ./psx-comBINe-main
 ```
 
 ## How To Use
+Run psx-comBINe with the original cue file. for example  
+`psx-comBINe ./game/game.cue`  
 
 ## TO-DO
 * help flag
@@ -43,25 +45,7 @@ before full deploy.
 
 
 ## Changelog (Reminder for self)
-* 0.3.1 - .cue file lines get detected and stripped of file info, with error  
-checking
-* 0.4.5 - Included boost in make and src files. 
-* 0.5.5 - Implimented filesystem managment and file creation
-* 0.11.9 - Sanity check for output buffer array creation
-* 0.12.10 - Changed fileHandler to binHander, and added a library solely for  
-cue handling
-* 0.12.12 - Moved functions from common.h to helpers.h, and removed extern  
-dependance
-* 0.17.14 - Started rework of CueHandler
-* 0.18.14 - Testing struct vector managment
-* 0.18.15 - Cue data struct printing finished. Debug assist
-* 0.20.15 - Cue File Track and Index push functions finished.
-* 0.21.15 - Have getCueData and printFILE setup to a basic extent.
-* 0.22.16 - BinHandler more neat and verbose
-* 0.23.16 - CueHandler finished, full in/out/combine functionality
-* 0.24.16 - cueRead is hardened against error and returns error states
-* 0.25.16 - Added validation functions for FILE TRACK and INDEX
-* 0.26.16 - Finalized clenaup. Ready for initial release
+* 1.0.0 - Initial functional release
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information

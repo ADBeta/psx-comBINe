@@ -38,12 +38,10 @@ CueHandler::CueHandler(const char* filename) {
 	//Set safety flag on the .cue input file. 100KB
 	cueFile->setByteLimit(102400);
 	
-	cueFile->setVerbose(true);
+	//cueFile->setVerbose(true);
 }
 
 CueHandler::~CueHandler() {
-	std::cout << "destruct cuehandler" << std::endl;
-	
 	//Delete the TeFiEd object
 	delete cueFile;
 	

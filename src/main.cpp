@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.26.16
+* v1.0.0
 * 30 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
@@ -81,6 +81,7 @@ int main(int argc, char *argv[]){
 		binFilenameVect.push_back(baseDirStr + cueIn.FILE[cFile].FILENAME);
 	}
 	
+	
 	/** Program execution *****************************************************/
 	//If the output directory doesn't exist already, create it.
 	if(boost::filesystem::is_directory(outDirStr) == false) {
@@ -109,8 +110,6 @@ int main(int argc, char *argv[]){
 	//Combine the data from all FILES in cueIn, to a single file on cueOut.
 	cueIn.combineCueFiles( cueOut, baseFileStr + ".bin", binOffsetBytes );
 	
-		
-	cueOut.printFILE(cueOut.FILE[0]);
 	
 	//Write the result of the combination to the cueOut file.
 	cueOut.outputCueData();
