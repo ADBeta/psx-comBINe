@@ -19,6 +19,8 @@ If this causes problems with older systems, feel free to create your own fork,
 as this program shouldbe as universal as possible - fileHandler.cpp uses boost  
 for directory creation and detection.  
 
+This project utilized TeFiEd heavily. check it out here: [TeFiEd](https://github.com/ADBeta/TeFiEd)  
+
 ## Compilation
 #### Linux
 - change directory into the dowloaded parent directory
@@ -46,6 +48,7 @@ before full deploy.
 
 ## Changelog (Reminder for self)
 * 1.0.0 - Initial functional release
+* 1.0.1 - Added (some) use instructions
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information
