@@ -40,9 +40,7 @@ $ cd ./psx-comBINe-main
 * Parent directory handler may not play nice with windows. make a test for this  
 before full deploy.
 * Create user input handler for program args
-* Make cueRead function work
-* Ensure printFILE detects a request for non-existent vector ID. causes segfault
-* Convert code to use TeFiEd getWord() functionality
+
 
 ## Changelog (Reminder for self)
 * 0.3.1 - .cue file lines get detected and stripped of file info, with error  
@@ -59,6 +57,11 @@ dependance
 * 0.18.15 - Cue data struct printing finished. Debug assist
 * 0.20.15 - Cue File Track and Index push functions finished.
 * 0.21.15 - Have getCueData and printFILE setup to a basic extent.
+* 0.22.16 - BinHandler more neat and verbose
+* 0.23.16 - CueHandler finished, full in/out/combine functionality
+* 0.24.16 - cueRead is hardened against error and returns error states
+* 0.25.16 - Added validation functions for FILE TRACK and INDEX
+* 0.26.16 - Finalized clenaup. Ready for initial release
 
 ## Licence
 This software is under the GPL (GPL3.0), please see LICENCE for information
