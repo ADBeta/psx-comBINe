@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v0.21.16
-* 27 Jan 2023
+* v0.26.16
+* 30 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -65,15 +65,28 @@ int main(int argc, char *argv[]){
 	//Read the .cue file in TODO
 	cueIn.read();
 	
+	
 	//Generate the file system strings for use later TODO Make this default behaviour with overwrite
 	genFSStrings(std::string(argv[1]));
 		
+	
+	//Read the cue file into the FILE.TRACK.INDEX vector structure.
+	std::cout << "Getting input CUE Data... " << std::flush;
+	cueIn.getCueData();
+	std::cout << "Done" << std::endl << std::endl;
+	
+	
+	//Populate the binFilenameVect from the cue vect object
+	for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
+		binFilenameVect.push_back(baseDirStr + cueIn.FILE[cFile].FILENAME);
+	}
+	
 	/** Program execution *****************************************************/
 	//If the output directory doesn't exist already, create it.
 	if(boost::filesystem::is_directory(outDirStr) == false) {
 		//Watch for errors creating output directory
 		if( boost::filesystem::create_directory(outDirStr) == false) {
-			errorMsg(2, "Cannot create output director. Check privileges");
+			errorMsg(2, "Main", "Cannot create output director. Check privileges");
 		}
 		
 		//If success print message to let user know directory has been created
@@ -81,54 +94,28 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	//Get the FILE strings from the input cue file and store them in a vector
-	//cueIn.pushFILEToVector(binFilenameVect);
-	
-	cueIn.getCueData();
-	
-	for(size_t x = 0; x < cueIn.FILE.size(); x++) {
-		cueIn.printFILE(cueIn.FILE[x]);
+	//Dump the binary files (found via binFilenameVect) to the output binary file
+	if(dumpBinFiles(binFilenameVect, (outDirStr + baseFileStr + ".bin")) != 0) {
+		errorMsg(2, "main", "Could not dump binary files");
 	}
+	
 	
 	//Open the output cue file and create the file. Exits on failure
-	//CueHandler cueOut("./test.cue");
-	//cueOut.create();
-	
-	//cueOut.TrackData[0].indexByte[0] = 69;
-	
-	//std::cout << cueOut.TrackData[0].indexByte[0] << std::endl;
-	/*
+	std::string outCueFilename = outDirStr + baseFileStr + ".cue";
+	CueHandler cueOut( outCueFilename.c_str() );
+	cueOut.create();
 	
 	
+	//Combine the data from all FILES in cueIn, to a single file on cueOut.
+	cueIn.combineCueFiles( cueOut, baseFileStr + ".bin", binOffsetBytes );
 	
-	cueOut.newTRACK(1,"AUDIO");
-	cueOut.newTRACK(2,"AUDIO");
-	cueOut.newTRACK(3,"AUDIO");
-	cueOut.newTRACK(4,"AUDIO");
-	
-	
-	cueOut.write();
-
-	*/
-	/*
-	
-	//Dump the binary filename vect to the output binary file.
-	if(dumpBinFiles(binFilenameVect, (outDirStr + baseFileStr + ".bin")) != 0) {
-		errorMsg(2, "Exiting - Could not dump binary files");
-	}
-	//Print blank line for readability
-	std::cout <<std::endl;
-	
-	for(size_t indx = 0; indx < fileIndexByte.size(); indx++) {
-		size_t crnt = fileIndexByte.at(indx); 
 		
-		std::cout << getTimestamp(crnt) << std::endl;	
-	}
+	cueOut.printFILE(cueOut.FILE[0]);
 	
+	//Write the result of the combination to the cueOut file.
+	cueOut.outputCueData();
+	cueOut.write();
 	
-	//std::cout << "FILE \"" << baseFilename << ".bin" << "\" BINARY" << std::endl;
-	*/
-	//Done :)
-	
+	//Exectuion is done.
 	return 0;
 }

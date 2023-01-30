@@ -162,9 +162,12 @@ bool TeFiEd::isOpen() {
 	return isOpenFlag;
 }
 
-std::string TeFiEd::getLine(const size_t index) {
+std::string TeFiEd::getLine(size_t index) {
 	//If the index is 0, return a blank string
 	if(index == 0) return "";
+	
+	//Always decriment index by 1 to fit the index on 1 style.
+	--index;
 	
 	if(index > this->m_ramfile.size() - 1) {
 		errorMsg("getLine", "Line", index + 1, "does not exist");
@@ -421,7 +424,7 @@ std::string TeFiEd::getWord(const std::string input, unsigned int index) {
 	std::string output;
 
 	//Set the delim string -- Regular delims, and Tab, Carriage Return (Windows)
-	const std::string delim = " .,:;\t\r";
+	const std::string delim = " .,;\t\r";
 	
 	//Start and end of word, and current word found.
 	size_t wordStart = 0, wordEnd = 0, wordIndex = 0;

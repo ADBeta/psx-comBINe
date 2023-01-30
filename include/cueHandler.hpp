@@ -55,6 +55,8 @@ class CueHandler {
 	//Destructor, deletes metadata array and cleans up TeFiEd object
 	~CueHandler();
 	
+	TeFiEd *cueFile; //TeFiEd text file object
+	
 	/*** Cue file data structs ************************************************/
 	//INDEXs. Grandchild (3rd level) value. Max 99
 	struct IndexData {
@@ -83,13 +85,37 @@ class CueHandler {
 	//Vector of FILEs (Cue Data is stored in this nested vector)
 	std::vector <FileData> FILE;
 	
+	//Clears the FILE vector and deallocates its RAM
+	void cleanFILE();
+	
 	/*** Cue file data functions **********************************************/
-	//Returns the t_LINE of the string passed (cue file line)
-	t_LINE getLINEType(const std::string lineStr);
+	//Returns the t_LINE of the string passed (whole line from cue file)
+	t_LINE LINEStrToType(const std::string lineStr);
+	
+	//Return the t_FILE of the string passed
+	t_FILE FILEStrToType(const std::string fileStr);	
 	
 	//Returns the t_TRACK of the string passed
-	t_TRACK getTRACKType(const std::string trackStr); 
+	t_TRACK TRACKStrToType(const std::string trackStr);
 	
+	//Returns the FILE type string from t_FILE_str via enum
+	std::string FILETypeToStr(const t_FILE);
+	
+	//Returns the TRACK type string from t_TRACK_str via enum
+	std::string TRACKTypeToStr(const t_TRACK);
+	
+	////////////////////////////////////////////////////////////////////////////
+	//Validation functions. Returns specific error codes
+	//Validate FILE
+	int validateFILE(const FileData &);
+	
+	//Validate TRACK
+	int validateTRACK(const TrackData &);
+	
+	//Validate INDEX
+	int validateINDEX(const IndexData &);
+	
+	////////////////////////////////////////////////////////////////////////////
 	//Push a new FILE to FILE[]
 	void pushFILE(const std::string FN, const t_FILE TYPE);
 	
@@ -98,112 +124,59 @@ class CueHandler {
 	
 	//Push a new INDEX to the last entry in FILE[].TRACK[]
 	void pushINDEX(const unsigned int ID, const unsigned long BYTES);
-	
-	//Prints a passed FileData Object to the cli
-	void printFILE(FileData &);
 
+	////////////////////////////////////////////////////////////////////////////
+	//Converts FileData Object into a string which is a CUE file line
+	std::string generateFILELine(const FileData &);
 	
+	//Converts TrackData Object into a string which is a CUE file line
+	std::string generateTRACKLine(const TrackData &);
 	
+	//Converts IndexData Object into a string which is a CUE file line
+	std::string generateINDEXLine(const IndexData &);
 	
-	
-	
-	
-	
+	/*** Input / Output CUE Handling ******************************************/
 	//Gets all the data from a .cue file and populates the FILE vector.
 	//Returns error status TODO
 	int getCueData();
 	
+	//Combines all the cue FILE data (removes seperate files) and pushes it
+	//to the CueHandler object passed via reference.
+	//Returns error status TODO
+	int combineCueFiles(CueHandler &combined, const std::string outFN,
+	                    const std::vector <unsigned long> offsetBytes);
 	
+	//Outputs the CueData to the cueFile
+	int outputCueData();
 	
-	
+	//Prints a passed FileData Object to the cli
+	void printFILE(FileData &);
+		
 	/*** **********************************************************************/
 	//Read in an existing cue file
 	void read();
 	
 	//Create a new cue file
 	void create();
-	
-	
-	
-	/*** Reading Functions ****************************************************/	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	//TODO NONE OF THIS IS CORRECT
-	
-	//
-	bool lineIsValid(const size_t lineNo);
-	
-	//Pulls the filename string out of a valid .cue FILE command and returns it
-	std::string getFILE(const std::string line);
-
-	//Finds all lines with FILE in them, then pushed the filename on that line,
-	//appended with the parent directory to a vector, (for dumping bin files)
-	void pushFILEToVector(std::vector<std::string> &vect);
-
-
-
-
 
 	/*** Writing Functions ****************************************************/
 	//Output (overwrite) the TeFiEd object RAM into the file.
 	void write();
-	
-	//Adds a FILE command entry to the cueFile. type can be BINARY or AUDIO etc
-	void newFILE(const std::string fileName, const std::string type);
-	
-	//Adds a TRACK, Numbered as num, to the cueFile. Type should be AUDIO etc
-	void newTRACK(const unsigned int num, const std::string type);
-	
-	//Adds a new INDEX, numbered as num, and the timestamp to the cueFile
-	void newINDEX(const unsigned int num, const std::string indexStr);
-
-
-
-
-
-
 
 	/** AUX Functions *********************************************************/
 	//Converts a number of bytes into an Audio CD timestamp.
 	std::string bytesToTimestamp(const unsigned long bytes);
 	
 	//Converts an Audio CD timestamp into number of bytes
-	unsigned long timestampToBytes(std::string timestamp);
+	unsigned long timestampToBytes(const std::string timestamp);
 	
-	//Adds two INDEX strings together and returns a timestamp string.
-	std::string addTimestamps(const std::string ts1, const std::string ts2);
+	//Modified from TeFiEd. Returns -index- word in a string
+	std::string getWord(const std::string input, unsigned int index);
 	
-	
-	
-	
-	
-	
-	
-	/*** Private functions and variables **************************************/
-	//private:
-	/** Variables **/
-	TeFiEd *cueFile; //TeFiEd text file object
-	
-	/** Functions **/
 	//Takes an input uint32_t, zero-pads to -pad- then return a string
 	std::string padIntStr(const unsigned long val, const unsigned int len = 0,
 	                      const char pad = '0');
 
 }; //class CueHandler
+
 #endif

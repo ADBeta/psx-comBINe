@@ -69,7 +69,7 @@ class TeFiEd {
 	
 	//Return the line string at the passed index. Request for line 0 will return
 	//A blank string. This is intended
-	std::string getLine(const size_t);
+	std::string getLine(size_t);
 	
 	//Overwrite the original file with the RAM file
 	int overwrite();

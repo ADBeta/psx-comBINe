@@ -19,21 +19,27 @@
 #include <iostream>
 #include <string>
 
-//Error message handler
+/*** Error message handler ****************************************************/
 //errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
-void errorMsg(unsigned int errLevel, std::string msg) {
+
+void errorMsg(unsigned int errLevel, std::string funct, std::string errStr) {
+              	
 	if(errLevel == 0) {
 		std::cerr << "Warn: ";
 	} else {
 		std::cerr << "Error: ";
 	}
 	
-	//Print the user message
-	std::cerr << msg << std::endl;
+	//Print the function, then the user message
+	std::cerr << funct << ": " << errStr << std::endl;
 	
 	//If the errLevel is > 1 then exit the program as a fatal error
 	if(errLevel > 1) exit(EXIT_FAILURE);
 }
+
+void errorMsg(unsigned int errLevel, std::string funct, int errEnum) {
+}
+
 
 //Prompt user if they wish to continue then return their choice
 bool promptContinue() {
@@ -55,6 +61,8 @@ bool promptContinue() {
 	}
 }
 
+
+/***  *************************************************************************/
 std::string padByteStr(size_t bytes, unsigned int pad) {
 	//Create the initial string from bytes
 	std::string byteStr = std::to_string((bytes));

@@ -18,7 +18,7 @@
 
 //Each entity is at which byte a file transistion to the next file. This is for
 //.cue output INDEX value (in time format which gets converted later)
-std::vector<size_t> fileIndexByte;
+std::vector<unsigned long> binOffsetBytes;
 
 int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 	/*** Setup ***/
@@ -27,7 +27,7 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 
 	//Create the output binary file and check it is open
 	binFileOut.open(outFn.c_str(), std::ios::out | std::ios::binary);
-	if(!binFileOut) errorMsg(2, "Cannot create output .bin file. Check privelages");
+	if(!binFileOut) errorMsg(2, "dumpBinFiles", "Cannot create output .bin file. Check privelages");
 	
 	//Current byte in array, bytes in each file, and total bytes from all files
 	size_t arrBytes = 0, fileBytes = 0, totalBytes = 0;
@@ -48,9 +48,12 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 		//Open input binary file to the current string in the vecor.
 		binFileIn.open(binVect[indx].c_str(), std::ios::in | std::ios::binary);
 		//error check
-		if(!binFileIn) errorMsg(2, "Can not open the input .bin file");
+		if(!binFileIn) errorMsg(2, "dumpBinFiles", "Can not open the input .bin file");
 		//Seek to the beginning of the in file to clear flags. Belt and braces
 		binFileIn.seekg(0, std::ios::beg);
+		
+		//Log the Offset byte of the current bin file (starts at 0)
+		binOffsetBytes.push_back(totalBytes);
 		
 		//Get all the bytes from the current input and push them to output.
 		char cByte;
@@ -71,14 +74,11 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 			++fileBytes;
 		}
 		
-		//Log the transistion byte of the current file for INDEX in .cue
-		fileIndexByte.push_back(totalBytes);
-		
 		//Close the current file for next loop
 		binFileIn.close();
 		
 		//Report how many megabytes the file is, that it is done, then reset.
-		std::cout << padMiBStr(fileBytes, 3) << "    Done" << std::endl;
+		std::cout << padMiBStr(fileBytes, 3) << std::endl;
 		fileBytes = 0;
 	}
 	
@@ -88,12 +88,18 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 	//Delete heap byte array
 	delete[] byteArray;
 	
+	//Print message that the outfile is waiting to finish wiring
+	std::cout << std::endl << "Finishing write to file ..." << std::flush;
+	
 	//Close the output file
 	binFileOut.close();
 	
+	//Report finished writing
+	std::cout << " Done" << std::endl;
+	
 	//Report completion and bytes written to the output bin file
-	std::cout << std::endl << "Successfully dumped " << padByteStr(totalBytes) 
-	          << " to " << outFn << std::endl;
+	std::cout << "Successfully dumped " << padByteStr(totalBytes) << " to " 
+	          << outFn << std::endl;
 
 	//Return 0 for success
 	return 0;
