@@ -8,7 +8,7 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v1.0.0
+* v1.0.1
 * 30 Jan 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
@@ -50,9 +50,10 @@ int main(int argc, char *argv[]){
 	/** Get user args *********************************************************/
 	//Test the user input is correct ** TODO
 	if(argc == 1) {
-		std::cout << "not enough args" << std::endl;
+		std::cout << "not enough args. Please provide a .cue file to combine"
+		          << std::endl;
 		return 1;
-	}
+	} 
 	
 	/** Setup *****************************************************************/
 	
