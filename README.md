@@ -48,7 +48,7 @@ $ cd ./psx-comBINe-main
 ## Usage
 psx-comBINe currently only supports 'direct' mode, which takes a multi-bin .cue file,
 where it will create a sub-directory called psx-comBINe, where it will combine the
-.bin and .cue data, and output them. 
+.bin and .cue data, and output them.  
 `$ psx-comBINe /Games/Game.cue`  
 
 ## TO-DO
@@ -63,7 +63,7 @@ before full deploy.
 ## Changelog (Reminder for self)
 * 1.0.0 - Initial functional release
 * 1.0.1 - Added (some) use instructions
-* 1.0.1 - Help is a bit more helpful
+* 1.0.2 - Help is a bit more helpful
 
 ## Licence
 <b> 2023 ADBeta </b>
