@@ -32,6 +32,17 @@ all available `boost` libraries.
 #### Ubuntu / Debian
 `sudo apt-get install libboost-all-dev`  
 
+## Requirments
+The only external dependency is boost, which, along with my own software supports
+32bit, Any platform -should- be able to be compiled to, if not I would be interested
+in porting or allowing support for those platforms.
+
+The minimum requirments for this program are:  
+* C++11 Compiler
+* 32 bit Architecture
+* 100MB RAM for file buffer ± 50KB RAM for the CUE Sheet data structure at max 
+capacity (99 TRACKS, 99 INDEXS per TRACK).
+
 ## Compilation
 #### Linux
 - change directory into the downloaded parent directory
@@ -66,5 +77,5 @@ before full deploy.
 * 1.0.2 - Help is a bit more helpful
 
 ## Licence
-<b> 2023 ADBeta </b>
+<b> 2023 ADBeta </b>  
 This software is under the GPL (GPL3.0), please see LICENCE for information
