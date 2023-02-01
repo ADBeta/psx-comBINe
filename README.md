@@ -1,47 +1,61 @@
-# psx-comBINe
-<b> (c) ADBeta 2023 </b>  
+﻿# psx-comBINe
 
-psx-comBINe is a program to combine/merge multiple .bin files from a psx .cue  
-.bin CD-ROM dump, and produces a single .bin file and .cue sheet.  
-This is specifically useful for certain emulators, conversion softwares such as  
-cue2pops, and I find it faster and less error prone when writing to cheap, low  
-quality CD's.
+psx-comBINe combines multiple .bin files into a single .bin file, according to 
+a .cue sheet from a PSX CD-ROM Dump.
 
-This operation is commonly done via CDMage, or other tools in the PSX community,  
-but having a purpose built tool seems like a useful addition to the community.  
+Some uses for this include:
+* cue2pops or other methods to create VCD POPStarter files do not support multiple
+bin files.
+* Most emulators do not support multiple .bin files, and those that doe would still
+perform better with a single .bin file.
+* (from my own experience) Single .bin and .cue file pairs are burnt to a CD much
+easier and with less errors, and perform better when being read by the hardware.
 
-This project is just a hobby, and is designed for Linux to begin with. I will  
-eventually port it to a Windows exe, feel free to do this with the files if you  
-want to test it out.  
+Combining /bin files is commonly done via CDMage, ISOBuster or other tools in the 
+PSX community - But for those wanting more specific, lightweight tools this is the
+target for psx-comBINe. 
 
-This program depends boost::filesystem, make sure this is installed before use.  
-If this causes problems with older systems, feel free to create your own fork,  
-as this program shouldbe as universal as possible - fileHandler.cpp uses boost  
-for directory creation and detection.  
+psx-comBINe is currently designed for Linux systems, but I do intend to port it 
+to Windows 32bit and 64bit executables in the near future. 
 
-This project utilized TeFiEd heavily. check it out here: [TeFiEd](https://github.com/ADBeta/TeFiEd)  
+This project utilized TeFiEd heavily. Check it out here: [TeFiEd](https://github.com/ADBeta/TeFiEd)  
+
+<b> NOTE: This program is in no way intended to support or condone piracy. This program
+should only be used with legitimately acquired backups of disks you own LEGALLY </b>
+
+## Dependencies
+This program requires the `boost-filesystem` libraries, but I recommend installing
+all available `boost` libraries.  
+
+#### Arch 
+`sudo pacman -Syu boost`  
+#### Ubuntu / Debian
+`sudo apt-get install libboost-all-dev`  
 
 ## Compilation
 #### Linux
-- change directory into the dowloaded parent directory
+- change directory into the downloaded parent directory
 - run `make`
 - an executable called 'psx-comBINe' should be in the bin directory
 
 ```
 $ cd ./psx-comBINe-main
 ./psx-comBINe-main $ make
-./psx-comBINe-main $ ./bin/psx-comBINe --help
+
+./psx-comBINe-main $ ./bin/psx-comBINe 
 ```
 
-## How To Use
-Run psx-comBINe with the original cue file. for example  
-`psx-comBINe ./game/game.cue`  
+## Usage
+psx-comBINe currently only supports 'direct' mode, which takes a multi-bin .cue file,
+where it will create a sub-directory called psx-comBINe, where it will combine the
+.bin and .cue data, and output them. 
+`$ psx-comBINe /Games/Game.cue`  
 
 ## TO-DO
 * help flag
 * user input protection
 * make sure program can handle .BIN .bin .CUE and .cue files.
-* Parent directory handler may not play nice with windows. make a test for this  
+* Parent directory handler may not play nice with windows. make a test for this
 before full deploy.
 * Create user input handler for program args
 
@@ -49,6 +63,8 @@ before full deploy.
 ## Changelog (Reminder for self)
 * 1.0.0 - Initial functional release
 * 1.0.1 - Added (some) use instructions
+* 1.0.1 - Help is a bit more helpful
 
 ## Licence
+<b> 2023 ADBeta </b>
 This software is under the GPL (GPL3.0), please see LICENCE for information

@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
 	/** Get user args *********************************************************/
 	//Test the user input is correct ** TODO
 	if(argc == 1) {
-		std::cout << "not enough args. Please provide a .cue file to combine"
+		std::cout << "not enough args. Please provide a .cue file"
 		          << std::endl;
 		return 1;
 	} 
