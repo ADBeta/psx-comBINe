@@ -22,7 +22,7 @@
 /** Variables *****************************************************************/
 //Each entity is at which byte a file transistion to the next file. This is for
 //.cue output INDEX value.
-extern std::vector<size_t> binOffsetBytes;
+extern std::vector<unsigned long> binOffsetBytes;
 
 //Pass vector to bin filenames. Opens each file one at a time and dumps them
 //into outFn as a binary file.
