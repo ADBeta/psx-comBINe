@@ -1,6 +1,6 @@
 ﻿# psx-comBINe
 
-!(https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
+![logo](https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
 
 psx-comBINe combines multiple .bin files into a single .bin file, according to 
 a .cue sheet from a PSX CD-ROM Dump.
