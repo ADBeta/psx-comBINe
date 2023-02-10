@@ -5,6 +5,8 @@
 psx-comBINe combines multiple .bin files into a single .bin file, according to 
 a .cue sheet from a PSX CD-ROM Dump.
 
+An experimental .exe is in the release files.  
+
 Some uses for this include:
 * cue2pops or other methods to create VCD POPStarter files do not support multiple
 bin files.
