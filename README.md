@@ -66,13 +66,19 @@ where it will create a sub-directory called psx-comBINe, where it will combine t
 .bin and .cue data, and output them.  
 `$ psx-comBINe /Games/Game.cue`  
 
+On Windows it is very much the same use, but use Windows Backslashes "\"  
+`psx-comBINe.exe .\Games\Game.cue`  
+
+
 ## TO-DO
 * help flag
 * user input protection
 * make sure program can handle .BIN .bin .CUE and .cue files.
-* Parent directory handler may not play nice with windows. make a test for this
-before full deploy.
-* Create user input handler for program args
+* Make internal WINDOWS detect and auto-port 
+* CLIah support
+* REM support and output
+* Hard testing and error handling
+* Speed testing
 
 
 ## Changelog (Reminder for self)
