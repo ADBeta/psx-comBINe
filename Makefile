@@ -14,15 +14,11 @@ OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 #Compiler
 CC := g++
 
-WINCC := x86_64-w64-mingw32-g++
-
 #Flags
 CPPFLAGS := -Iinclude -MMD -MP #NOTE. Include path is to /usr/include. this may be arch specific
 CFLAGS   := -Wall
 LDFLAGS  := -Llib -lboost_system -lboost_filesystem
 LDLIBS   := -lm 
-
-WINLDFLAGS := -Llib 
 
 .PHONY: all clean
 
@@ -40,10 +36,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 $(BIN_DIR) $(OBJ_DIR):
 	mkdir -p $@
 
-#Windows compilation
-win: $(OBJS) | $(BIN_DIR)
-	$(WINCC) $(LDFLAGS) $^ $(LDLIBS) -o $@
-	
 #Remove objects and binary
 clean:
 	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
