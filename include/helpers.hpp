@@ -28,13 +28,8 @@
 void errorMsg(unsigned int errLevel, std::string funct, std::string errStr);
 void errorMsg(unsigned int errLevel, std::string funct, int errEnum);
 
-//String array of error messages
-
-
 //Prompt user if they wish to continue and return status
 bool promptContinue();
-
-/*** **************************************************************************/
 
 //Pads and returns a comma seperate string of bytes.
 //NOTE: Pads string size not byte number

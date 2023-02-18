@@ -20,7 +20,24 @@
 #include "TeFiEd.hpp"
 #include "binHandler.hpp"
 #include "cueHandler.hpp"
+#include "CLIah.hpp"
 
+/*** Pre-defined output messages **********************************************/
+namespace message {
+std::string copyright = "psx-comBINe version 1.0.x (c) 2023 ADBeta\n";
+
+std::string shortHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
+Please use --help for full help information";
+
+std::string longHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
+The standard usage (no [option] arguments) takes a single input.cue file,\n\
+creates a directory in the .cue's parent directory called \"psx-comBINe\" \n\
+where it will output the combined .bin and .cue file, leaving the original \n\
+files untouched.\n\n";
+
+} //namespace message
+
+/*** Main functions ***********************************************************/
 //Vector of filenames pulled from the cueFile.
 std::vector<std::string> binFilenameVect;
 
@@ -47,31 +64,61 @@ void genFSStrings(const std::string inFile) {
 
 /*** Main *********************************************************************/
 int main(int argc, char *argv[]){
-	/** Get user args *********************************************************/
-	//Test the user input is correct ** TODO
+	/*** Define CLIah Arguments ***********************************************/
+	//Make sure CLIah doesn't error in any fatal way, as multiple strings will
+	//be passed via CLI
+	CLIah::Config::verbose = true; //Set verbosity when match is found
+	CLIah::Config::errorMode = CLIah::Config::ErrMode::ignore;
+	
+	CLIah::addNewArg(
+		"Help",               //Reference
+		"--help",             //Primary match string
+		CLIah::ArgType::flag, //Argument type
+		"-h",                 //Alias match string
+		true                  //Case sensitivity
+    );
+	
+	
+	
+	/** User Argument handling ************************************************/
+	//Until CLIah supports it, detect no input manually and exit
 	if(argc == 1) {
-		std::cout << "not enough args. Please provide a .cue file"
-		          << std::endl;
+		std::cout << message::shortHelp << std::endl;
 		return 1;
-	} 
+	}
+	
+	//Get CLIah to scan the CLI Args
+	CLIah::analyseArgs(argc, argv);
+	
+	//If help was requested, print the long help message then exit.
+	if( CLIah::isDetected("Help") ) {
+		std::cout << message::longHelp << std::endl;
+		return 0;
+	}
 	
 	/** Setup *****************************************************************/
-	
-	//TODO validate if argv[1] is a filename
-	//If argv[1] is a valid file, create a new TeFiEd using that filename, and
-	
+	//TODO seperate this branch of execution from the [option] branches
+	//Validate if argv[1] is a valid .cue file string.
+	if(std::string(argv[1]).find(".cue") == std::string::npos) {
+		errorMsg(2, "main", "input is not a cue file");
+	}
 	
 	//Open a new cueHandler object for the input file
 	CueHandler cueIn(argv[1]);
-	//Read the .cue file in TODO
+	//Read the .cue file into a TeFiEd RAM Vector
 	cueIn.read();
 	
 	
-	//Generate the file system strings for use later TODO Make this default behaviour with overwrite
-	genFSStrings(std::string(argv[1]));
-		
+	//Generate the file system strings for use later 
+	genFSStrings( std::string(argv[1]) );
 	
-	//Read the cue file into the FILE.TRACK.INDEX vector structure.
+	
+	
+	
+	
+	
+	/**************************************************************************/
+	//Read the cue file into the FILE.TRACK.INDEX structure.
 	std::cout << "Getting input CUE Data... " << std::flush;
 	cueIn.getCueData();
 	std::cout << "Done" << std::endl << std::endl;
@@ -83,7 +130,6 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	/** Program execution *****************************************************/
 	//If the output directory doesn't exist already, create it.
 	if(boost::filesystem::is_directory(outDirStr) == false) {
 		//Watch for errors creating output directory
