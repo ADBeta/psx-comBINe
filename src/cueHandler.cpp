@@ -81,6 +81,9 @@ t_LINE CueHandler::LINEStrToType(const std::string lineStr) {
 	if(lineStr.find("  TRACK") != std::string::npos) return ltTRACK;
 	if(lineStr.find("FILE \"") != std::string::npos) return ltFILE;
 	
+	//Remark type (new feature)
+	if(lineStr.find("REM ") != std::string::npos) return ltREM; 
+	
 	//Failure to find any known string means it's an invalid line
 	return ltINVALID;
 }
@@ -326,8 +329,15 @@ int CueHandler::getCueData() {
 		t_LINE cLineType = LINEStrToType(cLineStr);
 		//If the current line is invalid, exit
 		if(cLineType == ltINVALID) {
-			errorMsg(1, "getCueData", "Cue file contains invalid line");
-			return 1;
+			std::string errStr = "Cue file contains invalid command at line: ";
+			errStr.append( std::to_string(lineNo));
+			errorMsg(2, "getCueData", errStr);
+		}
+		
+		//REM (remark) line type
+		if(cLineType == ltREM) {
+			std::cout << "REMARK at line: " << lineNo << "\t message: " <<
+			cLineStr << std::endl;
 		}
 		
 		//FILE line type
@@ -346,9 +356,8 @@ int CueHandler::getCueData() {
 		if(cLineType == ltTRACK) {
 			//Make sure a FILE is availible to push to
 			if(FILE.empty() == true) {
-				errorMsg(1, "getCueData", 
+				errorMsg(2, "getCueData", 
 			      "Attempt to push TRACK before FILE. (Missing FILE line)");
-			    return 2;
 			}
 		
 			//Get ID (second word), and TYPE
@@ -363,9 +372,8 @@ int CueHandler::getCueData() {
 		if(cLineType == ltINDEX) {
 			//Make sure a TRACK is availible to push to
 			if(FILE.back().TRACK.empty() == true) {
-				errorMsg(1, "getCueData", 
+				errorMsg(2, "getCueData", 
 				  "Attempt to push INDEX before TRACK. (Missing TRACK line)");
-				return 3;
 			}
 			
 			//Get ID (second word), and timestamp (third word)

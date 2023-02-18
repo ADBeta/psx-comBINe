@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v1.0.1
-* 30 Jan 2023
+* v1.4.0
+* 18 Feb 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -124,6 +124,13 @@ int main(int argc, char *argv[]){
 	std::cout << "Done" << std::endl << std::endl;
 	
 	
+	//Print out all of the input CUE data (DEBUG MODE TODO)
+	for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
+		cueIn.printFILE(cueIn.FILE[cFile]);
+	}
+	
+	return 0;
+	
 	//Populate the binFilenameVect from the cue vect object
 	for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
 		binFilenameVect.push_back(baseDirStr + cueIn.FILE[cFile].FILENAME);
@@ -134,7 +141,7 @@ int main(int argc, char *argv[]){
 	if(boost::filesystem::is_directory(outDirStr) == false) {
 		//Watch for errors creating output directory
 		if( boost::filesystem::create_directory(outDirStr) == false) {
-			errorMsg(2, "Main", "Cannot create output director. Check privileges");
+			errorMsg(2, "main", "Cannot create output directory. Check privileges");
 		}
 		
 		//If success print message to let user know directory has been created
@@ -142,7 +149,7 @@ int main(int argc, char *argv[]){
 	}
 	
 	
-	//Dump the binary files (found via binFilenameVect) to the output binary file
+	//Dump the binary files (via binFilenameVect) to the output binary file
 	if(dumpBinFiles(binFilenameVect, (outDirStr + baseFileStr + ".bin")) != 0) {
 		errorMsg(2, "main", "Could not dump binary files");
 	}

@@ -68,23 +68,24 @@ where it will create a sub-directory called psx-comBINe, where it will combine t
 .bin and .cue data, and output them.  
 `$ ./psx-comBINe /Games/Game.cue`  
 
-On Windows it is very much the same use, but use Windows Backslashes "\"  
+On Windows it is very much the same use, but use Windows Backslashes "\\"  
 `.\psx-comBINe.exe .\Games\Game.cue`  
 
 
 ## TO-DO
 * make sure program can handle .BIN .bin .CUE and .cue files.
 * Make internal WINDOWS detect and auto-port
-* REM support and output
 * Hard testing and error handling
 * Speed testing
 * add arg options and write about them in help message
+* youtube video "how to combine multi-track bin files for ps1/psx games using psx-comBINe"
 
 
 ## Changelog (Reminder for self)
 * 1.0.0 - Initial functional release
 * 1.1.0 - CLIah is integrated
 * 1.2.0 - Refined execution, added help message
+* 1.4.0 - Support REM lines, changed error handlng
 
 ## Licence
 <b> 2023 ADBeta </b>  

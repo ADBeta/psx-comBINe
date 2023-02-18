@@ -24,8 +24,8 @@
 #define CUE_HANDLER_H
 
 /*** Enums and strings of enums ***********************************************/
-//Valid CUE line types, including INVALID and EMPTY string types.
-enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltINVALID };
+//Valid CUE line types, including INVALID, REM and EMPTY string types.
+enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltREM, ltINVALID };
 
 //Valid FILE formats. (only binary is supported for now)
 enum t_FILE { ftUNKNOWN, ftBINARY};
