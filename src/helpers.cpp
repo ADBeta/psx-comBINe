@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 /*** Error message handler ****************************************************/
 //errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
@@ -63,6 +64,20 @@ bool promptContinue() {
 
 
 /***  *************************************************************************/
+//Stolen from CLIah with new name
+std::string strToUppercase(std::string input) {
+	//Transform seems to be the recommended method - causes another include 
+	//and may cause other unknown issues. For practice, this will stay for now,
+	//But may be replaced with a direct index (or iterator) in future.
+	std::transform(input.begin(), input.end(), input.begin(), 
+		//operation is getting the current char and performing toupper
+		[](unsigned char chr){ return std::toupper(chr); } // correct
+	);
+	
+	//Return the uppercase string
+	return input;
+}
+
 std::string padByteStr(size_t bytes, unsigned int pad) {
 	//Create the initial string from bytes
 	std::string byteStr = std::to_string((bytes));

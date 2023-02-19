@@ -24,7 +24,7 @@ std::string strToUpper(std::string input) {
 	//But may be replaced with a direct index (or iterator) in future.
 	std::transform(input.begin(), input.end(), input.begin(), 
 		//operation is getting the current char and performing toupper
-		[](unsigned char chr){ return std::toupper(chr); } // correct
+		[](unsigned char chr){ return std::toupper(chr); }
 	);
 	
 	//Return the uppercase string

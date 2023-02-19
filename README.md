@@ -20,34 +20,27 @@ Combining .bin files is commonly done via CDMage, ISOBuster or other tools in th
 PSX community - psx-comBINe aims to be more lightweight, faster, and easier to
 combine into other projects as it uses only std and boost, and aims for a low overhead  
 
-psx-comBINe is currently designed for Linux systems, but I do intend to port it 
-to Windows 32bit and 64bit executables in the near future. 
-
 This program uses TeFiEd heavily. Check it out here: [TeFiEd](https://github.com/ADBeta/TeFiEd)  
 and CLIah for the Command line handling, which is here: [CLIah](https://github.com/ADBeta/CLIah)  
 
 <b> NOTE: This program is in no way intended to support or condone piracy. This program
-should only be used with legitimately acquired backups of disks you own LEGALLY </b>
-
+should only be used with legitimately acquired backups of disks you own LEGALLY </b>  
+----
 ## Dependencies
-This program requires the `boost-filesystem` libraries, but I recommend installing
-all available `boost` libraries.  
+To compile This program requires the `boost-filesystem` libraries, but I recommend 
+installing all available `boost` libraries.  
 
-#### Arch 
+#### Arch
 `sudo pacman -Syu boost`  
 #### Ubuntu / Debian
 `sudo apt-get install libboost-all-dev`  
 
 ## Requirments
-The only external dependency is boost, which, along with my own software supports
-32bit, Any platform -should- be able to be compiled to, if not I would be interested
-in porting or allowing support for those platforms.
-
 The minimum requirments for this program are:  
 * C++11 Compiler
 * 32 bit Architecture
-* 100MB RAM for file buffer + 50KB RAM for the CUE Sheet data structure at max 
-capacity (99 TRACKS, 99 INDEXS per TRACK).
+* 100MB RAM for binay file buffer + 50KB RAM for the CUE Sheet data structure at 
+max capacity (99 TRACKS, 99 INDEXS per TRACK).
 
 ## Compilation
 #### Linux
@@ -71,21 +64,20 @@ where it will create a sub-directory called psx-comBINe, where it will combine t
 On Windows it is very much the same use, but use Windows Backslashes "\\"  
 `.\psx-comBINe.exe .\Games\Game.cue`  
 
-
+----
 ## TO-DO
-* make sure program can handle .BIN .bin .CUE and .cue files.
 * Make internal WINDOWS detect and auto-port
 * Hard testing and error handling
 * Speed testing
 * add arg options and write about them in help message
 * youtube video "how to combine multi-track bin files for ps1/psx games using psx-comBINe"
 
-
 ## Changelog (Reminder for self)
 * 1.0.0 - Initial functional release
 * 1.1.0 - CLIah is integrated
 * 1.2.0 - Refined execution, added help message
 * 1.4.0 - Support REM lines, changed error handlng
+* 1.5.0 - Support for .CUE and .cue, neater main exec
 
 ## Licence
 <b> 2023 ADBeta </b>  

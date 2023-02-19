@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v1.4.0
-* 18 Feb 2023
+* v1.5.0
+* 19 Feb 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -24,7 +24,7 @@
 
 /*** Pre-defined output messages **********************************************/
 namespace message {
-std::string copyright = "psx-comBINe version 1.0.x (c) 2023 ADBeta\n";
+std::string copyright = "psx-comBINe version 1.5.x (c) 2023 ADBeta\n";
 
 std::string shortHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
 Please use --help for full help information";
@@ -79,6 +79,7 @@ int main(int argc, char *argv[]){
     );
 	
 	
+
 	
 	/** User Argument handling ************************************************/
 	//Until CLIah supports it, detect no input manually and exit
@@ -96,20 +97,16 @@ int main(int argc, char *argv[]){
 		return 0;
 	}
 	
-	/** Setup *****************************************************************/
-	//TODO seperate this branch of execution from the [option] branches
-	//Validate if argv[1] is a valid .cue file string.
-	if(std::string(argv[1]).find(".cue") == std::string::npos) {
-		errorMsg(2, "main", "input is not a cue file");
-	}
+	//Output directory and filename option will be detected later.
 	
-	//Open a new cueHandler object for the input file
+	/** Setup *****************************************************************/
+	//Open a new cueHandler object for the input file, Performs validation.
 	CueHandler cueIn(argv[1]);
 	//Read the .cue file into a TeFiEd RAM Vector
 	cueIn.read();
 	
 	
-	//Generate the file system strings for use later 
+	//Generate the file system strings for use later  TODO split based on args
 	genFSStrings( std::string(argv[1]) );
 	
 	

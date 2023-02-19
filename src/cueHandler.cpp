@@ -21,6 +21,7 @@
 
 #include "helpers.hpp"
 #include "TeFiEd.hpp"
+#include "CLIah.hpp" //strToUpper function yoinketh
 
 /*** Enum mapped strings (only for printFILE) *********************************/
 const std::string t_FILE_str[] = {"UNKNOWN", "BINARY"};   
@@ -38,6 +39,14 @@ CueHandler::CueHandler(const char* filename) {
 	//Set safety flag on the .cue input file. 100KB
 	cueFile->setByteLimit(102400);
 	
+	//Make sure the input filename is a valid .cue file
+	if( validateCueFilename(std::string(filename)) != 0) {
+		std::cout << "Could not open " << filename << " as a .cue file. Exiting" 
+		          << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	
+	//Debug option
 	//cueFile->setVerbose(true);
 }
 
@@ -184,6 +193,20 @@ std::string CueHandler::TRACKTypeToStr(const t_TRACK trackType) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //Validation functions. Returns specific error codes
+int CueHandler::validateCueFilename(std::string cueStr) {
+	//Convert cueStr to uppercase to make .cue vs .CUE etc. not matter
+	cueStr = strToUppercase(cueStr);
+
+	//Make sure the file extension is .cue
+	if(cueStr.find(".CUE") == std::string::npos) {
+		errorMsg(1, "validateCueFilename", 
+		         "Input file does not have a .cue extension");
+		return 1;
+	}
+	
+	return 0;
+}
+
 int CueHandler::validateFILE(const FileData &refFILE) {
 	if(refFILE.TYPE == ftUNKNOWN) {
 		errorMsg(0, "validateFILE", "FILE TYPE is UNKNOWN");
@@ -316,7 +339,7 @@ std::string CueHandler::generateINDEXLine(const IndexData &refINDEX) {
 }
 
 /*** Cue file data functions **************************************************/
-int CueHandler::getCueData() {
+void CueHandler::getCueData() {
 	//Clean the FILE vector RAM
 	cleanFILE();
 
@@ -384,8 +407,6 @@ int CueHandler::getCueData() {
 			pushINDEX(lineID, lineBytes);
 		}
 	}
-	
-	return 0;
 }
 
 int CueHandler::combineCueFiles(CueHandler &combined, const std::string outFN,

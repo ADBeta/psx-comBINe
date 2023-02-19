@@ -31,6 +31,9 @@ void errorMsg(unsigned int errLevel, std::string funct, int errEnum);
 //Prompt user if they wish to continue and return status
 bool promptContinue();
 
+//Stolen from CLIah :)
+std::string strToUppercase(std::string input);
+
 //Pads and returns a comma seperate string of bytes.
 //NOTE: Pads string size not byte number
 std::string padByteStr(size_t bytes, unsigned int pad = 0);

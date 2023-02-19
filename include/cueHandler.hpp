@@ -11,7 +11,6 @@
 * index text
 * 
 * this might be turned into its own project if I see it useful in future.
-*
 * (c) ADBeta
 *******************************************************************************/
 #include <iostream>
@@ -106,6 +105,9 @@ class CueHandler {
 	
 	////////////////////////////////////////////////////////////////////////////
 	//Validation functions. Returns specific error codes
+	//Validate an input .cue file string (argv[1])
+	int validateCueFilename(std::string);
+	
 	//Validate FILE
 	int validateFILE(const FileData &);
 	
@@ -137,8 +139,7 @@ class CueHandler {
 	
 	/*** Input / Output CUE Handling ******************************************/
 	//Gets all the data from a .cue file and populates the FILE vector.
-	//Returns error status TODO
-	int getCueData();
+	void getCueData();
 	
 	//Combines all the cue FILE data (removes seperate files) and pushes it
 	//to the CueHandler object passed via reference.
