@@ -8,6 +8,15 @@ An up-to-date release exe is in the release files.
 
 ![logo](https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
 
+psx-comBINe is unlike other applications because it has excellent compatibility 
+with the cue sheet standards. It can support any of the GNU approved CUE TYPEs, 
+as well as REM lines, slightly malformed structures and other small features that 
+make it more stable than other programs.
+
+It is written in C++ to be as fast as possible on all systems, and is designed to
+be able to run on a 32bit system (exe to be added) for those who need to use older
+machines. Speeds tests can be seen below.
+
 Some uses for this include:
 * cue2pops or other methods to create VCD POPStarter files do not support multiple
 bin files.
@@ -16,12 +25,8 @@ perform better with a single .bin file.
 * (from my own experience) Single .bin and .cue file pairs are burnt to a CD much
 easier and with less errors, and perform better when being read by the hardware.
 
-Combining .bin files is commonly done via CDMage, ISOBuster or other tools in the 
-PSX community - psx-comBINe aims to be more lightweight, faster, and easier to
-combine into other projects as it uses only std and boost, and aims for a low overhead  
-
-This program uses TeFiEd heavily. Check it out here: [TeFiEd](https://github.com/ADBeta/TeFiEd)  
-and CLIah for the Command line handling, which is here: [CLIah](https://github.com/ADBeta/CLIah)  
+This program uses [TeFiEd](https://github.com/ADBeta/TeFiEd)  
+and [CLIah](https://github.com/ADBeta/CLIah)  
 
 <b> NOTE: This program is in no way intended to support or condone piracy. This program
 should only be used with legitimately acquired backups of disks you own LEGALLY </b>  
@@ -39,7 +44,7 @@ installing all available `boost` libraries.
 ## Requirments
 The minimum requirments for this program are:  
 * C++11 Compiler
-* 32 bit Architecture
+* 32 or 64 bit Architecture
 * 100MB RAM for binay file buffer + 50KB RAM for the CUE Sheet data structure at 
 max capacity (99 TRACKS, 99 INDEXS per TRACK).
 
@@ -95,7 +100,7 @@ performed very well compared to alternative programs.
 ----
 ## TO-DO
 * Make internal WINDOWS detect and auto-port
-* Speed testing
+* impliment some of the file direction functions
 * youtube video "how to combine multi-track bin files for ps1/psx games using psx-comBINe"
 
 ## Changelog (Reminder for self)
