@@ -23,6 +23,7 @@
 #define CUE_HANDLER_H
 
 /*** Enums and strings of enums ***********************************************/
+/* Using plain enums to allow them to convert to int */
 //Valid CUE line types, including INVALID, REM and EMPTY string types.
 enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltREM, ltINVALID };
 
@@ -49,7 +50,7 @@ class CueHandler {
 	public:
 	//Constructor takes a filename (char *) and passes it to the TeFiEd cueFile
 	//Also creates the metadata handler structures
-	CueHandler(const char* filename);
+	CueHandler(const std::string filename);
 	
 	//Destructor, deletes metadata array and cleans up TeFiEd object
 	~CueHandler();

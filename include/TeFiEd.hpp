@@ -1,4 +1,5 @@
-/* Te(xt) Fi(le) Ed(itor) TeFiEd 
+/******************************************************************************* 
+* Te(xt) Fi(le) Ed(itor) TeFiEd 
 * Simple Text File Editor, written be as fast and efficient as possible.
 * -Beta version- 
 * Some simple text editing features aren't built in quite yet, but I plan to
@@ -7,7 +8,9 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-*/
+* v5.2.0
+* Last Modified 26 Feb 2023
+*******************************************************************************/
 
 #ifndef TeFiEd_H
 #define TeFiEd_H
@@ -18,13 +21,14 @@
 
 /*** Enum and types ***********************************************************/
 //Line ending type, for convertLineEnding
-enum t_LINE_END{ le_DOS, le_Unix };
+enum class LineEnding { DOS, Unix };
 
 /*** TeFiEd class *************************************************************/
 class TeFiEd {
 	public:
-	//Object constructor is used to pass the filename.
+	//Object constructor is used to pass the filename. (string overloaded)
 	TeFiEd(const char*);
+	TeFiEd(const std::string);
 	
 	//Destructor cleans up RAM.
 	~TeFiEd();
@@ -42,7 +46,6 @@ class TeFiEd {
 	/** File Metadata getters *************************************************/
 	//Return the filename string (converted from const char* to string)
 	std::string filename();
-	
 	//Return the filename string as a c string
 	const char* filename_c_str();
 	
@@ -82,22 +85,23 @@ class TeFiEd {
 	
 	/** File Editing Functions ************************************************/
 	//Convert RAM vector Line Ending stype to DOS or Unix (Pass string
-	void convertLineEnding(t_LINE_END);
+	void convertLineEnding(const LineEnding);
 	
+		
 	//Appends a string to the end of the RAM File
-	int appendString(const std::string);
+	int append(const std::string);
 	
 	//Append a string onto the end of a specific line
-	int appendToLine(const std::string, size_t line);
+	int appendLine(size_t line, const std::string);
 	
-	//Inserts a line of text into the vector at index.
-	int insertString(const std::string, size_t index);
+	//Inserts a line of text into the vector at passed line.
+	int insertLine(size_t line, const std::string);
 	
-	//Inserts a string of text, line index and start pos index.
-	int insertToLine(const std::string, size_t line, size_t pos);
+	//Replaces [line] with the string passed
+	int replace(size_t line, std::string);
 	
 	//Remove the specified line from RAM File.
-	int removeLine(size_t line);
+	int remove(size_t line);
 	
 	//Gets -index- word in a string. Overloaded with 2 methods:
 	//Pass line No & index, return string - blank when no match.
@@ -105,16 +109,19 @@ class TeFiEd {
 	std::string getWord(const size_t line, unsigned int index);
 	std::string getWord(const std::string, unsigned int index);
 	
-	//Find the first line containing a string, Pass an offset int, to start from
-	//that line instead of the first line (default first line)
-	size_t findLine(std::string, size_t offset = 1);
+	//Find the first line containing a string, returns line number
+	//Pass a line to start from (defaults to first line)
+	size_t find(std::string, size_t offset = 1);
 	
 	//Find the first line containing a string. Return 0 when no match is found.
-	size_t findFirstLine(std::string);
+	size_t findFirst(std::string);
 	
 	//Find the next instance of a line containing string. Returns 0 when no 
 	//match is found.
-	size_t findNextLine(std::string);
+	size_t findNext(std::string);
+	
+	
+	
 	
 	private:
 	/** Configuration variables ***********************************************/
@@ -131,7 +138,7 @@ class TeFiEd {
 	bool verbose = false;
 	
 	/** File Variables ********************************************************/
-	const char* m_filename; //Filename as char array
+	char* m_filename; //Filename as char array
 	std::fstream m_file; //fsteam object of file
 	std::vector<std::string> m_ramfile; //File RAM vector	
 	

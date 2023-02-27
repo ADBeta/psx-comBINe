@@ -32,7 +32,7 @@ const std::string t_TRACK_str[] = {
 };
 
 /*** CueHandler Functions *****************************************************/
-CueHandler::CueHandler(const char* filename) {
+CueHandler::CueHandler(const std::string filename) {
 	//Open the cue file passed
 	cueFile = new TeFiEd(filename);
 	
@@ -40,7 +40,7 @@ CueHandler::CueHandler(const char* filename) {
 	cueFile->setByteLimit(102400);
 	
 	//Make sure the input filename is a valid .cue file
-	if( validateCueFilename(std::string(filename)) != 0) {
+	if( validateCueFilename(filename) != 0) {
 		std::cout << "Could not open " << filename << " as a .cue file. Exiting" 
 		          << std::endl;
 		exit(EXIT_FAILURE);
@@ -65,7 +65,7 @@ void CueHandler::read() {
 	}
 	
 	//Make sure the Line Ending type is Unix
-	cueFile->convertLineEnding(le_Unix);	
+	cueFile->convertLineEnding(LineEnding::Unix);	
 }
 
 void CueHandler::create() {
@@ -452,7 +452,7 @@ int CueHandler::outputCueData() {
 		FileData pFILE = this->FILE[ cFile ];
 		
 		//Print Current FILE string to the cue file
-		cueFile->appendString( generateFILELine(pFILE) );
+		cueFile->append( generateFILELine(pFILE) );
 		
 		//Go through all the TRACKs
 		for(size_t cTrack = 0; cTrack < pFILE.TRACK.size(); cTrack++) {
@@ -460,7 +460,7 @@ int CueHandler::outputCueData() {
 			TrackData pTRACK = pFILE.TRACK[ cTrack ];
 			
 			//Print current TRACK string to the cue file
-			cueFile->appendString( generateTRACKLine(pTRACK) );
+			cueFile->append( generateTRACKLine(pTRACK) );
 			
 			//Go through all INDEXs
 			for(size_t cIndex = 0; cIndex < pTRACK.INDEX.size(); cIndex++) {
@@ -468,7 +468,7 @@ int CueHandler::outputCueData() {
 				IndexData pINDEX = pTRACK.INDEX[ cIndex ];
 				
 				//Print current INDEX string to the cue file
-				cueFile->appendString( generateINDEXLine(pINDEX) );
+				cueFile->append( generateINDEXLine(pINDEX) );
 			}
 		}
 	}

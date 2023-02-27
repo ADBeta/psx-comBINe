@@ -1,4 +1,5 @@
-/* Te(xt) Fi(le) Ed(itor) TeFiEd 
+/******************************************************************************* 
+* Te(xt) Fi(le) Ed(itor) TeFiEd 
 * Simple Text File Editor, written be as fast and efficient as possible.
 * -Beta version- 
 * Some simple text editing features aren't built in quite yet, but I plan to
@@ -7,22 +8,35 @@
 * Please see the github page for this project: https://github.com/ADBeta/TeFiEd
 * 
 * (c) ADBeta 
-* v4.3.4
-* Last Modified 28 Jan 2023
-*/
+*******************************************************************************/
 
 #include "TeFiEd.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cstring>
 
-TeFiEd::TeFiEd(const char* ip_filename) {
-	m_filename = ip_filename;
+TeFiEd::TeFiEd(const char* filename) {
+	//Create a char array at m_filename the size of the input string.
+	m_filename = new char[ strlen(filename) + 1 ];
+	
+	//Copy the input string to the new char array at m_filename
+	strcpy(m_filename, filename);
 }
+
+TeFiEd::TeFiEd(const std::string filename) {
+	//Create a char array at m_filename the size of the input string.
+	m_filename = new char[ filename.size() + 1 ];
+
+	//Copy the input string to the new char array at m_filename
+	strcpy(m_filename, filename.c_str());
+} 
 
 //Destructor cleans up the vector and oher RAM garbage disposal.
 TeFiEd::~TeFiEd() {	
+	delete[] m_filename;
+	
 	if(m_ramfile.size() != 0) {
 		this->flush();
 	}
@@ -166,7 +180,7 @@ std::string TeFiEd::getLine(size_t index) {
 	//If the index is 0, return a blank string
 	if(index == 0) return "";
 	
-	//Always decriment index by 1 to fit the index on 1 style.
+	//Always decriment index to fit the 1 index style
 	--index;
 	
 	if(index > this->m_ramfile.size() - 1) {
@@ -246,7 +260,7 @@ void TeFiEd::flush() {
 }
 
 /** File Edit Functions *******************************************************/
-void TeFiEd::convertLineEnding(t_LINE_END type) {
+void TeFiEd::convertLineEnding(const LineEnding type) {
 	//Keep track of how many lines were not the correct type for verbose prints
 	size_t wrongLines = 0;
 	
@@ -257,7 +271,7 @@ void TeFiEd::convertLineEnding(t_LINE_END type) {
 		char lastChar = m_ramfile[cLine].back();
 		
 		//In Unix convert mode, remove any 0x0D (\r or CR) chars
-		if(type == le_Unix) {
+		if(type == LineEnding::Unix) {
 			if(lastChar == 0x0D) {
 				//Remove the last char
 				m_ramfile[cLine].pop_back();		
@@ -265,7 +279,7 @@ void TeFiEd::convertLineEnding(t_LINE_END type) {
 				++wrongLines;
 			}
 		//In DOS mode, if a line does not have 0x0D (\r CR) then add one,
-		} else if (type == le_DOS) {
+		} else if (type == LineEnding::DOS) {
 			if(lastChar != 0x0D) {
 				//Add the \r to the end of line
 				m_ramfile[cLine].push_back(0x0D);
@@ -279,9 +293,9 @@ void TeFiEd::convertLineEnding(t_LINE_END type) {
 	
 	//Output verbose message about status and results
 	if(this->verbose == true) {
-		if(type == le_Unix) {
+		if(type == LineEnding::Unix) {
 			std::cout << "Unix ";
-		} else if(type == le_DOS) {
+		} else if(type == LineEnding::DOS) {
 			std::cout << "DOS ";
 		}
 	
@@ -290,9 +304,8 @@ void TeFiEd::convertLineEnding(t_LINE_END type) {
 	}
 }
 
-
 //Append string to the end of the RAM File
-int TeFiEd::appendString(const std::string inStr) {
+int TeFiEd::append(const std::string inStr) {
 	//Sanity check string and RAM size
 	if(checkString(inStr) != 0) {
 		return 1;
@@ -305,16 +318,16 @@ int TeFiEd::appendString(const std::string inStr) {
 	return 0;
 }
 
-int TeFiEd::insertString(const std::string inStr, size_t index) {
-	//Decriment index if above 0, RAM File is indexed +1 from 'normal' notation
-	if(index > 0) {
-		--index;
+int TeFiEd::insertLine(size_t line, const std::string inStr) {
+	//Decriment line if above 0, RAM File is indexed +1 from 'normal' notation
+	if(line > 0) {
+		--line;
 	}
 
 	//Make sure that the vector has enough elements to allow the insert
-	if(index > m_ramfile.size()) {
+	if(line > m_ramfile.size()) {
 		//Error message and return fail
-		errorMsg("insertLine", "Line", index + 1, "does not exist");
+		errorMsg("insertLine", "Line", line + 1, "does not exist");
 		
 		return 1;
 	}
@@ -324,67 +337,58 @@ int TeFiEd::insertString(const std::string inStr, size_t index) {
 		return 1;
 	}
 	
-	m_ramfile.insert(m_ramfile.begin() + index, inStr);
+	m_ramfile.insert(m_ramfile.begin() + line, inStr);
 	return 0;
 }
 
 //Append a string onto the end of a specific line
-int TeFiEd::appendToLine(const std::string inStr, size_t index) {
-	//Decriment index if above 0, RAM File is indexed +1 from 'normal' notation
-	if(index > 0) {
-		--index;
+int TeFiEd::appendLine(size_t line, const std::string inStr) {
+	//Decriment line if above 0, RAM File is indexed +1 from 'normal' notation
+	if(line > 0) {
+		--line;
 	}
 	
 	//Combine lengths of both input and pre-existing string for length check
-	std::string catString = m_ramfile[index] + inStr;
+	std::string catString = m_ramfile[line] + inStr;
 	//Sanity check string and RAM size
 	if(checkString(catString) != 0) {
 		return 1;
 	}
 	
 	//append the string in the vector at index given
-	m_ramfile[index].append(inStr);
+	m_ramfile[line].append(inStr);
 	
 	//Done
 	return 0;
 }
 
-//Insert a string to a sepcific line, starting at a specific position index.
-int TeFiEd::insertToLine(const std::string inStr, size_t index, size_t pos) {
-	//Decriment index if above 0, RAM File is indexed +1 from 'normal' notation
-	if(index > 0) --index;
-	
-	//Decriment pos if above 0
-	if(pos > 0) --pos;
-	
-	//Make sure that the vector has enough elements to allow the insert
-	if(index > m_ramfile.size()) {
-		errorMsg("insertString", "Line", index + 1, "does not exist");
-		
-		return 1;
+int TeFiEd::replace(size_t line, std::string inStr) {
+	//Decriment line if above 0, RAM File is indexed +1 from 'normal' notation
+	if(line > 0) {
+		--line;
 	}
 	
-	//Make sure that pos doesn't go past the string in vector[index]
-	if(pos > m_ramfile[index].size()) {
-		errorMsg("insertString", "cannot insert to line", index + 1,
-			"at position " + std::to_string(pos + 1));
+	//Make sure that the line requested is valid
+	if(line > m_ramfile.size()) {
+		//Error message and return fail
+		errorMsg("replsce", "Line", line + 1, "does not exist");
 		
 		return 1;
-	}
+	}	
 	
-	//Combine lengths of both input and pre-existing string for length check
-	std::string catString = m_ramfile[index] + inStr;
 	//Sanity check string and RAM size
-	if(checkString(catString) != 0) {
+	if(checkString(inStr) != 0) {
 		return 1;
 	}
 	
-	//If nothing goes wrong, append to the string
-	m_ramfile[index].insert(pos, inStr);
+	//Change the RAM vectors string to inStr
+	m_ramfile[line] = inStr;
+	
+	//Done
 	return 0;
 }
 
-int TeFiEd::removeLine(size_t index) {
+int TeFiEd::remove(size_t index) {
 	//Decriment index if above 0, RAM File is indexed +1 from 'normal' notation
 	if(index > 0) {
 		--index;
@@ -457,7 +461,7 @@ std::string TeFiEd::getWord(const std::string input, unsigned int index) {
 	return output;
 }
 
-size_t TeFiEd::findLine(std::string search, size_t offset) {
+size_t TeFiEd::find(std::string search, size_t offset) {
 	//Force offset to be 1 if 0 is passed
 	if(offset < 1) offset = 1;
 	
@@ -477,7 +481,7 @@ size_t TeFiEd::findLine(std::string search, size_t offset) {
 	return 0;
 }
 
-size_t TeFiEd::findFirstLine(std::string search) {
+size_t TeFiEd::findFirst(std::string search) {
 	size_t lineCount = lines() + 1; //Get how many lines there are in the vector
 	
 	//Search through each of them until we match the search string
@@ -494,7 +498,7 @@ size_t TeFiEd::findFirstLine(std::string search) {
 	return 0;
 }
 
-size_t TeFiEd::findNextLine(std::string search) {
+size_t TeFiEd::findNext(std::string search) {
 	/*** Setup ***/
 	//Last seach string, when new search string is given, reset to beginning
 	static std::string lastSearch;

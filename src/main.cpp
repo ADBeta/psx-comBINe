@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v1.5.0
-* 19 Feb 2023
+* v1.7.0
+* 27 Feb 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -24,16 +24,21 @@
 
 /*** Pre-defined output messages **********************************************/
 namespace message {
-std::string copyright = "psx-comBINe version 1.5.x (c) 2023 ADBeta\n";
+std::string copyright = "\npsx-comBINe 1.5.2 Feb 2023 ADBeta (c)\n";
 
 std::string shortHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
-Please use --help for full help information";
+Please use --help for full help information\n";
 
 std::string longHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
 The standard usage (no [option] arguments) takes a single input.cue file,\n\
 creates a directory in the .cue's parent directory called \"psx-comBINe\" \n\
 where it will output the combined .bin and .cue file, leaving the original \n\
-files untouched.\n\n";
+files untouched.\n\n\
+Option\t\t\tDescription\n\
+-h, --help\t\tShow this help message\n\
+-d, --directory\t\tChange the output directory\n\
+-f, --filename\t\tChange the output filename from the default\n\
+-v, --verbose\t\tPrint a verbose CUE sheet diagnostics before dumping\n";
 
 } //namespace message
 
@@ -67,24 +72,41 @@ int main(int argc, char *argv[]){
 	/*** Define CLIah Arguments ***********************************************/
 	//Make sure CLIah doesn't error in any fatal way, as multiple strings will
 	//be passed via CLI
-	CLIah::Config::verbose = true; //Set verbosity when match is found
-	CLIah::Config::errorMode = CLIah::Config::ErrMode::ignore;
+	//CLIah::Config::verbose = true; //Set verbosity when match is found
+	CLIah::Config::stringsEnabled = true; //Set arbitrary strings allowed
 	
 	CLIah::addNewArg(
 		"Help",               //Reference
 		"--help",             //Primary match string
 		CLIah::ArgType::flag, //Argument type
-		"-h",                 //Alias match string
-		true                  //Case sensitivity
+		"-h"                 //Alias match string
     );
 	
-	
-
-	
+	CLIah::addNewArg(
+		"Dir",
+		"--directory",
+		CLIah::ArgType::subcommand,
+		"-d"
+    );
+    
+    CLIah::addNewArg(
+		"File",
+		"--filename",
+		CLIah::ArgType::subcommand,
+		"-f"
+    );
+    
+    CLIah::addNewArg(
+		"Verbose",
+		"--verbose",
+		CLIah::ArgType::flag,
+		"-v"
+    );
+    	
 	/** User Argument handling ************************************************/
 	//Until CLIah supports it, detect no input manually and exit
 	if(argc == 1) {
-		std::cout << message::shortHelp << std::endl;
+		std::cout << message::shortHelp << message::copyright << std::endl;
 		return 1;
 	}
 	
@@ -93,27 +115,24 @@ int main(int argc, char *argv[]){
 	
 	//If help was requested, print the long help message then exit.
 	if( CLIah::isDetected("Help") ) {
-		std::cout << message::longHelp << std::endl;
+		std::cout << message::longHelp << message::copyright << std::endl;
 		return 0;
 	}
+	
+	//TODO compare first string with argv[1] to make sure it is the first arg
 	
 	//Output directory and filename option will be detected later.
 	
 	/** Setup *****************************************************************/
 	//Open a new cueHandler object for the input file, Performs validation.
-	CueHandler cueIn(argv[1]);
+	CueHandler cueIn( CLIah::stringVector.at(0).string );
 	//Read the .cue file into a TeFiEd RAM Vector
 	cueIn.read();
 	
-	
 	//Generate the file system strings for use later  TODO split based on args
-	genFSStrings( std::string(argv[1]) );
+	genFSStrings( CLIah::stringVector.at(0).string );
 	
-	
-	
-	
-	
-	
+
 	/**************************************************************************/
 	//Read the cue file into the FILE.TRACK.INDEX structure.
 	std::cout << "Getting input CUE Data... " << std::flush;
@@ -121,12 +140,12 @@ int main(int argc, char *argv[]){
 	std::cout << "Done" << std::endl << std::endl;
 	
 	
-	//Print out all of the input CUE data (DEBUG MODE TODO)
-	for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
-		cueIn.printFILE(cueIn.FILE[cFile]);
+	//Print out all of the input CUE data if verbose is enabled
+	if(CLIah::isDetected("Verbose")) {
+		for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
+			cueIn.printFILE(cueIn.FILE[cFile]);
+		}
 	}
-	
-	return 0;
 	
 	//Populate the binFilenameVect from the cue vect object
 	for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
@@ -154,7 +173,7 @@ int main(int argc, char *argv[]){
 	
 	//Open the output cue file and create the file. Exits on failure
 	std::string outCueFilename = outDirStr + baseFileStr + ".cue";
-	CueHandler cueOut( outCueFilename.c_str() );
+	CueHandler cueOut( outCueFilename );
 	cueOut.create();
 	
 	

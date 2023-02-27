@@ -10,7 +10,9 @@
 #include <string>
 #include <vector>
 
-//NOTE: algorithm is used for strToUpper(), purely for practice with transform.
+#include <limits>
+
+//NOTE: algorithm is used for strToLower(), purely for practice with transform.
 //If it is noted to be slow, or break some systems I will replace it with manual
 //Index based looping on a string. Let me know.
 #include <algorithm> 
@@ -18,46 +20,54 @@
 #include "CLIah.hpp"
 
 /*** Helper functions *********************************************************/
-std::string strToUpper(std::string input) {
+std::string strToLower(std::string input) {
 	//Transform seems to be the recommended method - causes another include 
 	//and may cause other unknown issues. For practice, this will stay for now,
 	//But may be replaced with a direct index (or iterator) in future.
 	std::transform(input.begin(), input.end(), input.begin(), 
 		//operation is getting the current char and performing toupper
-		[](unsigned char chr){ return std::toupper(chr); }
+		[](unsigned char chr){ return std::tolower(chr); }
 	);
 	
-	//Return the uppercase string
+	//Return the lowercase string
 	return input;
-}
-
-/*** Error Handling ***********************************************************/
-void CLIah::errorMsg(const unsigned int errLevel, const std::string errMsg) {
-	std::string prefix;
-	
-	//Set prefix to Warning or Error depenging on errLevel
-	if(errLevel == 0) { prefix = "Warning: ";
-	} else { prefix = "Error: "; }
-	
-	std::cerr << prefix << errMsg << std::endl;
-	
-	//If the errLevel is > 1 then exit the program as a fatal error
-	if(errLevel > 1) exit(EXIT_FAILURE);
 }
 
 /*** CLIah Functions **********************************************************/
 namespace CLIah {
 	namespace Config {
-		//Error mode when certain circumatances are encountered
-		ErrMode errorMode = ErrMode::exit;
-		
+		//Are arbitrary strings enabled. If true, unknown args will be used as 
+		//strings, if false, they will cause and error and exit
+		bool stringsEnabled = false;
 		//Verbosity selection. Prints matched Args. Defaults to false
 		bool verbose = false;
 		
 	} //namespace Config
 
 /*** Non API Functions ********************************************************/
+//CLIah maxIndex vlaues is an alias of numeric limits unsigned int
+unsigned int indexMax = std::numeric_limits<unsigned int>::max();
+
 std::vector <Arg> argVector;
+std::vector <String> stringVector;
+
+void argError(int errLevel, Arg &ref) {
+	std::cerr << "Error: CLIah: ";
+	
+	//If the arg has a custom help message, print it
+	if(ref.errMessage.empty() == 0) {
+		std::cerr << ref.errMessage << std::endl;
+	} else {
+		//Depending on the style of argument, print a pre-defined error message
+		if(ref.type == ArgType::subcommand) {
+			std::cerr << "Argument \"" << ref.argReference << "\" " 
+			<< " is a subcommand but does not have any substring." << std::endl;
+		}
+	}
+	
+	//Error level exit routine
+	if(errLevel > 0) exit(EXIT_FAILURE);	
+}
 
 void printArg(const Arg &ref) {
 	//Print the argReference, primary and alias args.
@@ -85,6 +95,16 @@ void printArg(const Arg &ref) {
 		std::cout << "Substring       | " << ref.substring << std::endl;
 	}
 	
+	//Print the index
+	std::cout << "Index           | " << ref.index << std::endl;
+	
+	std::cout << std::endl;
+}
+
+void printString(const String &ref) {
+	std::cout << "String          | " << ref.string << std::endl;
+	std::cout << "Index           | " << ref.index << std::endl;
+	
 	std::cout << std::endl;
 }
 
@@ -97,9 +117,9 @@ bool argStringsMatch(const Arg &ref, std::string input) {
 	//Pri Alias and input to uppercase to make any case usage irrelevant
 	if(ref.caseSensitive == false) {
 		//Convert input, priStr and aliasStr to uppercase
-		input = strToUpper(input);
-		priStr = strToUpper(priStr);
-		aliasStr = strToUpper(aliasStr);
+		input = strToLower(input);
+		priStr = strToLower(priStr);
+		aliasStr = strToLower(aliasStr);
 	}
 	
 	//If an exact match for either pri or alias occurs, return a match flag
@@ -145,8 +165,8 @@ void analyseArgs(int argc, char *argv[]) {
 				if(tempType == CLIah::ArgType::subcommand) {
 					//Make sure there *IS* a next argument, if not fatal error.
 					if(argStrIdx + 1 >= argc) {
-						errorMsg(2, "analyseArgs: " + inputArg +
-						          " is Subcommand type but has no substring");
+						//Print error message and exit.
+						argError(1, *itrtr);
 					}
 					
 					//Incriment argStrIdx to get the substring, and the next
@@ -160,6 +180,8 @@ void analyseArgs(int argc, char *argv[]) {
 				/*** Constant execution when a match is found *****************/
 				//Set the current argVector object detection flag to true
 				itrtr->detected = true;
+				//Set the index to argStrIndex
+				itrtr->index = argStrIdx;
 				
 				//If verbosity is enabled, print the matched arg
 				if(Config::verbose == true) {
@@ -174,22 +196,26 @@ void analyseArgs(int argc, char *argv[]) {
 			
 		} //End of ArgVector loop
 		
-		
 		/*** Error Handling ***************************************************/
 		//If no match was found for inputArg after checking all argVector objs
 		if(matchFound == false) {
-			//If mode is set to ignore, skip this bit and just continue
-			if(Config::errorMode != Config::ErrMode::ignore) {
-				//Set up the error string
-				std::string errStr = "No match for Arg \"" + inputArg + "\"";
+			//If Strings are enabled
+			if(Config::stringsEnabled == true) {
+				//Set a temp String object to the values from argv[] and argc
+				String tempString;
+				tempString.string = inputArg;
+				tempString.index = argStrIdx;
+				stringVector.push_back(tempString);
 				
-				//Depending on ErrMode, warn or exit with errStr.
-				if(Config::errorMode == Config::ErrMode::warn) {
-					errorMsg(0, errStr);
+				//If verbose is enabled, print the string
+				if(Config::verbose == true) {
+					std::cout << "A string was found" << std::endl;
+					printString(tempString);
 				}
-				if(Config::errorMode == Config::ErrMode::exit) {
-					errorMsg(2, errStr);
-				}
+			} else {
+				std::cerr << "Error: CLIah: No matching Argument for input \"" 
+				          << inputArg << "\"" << std::endl;
+				exit(EXIT_FAILURE);
 			}
 		} //End of error handler 
 		
@@ -197,7 +223,7 @@ void analyseArgs(int argc, char *argv[]) {
 }
 
 void addNewArg(const std::string ref, const std::string pri, const ArgType type,
-               const std::string alias = "", const bool caseSensitive = true) {
+               const std::string alias, const bool caseSensitive) {
 	//Create an Arg object to set the parameters to
 	Arg newArg;
 	
@@ -212,8 +238,12 @@ void addNewArg(const std::string ref, const std::string pri, const ArgType type,
 	argVector.push_back(newArg);
 }
 
-Arg getArgByReference(const std::string refStr) {
-	static Arg retArg;
+void setErrorMessage(const std::string ref, const std::string msg) {
+	getArgByReference(ref)->errMessage = msg;
+}
+
+Arg *getArgByReference(const std::string refStr) {
+	Arg *argPtr = NULL;
 	
 	//Go through every argVector element and check for reference string
 	std::vector<Arg>::iterator itrtr; 
@@ -221,30 +251,65 @@ Arg getArgByReference(const std::string refStr) {
 		//Compare reference string and argReference. 
 		if(refStr.compare( itrtr->argReference ) == 0) {
 			//Set the return Arg object pointer, and return it
-			retArg = *itrtr;
-			return retArg;
+			argPtr = &(*itrtr);
+			break;
 		}
 	}
 	
-	//If no match is found, fatal error as this could cause segfaults
-	errorMsg(2, "getArgByReference: No Arg exists using reference " + refStr);
+	//Return to avoid compile warning
+	return argPtr;
+}
+
+
+
+Arg *getArgByIndex(unsigned int index) {
+	Arg *retArg = NULL;
+	
+	//Go through every argVector element and check for reference string
+	std::vector<Arg>::iterator itrtr; 
+	for(itrtr = argVector.begin(); itrtr != argVector.end(); itrtr++) {
+		//Compare reference string and argReference. 
+		if(index == itrtr->index) {
+			//Set the return Arg object pointer, and return it
+			retArg = &(*itrtr);
+			break;
+		}
+	}
 	
 	//Return to avoid compile warning
 	return retArg;
 }
 
-bool isDetected(const std::string refStr) {
-	//Get the Arg by reference and assign it to an Arg object
-	Arg tempArg = getArgByReference(refStr);
+String *getStringByIndex(unsigned int index) {
+	String *retString = NULL;
 	
-	return tempArg.detected;
+	//Go through every argVector element and check for reference string
+	std::vector<String>::iterator itrtr; 
+	for(itrtr = stringVector.begin(); itrtr != stringVector.end(); itrtr++) {
+		//Compare reference string and argReference. 
+		if(index == itrtr->index) {
+			//Set the return Arg object pointer, and return it
+			retString = &(*itrtr);
+			break;
+		}
+	}
+	
+	//Return to avoid compile warning
+	return retString;
+}
+
+bool isDetected(const std::string refStr) {
+	//Arg pointer from getArg
+	Arg *ptrArg = getArgByReference(refStr);
+	
+	return ptrArg->detected;
 }
 
 std::string getSubstring(const std::string refStr) {
-	//Get the Arg by reference and assign it to an Arg object
-	Arg tempArg = getArgByReference(refStr);
+	//Arg pointer from getArg
+	Arg *ptrArg = getArgByReference(refStr);
 	
-	return tempArg.substring;
+	return ptrArg->substring;
 }
 
 } //namespace CLIah
