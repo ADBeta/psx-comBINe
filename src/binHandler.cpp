@@ -27,7 +27,9 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 
 	//Create the output binary file and check it is open
 	binFileOut.open(outFn.c_str(), std::ios::out | std::ios::binary);
-	if(!binFileOut) errorMsg(2, "dumpBinFiles", "Cannot create output .bin file. Check privelages");
+	std::cout << "creating " << outFn << std::endl;
+	if(!binFileOut) errorMsg(2, "dumpBinFiles", 
+	                         "Cannot create output .bin file. Check privelages");
 	
 	//Current byte in array, bytes in each file, and total bytes from all files
 	size_t arrBytes = 0, fileBytes = 0, totalBytes = 0;
@@ -48,7 +50,10 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 		//Open input binary file to the current string in the vecor.
 		binFileIn.open(binVect[indx].c_str(), std::ios::in | std::ios::binary);
 		//error check
-		if(!binFileIn) errorMsg(2, "dumpBinFiles", "Can not open the input .bin file");
+		if(!binFileIn) {
+			errorMsg(2, "dumpBinFiles", "Can not open " + binVect[indx]);
+		}
+		
 		//Seek to the beginning of the in file to clear flags. Belt and braces
 		binFileIn.seekg(0, std::ios::beg);
 		

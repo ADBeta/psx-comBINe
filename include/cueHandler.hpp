@@ -40,7 +40,7 @@ extern const std::string t_FILE_str[];
 	MODE2/2336	CD-ROM XA Mode 2 Data (form mix)
 	MODE2/2352	CD-ROM XA Mode 2 Data (raw)
 	CDI/2336	CDI Mode 2 Data
-	CDI/2352	CDI Mode 2 Data                                           */
+	CDI/2352	CDI Mode 2 Data                                               */
 enum t_TRACK {ttUNKNOWN, ttAUDIO, ttCDG, ttMODE1_2048, ttMODE1_2352,
               ttMODE2_2336, ttMODE2_2352, ttCDI_2336, ttCDI_2352 };
 extern const std::string t_TRACK_str[];
@@ -144,7 +144,6 @@ class CueHandler {
 	
 	//Combines all the cue FILE data (removes seperate files) and pushes it
 	//to the CueHandler object passed via reference.
-	//Returns error status TODO
 	int combineCueFiles(CueHandler &combined, const std::string outFN,
 	                    const std::vector <unsigned long> offsetBytes);
 	

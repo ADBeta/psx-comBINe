@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v1.7.0
-* 27 Feb 2023
+* v2.0.0
+* 05 Mar 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -22,94 +22,121 @@
 #include "cueHandler.hpp"
 #include "CLIah.hpp"
 
+/*** OS Detection *************************************************************/
+#ifdef __linux__
+	#define DIR_DELIM '/'
+	#define DIR_SUFFIX "psx-comBINe/"
+#elif _WIN32
+	#define DIR_DELIM '\\'
+	#define DIR_SUFFIX "psx-comBINe\\"
+#endif
+
 /*** Pre-defined output messages **********************************************/
 namespace message {
-std::string copyright = "\npsx-comBINe 1.5.2 Feb 2023 ADBeta (c)\n";
+std::string copyright = "\npsx-comBINe 2.0.0 March 2023 ADBeta (c)";
 
-std::string shortHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
-Please use --help for full help information\n";
+std::string malformed = "Filename must be the first argument\n";
+
+std::string shortHelp = "Usage: psx-comBINe [input.cue] [options]\n\
+use --help for full help information\n";
 
 std::string longHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
-The standard usage (no [option] arguments) takes a single input.cue file,\n\
-creates a directory in the .cue's parent directory called \"psx-comBINe\" \n\
-where it will output the combined .bin and .cue file, leaving the original \n\
+By default psx-comBINe takes a single input.cue file, creates a directory in\n\
+the .cue's parent directory called \"psx-comBINe\".\n\
+it will then output the combined .bin and .cue file, leaving the original \n\
 files untouched.\n\n\
-Option\t\t\tDescription\n\
+Options:\n\
 -h, --help\t\tShow this help message\n\
 -d, --directory\t\tChange the output directory\n\
--f, --filename\t\tChange the output filename from the default\n\
+-f, --filename\t\tSpecify the output filenames instead of copying the input\n\
 -v, --verbose\t\tPrint a verbose CUE sheet diagnostics before dumping\n";
-
 } //namespace message
 
 /*** Main functions ***********************************************************/
 //Vector of filenames pulled from the cueFile.
 std::vector<std::string> binFilenameVect;
 
-//Strings used for input/output file system and directory management
-std::string baseDirStr, baseFileStr, outDirStr;
+//Filesystem strings. Input and output directory, and the base filename of the 
+//input, eg input "./game/game.cue" to use "game" for input and output files
+std::string inputDirString, outputDirString, baseFileString;
+
+//Output bin and cue path + filename + extension. Set later
+std::string outCueFileString, outBinFileString;
 
 //Generate the file system strings from input file (argv[1])
-void genFSStrings(const std::string inFile) {
-	//Find the last / in the in file, to split it into baseDir and baseFile
-	size_t lastSlash = inFile.find_last_of('/');
+void generateFilesystemStrings(const std::string inFilename) {
+	//Find the last delim (/ or \) position, to split the string
+	size_t lastSlashPos = inFilename.find_last_of( DIR_DELIM ) + 1;
 	
-	//Split from 0 to / to get directory
-	baseDirStr = inFile.substr(0, lastSlash + 1);
+	//Split from 0 to the delim to get the input directory
+	inputDirString = inFilename.substr(0, lastSlashPos);
 	
-	//Append psx-comBINe to the input string for output path
-	outDirStr = baseDirStr + "psx-comBINe/";
+	//If the directory flag is set, set the output Directory to that, otherwise,
+	//use the default */psx-comBINe/ direcory
+	if(CLIah::isDetected("Dir")) {
+		outputDirString = CLIah::getSubstring("Dir");
+		
+		//Make sure the output directory passed has a termination DELIM.
+		if(outputDirString.back() != DIR_DELIM) {
+			outputDirString.push_back( DIR_DELIM );
+		}
+		
+	} else {
+		//Append psx-comBINe to the input string for output path
+		outputDirString = inputDirString + DIR_SUFFIX;
+	}
 	
-	//Two stage process - First split from the end to the / of the inFile string
-	//then substring from 0 to the first . of that string. This is done to 
-	//prevent "./dirctory" or "/directory/file.a.b.c" from breaking the string.
-	baseFileStr = inFile.substr(lastSlash + 1, inFile.length());
-	baseFileStr = baseFileStr.substr(0, baseFileStr.find('.'));	
+	//Set the output filename base (./directory/file to file)
+	//If filename flag is set, trust the users string
+	if(CLIah::isDetected("Filename")) {
+		baseFileString = CLIah::getSubstring("Filename");
+	}  else {
+		//First split from the last delim (/ or \) to the end of the string
+		baseFileString = inFilename.substr(lastSlashPos, inFilename.length());
+		//Then split the first substring from 0 to the first "." 
+		//this prevents "./dirctory" or "/directory/file.a.b.c" from breaking 	
+		baseFileString = baseFileString.substr(0, baseFileString.find('.'));
+	}
 }
 
 /*** Main *********************************************************************/
 int main(int argc, char *argv[]){
 	/*** Define CLIah Arguments ***********************************************/
-	//Make sure CLIah doesn't error in any fatal way, as multiple strings will
-	//be passed via CLI
 	//CLIah::Config::verbose = true; //Set verbosity when match is found
 	CLIah::Config::stringsEnabled = true; //Set arbitrary strings allowed
 	
 	CLIah::addNewArg(
-		"Help",               //Reference
-		"--help",             //Primary match string
-		CLIah::ArgType::flag, //Argument type
-		"-h"                 //Alias match string
-    );
-	
+		"Help",                 //Reference
+		"--help",               //Primary match string
+		CLIah::ArgType::flag,   //Argument type
+		"-h"                    //Alias match string
+	);
+	//Change output directory
 	CLIah::addNewArg(
 		"Dir",
 		"--directory",
 		CLIah::ArgType::subcommand,
 		"-d"
-    );
-    
-    CLIah::addNewArg(
-		"File",
+	);
+	//Change output filenames
+	CLIah::addNewArg(
+		"Filename",
 		"--filename",
 		CLIah::ArgType::subcommand,
 		"-f"
-    );
-    
+	);
+    //Make psx-comBINe verbose
     CLIah::addNewArg(
 		"Verbose",
 		"--verbose",
 		CLIah::ArgType::flag,
 		"-v"
-    );
-    	
-	/** User Argument handling ************************************************/
-	//Until CLIah supports it, detect no input manually and exit
-	if(argc == 1) {
-		std::cout << message::shortHelp << message::copyright << std::endl;
-		return 1;
-	}
+	);
 	
+	//TODO
+	std::cout << DIR_DELIM << "   " << DIR_SUFFIX << std::endl;
+
+	/** User Argument handling ************************************************/
 	//Get CLIah to scan the CLI Args
 	CLIah::analyseArgs(argc, argv);
 	
@@ -119,9 +146,18 @@ int main(int argc, char *argv[]){
 		return 0;
 	}
 	
-	//TODO compare first string with argv[1] to make sure it is the first arg
+	//Make sure that at least one string exists and is the first argument passed
+	if( CLIah::stringVector.size() == 0 ) {
+		std::cout << message::shortHelp << message::copyright << std::endl;
+		return 1;
+	}
 	
-	//Output directory and filename option will be detected later.
+	//Compare first string with argv[1] to make sure it is the first arg
+	 if( CLIah::stringVector.at(0).string.compare(argv[1]) != 0 ) {
+	 	std::cout << message::malformed << message::shortHelp 
+	 	          << message::copyright << std::endl;
+		return 1;
+	 }
 	
 	/** Setup *****************************************************************/
 	//Open a new cueHandler object for the input file, Performs validation.
@@ -129,16 +165,18 @@ int main(int argc, char *argv[]){
 	//Read the .cue file into a TeFiEd RAM Vector
 	cueIn.read();
 	
-	//Generate the file system strings for use later  TODO split based on args
-	genFSStrings( CLIah::stringVector.at(0).string );
+	//Generate the file system strings, handles -d option
+	generateFilesystemStrings( CLIah::stringVector.at(0).string );
 	
+	//Create output .cue and .bin output filenames
+	outCueFileString = outputDirString + baseFileString + ".cue";
+	outBinFileString = outputDirString + baseFileString + ".bin";
 
 	/**************************************************************************/
 	//Read the cue file into the FILE.TRACK.INDEX structure.
 	std::cout << "Getting input CUE Data... " << std::flush;
 	cueIn.getCueData();
 	std::cout << "Done" << std::endl << std::endl;
-	
 	
 	//Print out all of the input CUE data if verbose is enabled
 	if(CLIah::isDetected("Verbose")) {
@@ -149,37 +187,37 @@ int main(int argc, char *argv[]){
 	
 	//Populate the binFilenameVect from the cue vect object
 	for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
-		binFilenameVect.push_back(baseDirStr + cueIn.FILE[cFile].FILENAME);
+		//Create a string of the file path to each bin file
+		std::string binFilePath = inputDirString + cueIn.FILE[cFile].FILENAME;
+		binFilenameVect.push_back(binFilePath);
 	}
 	
-	
+	/**************************************************************************/
 	//If the output directory doesn't exist already, create it.
-	if(boost::filesystem::is_directory(outDirStr) == false) {
+	if(boost::filesystem::is_directory(outputDirString) == false) {
 		//Watch for errors creating output directory
-		if( boost::filesystem::create_directory(outDirStr) == false) {
-			errorMsg(2, "main", "Cannot create output directory. Check privileges");
+		if(boost::filesystem::create_directory( outputDirString ) == false) {
+			errorMsg(2, "", "Cannot create output directory. Check privileges");
 		}
 		
 		//If success print message to let user know directory has been created
-		std::cout << "Created Directory: " << outDirStr << std::endl;
+		std::cout << "Created Directory: " << outputDirString << std::endl;
 	}
 	
-	
+	/**************************************************************************/
 	//Dump the binary files (via binFilenameVect) to the output binary file
-	if(dumpBinFiles(binFilenameVect, (outDirStr + baseFileStr + ".bin")) != 0) {
-		errorMsg(2, "main", "Could not dump binary files");
+	if(dumpBinFiles(binFilenameVect, outBinFileString) != 0) {
+		errorMsg(2, "main", "Could not dump binary files: ");
 	}
 	
-	
+	/**************************************************************************/
 	//Open the output cue file and create the file. Exits on failure
-	std::string outCueFilename = outDirStr + baseFileStr + ".cue";
-	CueHandler cueOut( outCueFilename );
+	CueHandler cueOut(outCueFileString);
 	cueOut.create();
 	
-	
 	//Combine the data from all FILES in cueIn, to a single file on cueOut.
-	cueIn.combineCueFiles( cueOut, baseFileStr + ".bin", binOffsetBytes );
-	
+	//Pass the cueOut object, the relative .bin name (NOT OUTPUT BIN STRING)
+	cueIn.combineCueFiles(cueOut, (baseFileString + ".bin"), binOffsetBytes);
 	
 	//Write the result of the combination to the cueOut file.
 	cueOut.outputCueData();

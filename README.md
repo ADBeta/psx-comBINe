@@ -1,21 +1,21 @@
 ﻿# psx-comBINe
 
-psx-comBINe combines a multi-bin CD-ROM PSX Game into a single .CUE and .BIN pair.  
-(supports all CUE MODES, 99 TRACKS, with 99 INDEXS each, and can handle multi-session
-dumps)
+psx-comBINe combines a multi-bin CD-ROM PSX Game into a single .CUE and .BIN pair
+and supports all CUE MODES, Remarks, 99 TRACKS, with 99 INDEXS each, support for
+multi-session dumps.
 
-An up-to-date release exe is in the release files.
+32bit and 64bit exes are in the release files.
 
 ![logo](https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
 
 psx-comBINe is unlike other applications because it has excellent compatibility 
-with the cue sheet standards. It can support any of the GNU approved CUE TYPEs, 
-as well as REM lines, slightly malformed structures and other small features that 
-make it more stable than other programs.
+with the CUE sheet standards. It can support any of the GNU approved CUE TYPEs, 
+as well as REM lines, a max of 99 TRACKs and INDEXs, and repairs slightly 
+malformed inputs.
 
 It is written in C++ to be as fast as possible on all systems, and is designed to
-be able to run on a 32bit system (exe to be added) for those who need to use older
-machines. Speeds tests can be seen below.
+be able to run on a 32bit systems for those who need to use older machines.  
+Speed tests can be seen below.
 
 Some uses for this include:
 * cue2pops or other methods to create VCD POPStarter files do not support multiple
@@ -25,8 +25,7 @@ perform better with a single .bin file.
 * (from my own experience) Single .bin and .cue file pairs are burnt to a CD much
 easier and with less errors, and perform better when being read by the hardware.
 
-This program uses [TeFiEd](https://github.com/ADBeta/TeFiEd)  
-and [CLIah](https://github.com/ADBeta/CLIah)  
+This program uses [TeFiEd](https://github.com/ADBeta/TeFiEd) and [CLIah](https://github.com/ADBeta/CLIah)  
 
 <b> NOTE: This program is in no way intended to support or condone piracy. This program
 should only be used with legitimately acquired backups of disks you own LEGALLY </b>  
@@ -62,45 +61,58 @@ $ cd ./psx-comBINe-main
 ```
 
 ## Usage
-psx-comBINe currently only supports 'direct' mode, which takes a multi-bin .cue file,
-where it will create a sub-directory called psx-comBINe, where it will combine the
-.bin and .cue data, and output them.  
-`$ ./psx-comBINe /Games/Game.cue`  
+The default way to use psx-comBINe is like this  
+`$ ./psx-comBINe /Games/Game.cue`
 
 On Windows it is very much the same use, but use Windows Backslashes "\\"  
-`.\psx-comBINe.exe .\Games\Game.cue`  
+`.\psx-comBINe.exe .\Games\Game.cue`
+
+For more uses and information use the inbuilt help  
+`psx-comBINe --help`
 
 ----
 ## Speed tests
-Tests performed on Arch Linux and Windows 10 Respectively, with a sample size of
-10 multibin dumps from Enter Key press, to program exit using psx-comBINe 1.7.0  
 ```
 Rage Racer   750,713 KB - 17 Tracks
 Ridge Racer  467,180 KB - 14 Tracks
 Rayman       701,881 KB - 51 Tracks
 
-Platform     Average time     Data Speed
+PSX Game      Average time     Data Speed
 
-Windows:
+Windows 10:
 -----------------------------------------
 Rage Racer   22.37 Seconds    33,558 KB/s
 Ridge Racer  13.91 Seconds    33,585 KB/s
 Rayman       21.29 Seconds    32,967 KB/s
+                   Average     32.59 MB/s
 
-Linux:
+Arch Linux:
 -----------------------------------------
-Rage Racer   11.21 Seconds    66,968 KB/s
-Ridge Racer  7.05 Seconds     66,266 KB/s
-Rayman       11.24 Seconds    62,444 KB/s
-```
+Rage Racer   09.77 Seconds    76,838 KB/s
+Ridge Racer  05.34 Seconds    87,486 KB/s
+Rayman       08.67 Seconds    80,955 KB/s
+                   Average     79.84 MB/s
 
-From my tests, psx-comBINe ran around 2x faster on Linux, however Windows still
+Fedora Linux 18 (2012)
+32bit, 1.6GHz, Single core Atom CPU:
+-----------------------------------------
+Rage Racer   67.35 Seconds    11,195 KB/s
+Ridge Racer  41.73 Seconds    11,154 KB/s
+Rayman       62.50 Seconds    11,230 KB/s
+                   Average     10.93 MB/s
+
+Windows 7
+32bit, 1.6GHz, Single core Atom CPU:
+-----------------------------------------
+
+```
+From my tests, psx-comBINe ran around 2.5x faster on Linux, however Windows still
 performed very well compared to alternative programs.  
+The performance on older hardware, while not impressive, is very usable, and I am
+proud to have supported people stuck with those types of machines so well.
 
 ----
 ## TO-DO
-* Make internal WINDOWS detect and auto-port
-* impliment some of the file direction functions
 * youtube video "how to combine multi-track bin files for ps1/psx games using psx-comBINe"
 
 ## Changelog (Reminder for self)
@@ -110,7 +122,10 @@ performed very well compared to alternative programs.
 * 1.4.0 - Support REM lines, changed error handlng
 * 1.5.0 - Support for .CUE and .cue, neater main exec
 * 1.7.0 - Upgraded TeFiEd and CLIah. Improved support and speed. Failsafes enabled
+* 2.0.0 - All CLI modes supported. Pre-compiled 32bit and 64bit exes provided. 
+Super low-spec machine compile and speed test (1 core 
+Atom CPU, 1GB RAM). Improved performance generally.
 
 ## Licence
 <b> 2023 ADBeta </b>  
-This software is under the GPL (GPL3.0), please see LICENCE for information
+This software is under the GPL 3.0 Licence, please see LICENCE for information

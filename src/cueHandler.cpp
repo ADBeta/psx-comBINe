@@ -359,8 +359,9 @@ void CueHandler::getCueData() {
 		
 		//REM (remark) line type
 		if(cLineType == ltREM) {
-			std::cout << "REMARK at line: " << lineNo << "\t message: " <<
-			cLineStr << std::endl;
+			//TODO Decide what to do with REMARKS
+			//std::cout << "REMARK at line: " << lineNo << "\t message: " <<
+			//cLineStr << std::endl;
 		}
 		
 		//FILE line type
@@ -409,13 +410,13 @@ void CueHandler::getCueData() {
 	}
 }
 
-int CueHandler::combineCueFiles(CueHandler &combined, const std::string outFN,
+int CueHandler::combineCueFiles(CueHandler &combined, const std::string outBin,
                                 const std::vector <unsigned long> offsetBytes) {
 	//Clear the pointer object FILE vector RAM
 	combined.cleanFILE();
 		
-	//Push the passed filename to the FILE Vector (the only file)
-	combined.pushFILE(outFN, this->FILE[0].TYPE);
+	//Push the passed filename (relative, not output) to the FILE Vector
+	combined.pushFILE(outBin, this->FILE[0].TYPE);
 	
 	//Go through all the callers' FILE vector
 	for(size_t cFile = 0; cFile < this->FILE.size(); cFile++) {
@@ -478,8 +479,8 @@ int CueHandler::outputCueData() {
 
 
 void CueHandler::printFILE(FileData & pFILE) {
-	//Check if pFILE is empty TODO Better detection
-	if(pFILE.FILENAME == "") {
+	//Check if pFILE is empty
+	if(pFILE.FILENAME.empty()) {
 		errorMsg(1, "printFile", "Selected FILE element is not valid.");
 		return;
 	}
@@ -535,10 +536,9 @@ std::string CueHandler::bytesToTimestamp(const unsigned long bytes) {
 	//There are 2352 byte per sector. Calculate how many sectors are in the file
 	unsigned long sectors = bytes / 2352;
 	
-	//TODO
 	//Error check if the input is divisible by a sector. Exit if not
 	if(bytes % 2352 != 0) {
-		errorMsg(2, "bytesToTimestamp", "timestamp is not aligned to SECTOR size (Corrupt timestamp)");
+		errorMsg(2, "bytesToTimestamp", "timestamp is not valid (SECTOR Bytes)");
 	}
 	
 	//75 sectors per second. Frames are the left over sectors from a second
@@ -550,7 +550,8 @@ std::string CueHandler::bytesToTimestamp(const unsigned long bytes) {
 	seconds = seconds % 60;
 	
 	//If minutes exceeds 99, there is probably an error due to Audio CD Standard
-	if(minutes > 99) errorMsg(1, "bytesToTimestamp", "Total bin file size exceeds 99 minutes");
+	if(minutes > 99) errorMsg(1, "bytesToTimestamp", 
+	                          "Total bin file size exceeds 99 minutes");
 	
 	std::string timestamp;	
 	
@@ -583,16 +584,15 @@ unsigned long CueHandler::timestampToBytes(const std::string timestamp) {
 	//There are 2352 bytes per sector.
 	unsigned long bytes = sectors * 2352;
 	
-	//TODO
 	//Error check if the input is divisible by a sector. Exit if not
 	if(bytes % 2352 != 0) {
-		errorMsg(2, "timestampToBytes", "timestamp is not aligned to SECTOR size (Corrupt timestamp)");
+		errorMsg(2, "timestampToBytes", "timestamp is not valid (SECTOR Bytes)");
 	}
 	
 	return bytes;
 }
 
-//-- Modified function from TeFiEd to not depend on object --//
+/*** Modified function from TeFiEd to not depend on object ********************/
 std::string CueHandler::getWord(const std::string input, unsigned int index) {
 	//If index is 0, set it to 1. always 1 indexed
 	if(index == 0) index = 1;
