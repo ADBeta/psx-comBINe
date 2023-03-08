@@ -8,8 +8,8 @@
 * improves reliabilty when buring to a disk to only have one .bin file.
 *
 * (c) ADBeta
-* v2.0.0
-* 05 Mar 2023
+* v2.1.0
+* 08 Mar 2023
 *******************************************************************************/
 #include <boost/filesystem.hpp>
 #include <iostream>
@@ -33,7 +33,7 @@
 
 /*** Pre-defined output messages **********************************************/
 namespace message {
-std::string copyright = "\npsx-comBINe 2.0.0 March 2023 ADBeta (c)";
+std::string copyright = "\npsx-comBINe 2.1.0 March 2023 ADBeta (c)";
 
 std::string malformed = "Filename must be the first argument\n";
 
@@ -132,9 +132,6 @@ int main(int argc, char *argv[]){
 		CLIah::ArgType::flag,
 		"-v"
 	);
-	
-	//TODO
-	std::cout << DIR_DELIM << "   " << DIR_SUFFIX << std::endl;
 
 	/** User Argument handling ************************************************/
 	//Get CLIah to scan the CLI Args
