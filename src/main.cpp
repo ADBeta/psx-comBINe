@@ -33,7 +33,7 @@
 
 /*** Pre-defined output messages **********************************************/
 namespace message {
-std::string copyright = "\npsx-comBINe 2.1.0 March 2023 ADBeta (c)";
+std::string copyright = "\npsx-comBINe 2.1.1 08 March 2023 ADBeta(c)";
 
 std::string malformed = "Filename must be the first argument\n";
 

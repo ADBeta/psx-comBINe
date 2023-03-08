@@ -20,10 +20,10 @@ Speed tests can be seen below.
 Some uses for this include:
 * cue2pops or other methods to create VCD POPStarter files do not support multiple
 bin files.
-* Most emulators do not support multi-bin dumps, and those that do would still
-perform better with a single .bin file.
-* (from my own experience) Single .bin and .cue file pairs are burnt to a CD much
-easier and with less errors, and perform better when being read by the hardware.
+* Most emulators do not support multi-bin dumps
+* In my experience, CDs burnt using single .bin .cue pairs suffer far fewer burn
+errors, read errors or hangs. I believe this to be due to IO File Swaps during
+burning causing issues in some cheaper CDs and/or software bugs.
 
 This program uses [TeFiEd](https://github.com/ADBeta/TeFiEd) and [CLIah](https://github.com/ADBeta/CLIah)  
 
@@ -32,8 +32,7 @@ should only be used with legitimately acquired backups of disks you own LEGALLY 
 
 ----
 ## Dependencies
-To compile This program requires the `boost-filesystem` libraries, but I recommend 
-installing all available `boost` libraries.  
+To compile This program requires the `boost-filesystem` library. (boost)
 
 #### Arch
 `sudo pacman -Syu boost`  
@@ -81,36 +80,38 @@ PSX Game      Average time     Data Speed
 
 Windows 10:
 -----------------------------------------
-Rage Racer   22.37 Seconds    33,558 KB/s
-Ridge Racer  13.91 Seconds    33,585 KB/s
-Rayman       21.29 Seconds    32,967 KB/s
-                   Average     32.59 MB/s
+Rage Racer   22.37 Seconds    33,558 KiB/s
+Ridge Racer  13.91 Seconds    33,585 KiB/s
+Rayman       21.29 Seconds    32,967 KiB/s
+                   Average     32.59 MiB/s
 
 Arch Linux:
 -----------------------------------------
-Rage Racer   09.77 Seconds    76,838 KB/s
-Ridge Racer  05.34 Seconds    87,486 KB/s
-Rayman       08.67 Seconds    80,955 KB/s
-                   Average     79.84 MB/s
+Rage Racer   09.77 Seconds    76,838 KiB/s
+Ridge Racer  05.34 Seconds    87,486 KiB/s
+Rayman       08.67 Seconds    80,955 KiB/s
+                   Average     79.84 MiB/s
 
 Fedora Linux 18 (2012)
 32bit, 1.6GHz, Single core Atom CPU:
 -----------------------------------------
-Rage Racer   67.35 Seconds    11,195 KB/s
-Ridge Racer  41.73 Seconds    11,154 KB/s
-Rayman       62.50 Seconds    11,230 KB/s
-                   Average     10.93 MB/s
+Rage Racer   67.35 Seconds    11,195 KiB/s
+Ridge Racer  41.73 Seconds    11,154 KiB/s
+Rayman       62.50 Seconds    11,230 KiB/s
+                   Average     10.93 MiB/s
 
 Windows 7
 32bit, 1.6GHz, Single core Atom CPU:
 -----------------------------------------
-
+Rage Racer   178.2 Seconds     4,212 KiB/s
+Ridge Racer  110.1 Seconds     4,243 KiB/s
+Rayman       172.3 Seconds     4,073 KiB/s
+                   Average      4.17 MiB/s
 ```
 From my tests, psx-comBINe ran around 2.5x faster on Linux, however Windows still
-performed very well compared to alternative programs.  
-The performance on older hardware, while not impressive, is very usable, and I am
-proud to have supported people stuck with those types of machines so well.
-
+performed very well.  
+The performance on older hardware, while not impressive, is very usable, and provides
+support for those people stuck with old hardware.
 ----
 ## TO-DO
 * youtube video "how to combine multi-track bin files for ps1/psx games using psx-comBINe"
@@ -125,6 +126,7 @@ proud to have supported people stuck with those types of machines so well.
 * 2.0.0 - All CLI modes supported. Pre-compiled 32bit and 64bit exes provided. 
 Super low-spec machine compile and speed test (1 core 
 Atom CPU, 1GB RAM). Improved performance generally.
+* 2.1.1 - Fully static exes and minor bugfixes.
 
 ## Licence
 <b> 2023 ADBeta </b>  

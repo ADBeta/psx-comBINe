@@ -94,7 +94,7 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 	delete[] byteArray;
 	
 	//Print message that the outfile is waiting to finish wiring
-	std::cout << std::endl << "Finishing write to file ..." << std::flush;
+	std::cout << "\nFinishing write to file ..." << std::flush;
 	
 	//Close the output file
 	binFileOut.close();
