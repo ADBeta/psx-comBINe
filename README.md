@@ -48,15 +48,11 @@ max capacity (99 TRACKS, 99 INDEXS per TRACK).
 
 ## Compilation
 #### Linux
-- change directory into the downloaded parent directory
-- run `make`
-- an executable called 'psx-comBINe' should be in the bin directory
-
+The easiest way to install psx-comBINe is to use git clone:
 ```
-$ cd ./psx-comBINe-main
-./psx-comBINe-main $ make
-
-./psx-comBINe-main $ ./bin/psx-comBINe -h
+git clone https://github.com/ADBeta/psx-comBINe
+cd ./psx-comBINe
+sudo make install
 ```
 
 ## Usage
