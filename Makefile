@@ -20,7 +20,7 @@ CFLAGS   := -Wall
 LDFLAGS  := -Llib -lboost_system -lboost_filesystem
 LDLIBS   := -lm 
 
-.PHONY: all clean
+.PHONY: all install clean
 
 all: $(TARGET)
 
@@ -36,6 +36,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 $(BIN_DIR) $(OBJ_DIR):
 	mkdir -p $@
 
+install: $(TARGET)
+	mv ./$(TARGET) /usr/local/bin
+	
 #Remove objects and binary
 clean:
 	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
