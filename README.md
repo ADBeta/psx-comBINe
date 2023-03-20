@@ -8,6 +8,8 @@ multi-session dumps.
 
 ![logo](https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
 
+I have made a [YouTube video](https://www.youtube.com/watch?v=gBMUwBJaiMM) about psx-comBINe
+
 psx-comBINe is unlike other applications because it has excellent compatibility 
 with the CUE sheet standards. It can support any of the GNU approved CUE TYPEs, 
 as well as REM lines, a max of 99 TRACKs and INDEXs, and repairs slightly 
