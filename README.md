@@ -110,10 +110,8 @@ From my tests, psx-comBINe ran around 2.5x faster on Linux, however Windows stil
 performed very well.  
 The performance on older hardware, while not impressive, is very usable, and provides
 support for those people stuck with old hardware.
-----
-## TO-DO
-* youtube video "how to combine multi-track bin files for ps1/psx games using psx-comBINe"
 
+----
 ## Changelog (Reminder for self)
 * 1.0.0 - Initial functional release
 * 1.1.0 - CLIah is integrated
