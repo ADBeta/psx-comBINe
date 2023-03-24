@@ -10,6 +10,14 @@ multi-session dumps.
 
 I have made a [YouTube video](https://www.youtube.com/watch?v=gBMUwBJaiMM) about psx-comBINe
 
+psx-comBINe aims to replace ISOBuster, CDMage, binmerge etc, but being faster,
+lighter and more easily integrated into larger workflows. This is perfect 
+for use within an emulator to pre-combine files before running, to fix a 
+classic issue in the community - It is also written to support low power machines,
+32bit system and has a very small RAM overhead. Due to this, it is ideal for
+most users, espeically those using Linux, who can levarage the higher speeds it
+provides with file management.
+
 psx-comBINe is unlike other applications because it has excellent compatibility 
 with the CUE sheet standards. It can support any of the GNU approved CUE TYPEs, 
 as well as REM lines, a max of 99 TRACKs and INDEXs, and repairs slightly 
