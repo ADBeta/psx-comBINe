@@ -11,7 +11,7 @@
 * v2.1.0
 * 08 Mar 2023
 *******************************************************************************/
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -23,12 +23,12 @@
 #include "CLIah.hpp"
 
 /*** OS Detection *************************************************************/
-#ifdef __linux__
-	#define DIR_DELIM '/'
-	#define DIR_SUFFIX "psx-comBINe/"
-#elif _WIN32
+#ifdef WIN32
 	#define DIR_DELIM '\\'
 	#define DIR_SUFFIX "psx-comBINe\\"
+#else
+	#define DIR_DELIM '/'
+	#define DIR_SUFFIX "psx-comBINe/"
 #endif
 
 /*** Pre-defined output messages **********************************************/
@@ -191,9 +191,9 @@ int main(int argc, char *argv[]){
 	
 	/**************************************************************************/
 	//If the output directory doesn't exist already, create it.
-	if(boost::filesystem::is_directory(outputDirString) == false) {
+	if(std::filesystem::is_directory(outputDirString) == false) {
 		//Watch for errors creating output directory
-		if(boost::filesystem::create_directory( outputDirString ) == false) {
+		if(std::filesystem::create_directory( outputDirString ) == false) {
 			errorMsg(2, "", "Cannot create output directory. Check privileges");
 		}
 		
