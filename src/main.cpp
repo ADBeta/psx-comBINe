@@ -191,6 +191,7 @@ int main(int argc, char *argv[]){
 	
 	/**************************************************************************/
 	//If the output directory doesn't exist already, create it.
+	try{
 	if(std::filesystem::is_directory(outputDirString) == false) {
 		//Watch for errors creating output directory
 		if(std::filesystem::create_directory( outputDirString ) == false) {
@@ -199,6 +200,10 @@ int main(int argc, char *argv[]){
 		
 		//If success print message to let user know directory has been created
 		std::cout << "Created Directory: " << outputDirString << std::endl;
+	}
+	} catch(...)
+	{
+
 	}
 	
 	/**************************************************************************/

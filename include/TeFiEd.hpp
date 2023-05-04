@@ -138,7 +138,7 @@ class TeFiEd {
 	bool verbose = false;
 	
 	/** File Variables ********************************************************/
-	char* m_filename; //Filename as char array
+	std::string m_filename; //Filename as string
 	std::fstream m_file; //fsteam object of file
 	std::vector<std::string> m_ramfile; //File RAM vector	
 	

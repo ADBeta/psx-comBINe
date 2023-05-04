@@ -17,25 +17,12 @@
 #include <string>
 #include <cstring>
 
-TeFiEd::TeFiEd(const char* filename) {
-	//Create a char array at m_filename the size of the input string.
-	m_filename = new char[ strlen(filename) + 1 ];
-	
-	//Copy the input string to the new char array at m_filename
-	strcpy(m_filename, filename);
-}
+TeFiEd::TeFiEd(const char* filename): m_filename(filename) {}
 
-TeFiEd::TeFiEd(const std::string filename) {
-	//Create a char array at m_filename the size of the input string.
-	m_filename = new char[ filename.size() + 1 ];
-
-	//Copy the input string to the new char array at m_filename
-	strcpy(m_filename, filename.c_str());
-} 
+TeFiEd::TeFiEd(const std::string filename): m_filename(filename) {} 
 
 //Destructor cleans up the vector and oher RAM garbage disposal.
 TeFiEd::~TeFiEd() {	
-	delete[] m_filename;
 	
 	if(m_ramfile.size() != 0) {
 		this->flush();
@@ -49,7 +36,7 @@ std::string TeFiEd::filename() {
 }
 
 const char *TeFiEd::filename_c_str() {
-	return m_filename;
+	return m_filename.c_str();
 }
 
 std::string TeFiEd::parentDir() {
@@ -129,12 +116,12 @@ int TeFiEd::read() {
 		return 1;
 	}
 
-	//String containing current line of text
-	std::string lineStr;
 	
 	size_t byteCount = 0;
 	//Get the next line in the stream, unless next line is EOF
 	while(this->m_file.peek() != EOF) {
+		//String containing current line of text
+		std::string lineStr;
 		//Copy current line string to var
 		std::getline(this->m_file, lineStr);
 		

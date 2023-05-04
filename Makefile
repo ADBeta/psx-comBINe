@@ -4,7 +4,7 @@ OBJ_DIR := obj
 BIN_DIR := bin
 
 #TARGET
-TARGET := $(BIN_DIR)/psx-comBINe
+TARGET := $(BIN_DIR)/comBINe
 
 #Source files
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)

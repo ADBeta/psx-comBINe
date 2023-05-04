@@ -521,7 +521,8 @@ void CueHandler::printFILE(FileData & pFILE) {
 
 /** Writing functions *********************************************************/
 void CueHandler::write() {
-	cueFile->overwrite();
+	if(cueFile)
+		cueFile->overwrite();
 }
 
 /** AUX functions *************************************************************/
