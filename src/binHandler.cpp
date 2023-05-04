@@ -35,7 +35,7 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 	size_t arrBytes = 0, fileBytes = 0, totalBytes = 0;
 	
 	//Create a heap byte array (From defined size in header)
-	char *byteArray = new char[_def_ARR_SIZE];
+	std::vector<char> byteArray(_def_ARR_SIZE);
 	//TODO error handle
 	//errorMsg(2, "Failed to allocate the bin buffer array (Requires 100MiB free RAM)");
 	
@@ -61,22 +61,20 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 		binOffsetBytes.push_back(totalBytes);
 		
 		//Get all the bytes from the current input and push them to output.
-		char cByte;
-		while(binFileIn.get(cByte)) {
-			//Put the read byte into the array
-			byteArray[arrBytes] = cByte;
-			++arrBytes;
+
+		while(binFileIn.read(byteArray.data(), byteArray.size())) {
+			//get number of bytes read
+			const auto count_read = binFileIn.gcount();
+			arrBytes += count_read;
 			
-			//If the array is full, dump it to the output file, and reset.
-			if(arrBytes == _def_ARR_SIZE) {
-				binFileOut.write(byteArray, arrBytes);
-				arrBytes = 0;
-			}
+			//Dump buffer to the output file.
+			binFileOut.write(byteArray.data(), count_read);
+				
 			
 			//Keep track of how many bytes read so far, fileByte gets reset at
 			//next loop, totalBytes does not get reset
-			++totalBytes;
-			++fileBytes;
+			totalBytes += count_read;
+			fileBytes += count_read;
 		}
 		
 		//Close the current file for next loop
@@ -88,10 +86,8 @@ int dumpBinFiles(std::vector<std::string> &binVect, const std::string outFn) {
 	}
 	
 	//Flush what is left of the byte array to the output file
-	if(arrBytes != 0) binFileOut.write(byteArray, arrBytes);
+	if(arrBytes != 0) binFileOut.write(byteArray.data(), arrBytes);
 
-	//Delete heap byte array
-	delete[] byteArray;
 	
 	//Print message that the outfile is waiting to finish wiring
 	std::cout << "\nFinishing write to file ..." << std::flush;
