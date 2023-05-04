@@ -16,8 +16,8 @@
 #ifndef BINHANDLER_H
 #define BINHANDLER_H
 
-//Define how large the RAM byte array while dumping should be. (100MiB)
-#define _def_ARR_SIZE 104857600
+//Define how large the RAM byte array while dumping should be. (4k)
+#define _def_ARR_SIZE 1<<12
 
 /** Variables *****************************************************************/
 //Each entity is at which byte a file transistion to the next file. This is for

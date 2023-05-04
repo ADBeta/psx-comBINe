@@ -15,7 +15,6 @@
 
 #include "helpers.hpp"
 #include "binHandler.hpp"
-
 //Each entity is at which byte a file transistion to the next file. This is for
 //.cue output INDEX value (in time format which gets converted later)
 std::vector<unsigned long> binOffsetBytes;
