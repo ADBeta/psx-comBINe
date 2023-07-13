@@ -18,7 +18,7 @@ CC := g++
 CPPFLAGS := -Iinclude -MMD -MP
 CFLAGS   := -Wall -DBOOST_NO_CXX11_SCOPED_ENUMS
 LDFLAGS  := -L/usr/include/boost -lboost_filesystem -lboost_system
-LDLIBS   := -lm 
+LDLIBS   := -lm -lboost_filesystem -lboost_system
 
 .PHONY: all install clean
 
