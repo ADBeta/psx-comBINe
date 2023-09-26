@@ -13,7 +13,6 @@ this is useful to repair corrupted dumps - **PLEASE NOTE** This feature only
 works for specific situations. See [Usage.md](https://github.com/ADBeta/psx-comBINe/blob/main/Usage.md) for more info
 * Improved speed and stability of the program - Around 30% less processing 
 overhead
-* Changed the sourcecode to use more modern and type-safe declaration types
 
 **What's next?**
 * I plan to branch off this program to have a GUI, so it's more user friendly to
@@ -22,7 +21,6 @@ those without knowledge of the command line
 on, however:
 * Feature creep is a concern with projects like these, as such, some requests 
 and features will be ported into their own programs as time goes on.
-* I will try to make the next version multi-threaded
 * Adding directory support for combining input files, to make using psx-combine
 even easier
 
@@ -73,12 +71,12 @@ git clone https://github.com/ADBeta/psx-comBINe
 cd ./psx-comBINe
 sudo make install
 ```
-This will copy the the psx-combine executable to your `/usr/local/bin./` folder.  
+This will copy the the psx-combine executable to your `/usr/local/bin/` folder.  
 If you do not want this to happen you can use  
 ```sh
 make
 ```
-instead, this will output the psx-combine executable to the the `/psx-comBINe/bin`
+This will output the psx-combine executable to the the `/psx-comBINe/bin`
 directory  
 
 ### Windows
