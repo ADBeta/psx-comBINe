@@ -23,12 +23,12 @@
 #define CUE_HANDLER_H
 
 /*** Enums and strings of enums ***********************************************/
-/* Using plain enums to allow them to convert to int */
+/* NOTE Using plain enums to allow them to convert to int */
 //Valid CUE line types, including INVALID, REM and EMPTY string types.
 enum t_LINE { ltEMPTY, ltFILE, ltTRACK, ltINDEX, ltREM, ltINVALID };
 
 //Valid FILE formats. (only binary is supported for now)
-enum t_FILE { ftUNKNOWN, ftBINARY};
+enum t_FILE {ftBINARY};
 //String of LINE types mapped to enum
 extern const std::string t_FILE_str[];
 
@@ -40,10 +40,11 @@ extern const std::string t_FILE_str[];
 	MODE2/2336	CD-ROM XA Mode 2 Data (form mix)
 	MODE2/2352	CD-ROM XA Mode 2 Data (raw)
 	CDI/2336	CDI Mode 2 Data
-	CDI/2352	CDI Mode 2 Data                                               */
-enum t_TRACK {ttUNKNOWN, ttAUDIO, ttCDG, ttMODE1_2048, ttMODE1_2352,
-              ttMODE2_2336, ttMODE2_2352, ttCDI_2336, ttCDI_2352 };
+	CDI/2352	CDI Mode 2 Data                   */
+enum t_TRACK { ttAUDIO, ttCDG, ttMODE1_2048, ttMODE1_2352,
+               ttMODE2_2336, ttMODE2_2352, ttCDI_2336, ttCDI_2352 };
 extern const std::string t_TRACK_str[];
+
 
 /*** CueHandler Class *********************************************************/
 class CueHandler {
@@ -68,7 +69,7 @@ class CueHandler {
 	//Child TRACK (2nd level) object. Max 99
 	struct TrackData {
 		unsigned int ID = 0;
-		t_TRACK TYPE = ttUNKNOWN;
+		t_TRACK TYPE;
 		//Vector of INDEXs
 		std::vector <IndexData> INDEX;
 	};
@@ -77,7 +78,7 @@ class CueHandler {
 	struct FileData {
 		//FILE data - Default values
 		std::string FILENAME;
-		t_FILE TYPE = ftUNKNOWN;
+		t_FILE TYPE;
 		//Vector of TRACKs for each FILE
 		std::vector <TrackData> TRACK;
 	};
@@ -109,9 +110,6 @@ class CueHandler {
 	//Validate an input .cue file string (argv[1])
 	int validateCueFilename(std::string);
 	
-	//Validate FILE
-	int validateFILE(const FileData &);
-	
 	//Validate TRACK
 	int validateTRACK(const TrackData &);
 	
@@ -129,31 +127,25 @@ class CueHandler {
 	void pushINDEX(const unsigned int ID, const unsigned long BYTES);
 
 	////////////////////////////////////////////////////////////////////////////
-	//Converts FileData Object into a string which is a CUE file line
+	//Converts FileData Object into a string for the CUE file
 	std::string generateFILELine(const FileData &);
 	
-	//Converts TrackData Object into a string which is a CUE file line
+	//Converts TrackData Object into a string for the CUE file
 	std::string generateTRACKLine(const TrackData &);
 	
-	//Converts IndexData Object into a string which is a CUE file line
+	//Converts IndexData Object into a string for the CUE file
 	std::string generateINDEXLine(const IndexData &);
 	
 	/*** Input / Output CUE Handling ******************************************/
 	//Gets all the data from a .cue file and populates the FILE vector.
 	void getCueData();
-	
-	//Combines all the cue FILE data (removes seperate files) and pushes it
-	//to the CueHandler object passed via reference.
-	int combineCueFiles(CueHandler &combined, const std::string outFN,
-	                    const std::vector <unsigned long> offsetBytes);
-	
+		
 	//Outputs the CueData to the cueFile
 	int outputCueData();
 	
 	//Prints a passed FileData Object to the cli
 	void printFILE(FileData &);
-		
-	/*** **********************************************************************/
+	
 	//Read in an existing cue file
 	void read();
 	

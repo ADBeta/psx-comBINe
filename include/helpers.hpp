@@ -2,36 +2,50 @@
 * This file is part of psx-comBINe. Please see the github:
 * https://github.com/ADBeta/psx-comBINe
 *
-* psx-comBINe is a simple program to combine multiple .bin files into a single
-* file, and modified the .cue file indexing, this is ideal for PSX/PS1 CD-ROMs
-* e.g. Rayman to get them ready for cue2pops or some emulators. I also find it 
-* improves reliabilty when buring to a disk to only have one .bin file.
-*
-* Cue File manager. Uses TeFiEd to handle output file cue file track, file and 
-* index text
-* 
-* this might be turned into its own project if I see it useful in future.
-*
 * (c) ADBeta
 *******************************************************************************/
 #include <string>
+#include <exception>
+#include <chrono>
 
 #ifndef HELPERS_H
 #define HELPERS_H
 
+/*** Exception handling *******************************************************/
+class PrgExcep : public std::exception {
+	public:
+	PrgExcep(const char* msg) { errMsg = msg; }
+	
+	const char *what () const throw() { return errMsg; }
+	
+	private:
+	const char *errMsg;
+	
+};
 
-/*** Error handling ***********************************************************/
-//Print error message with different error levels:
-//0 warn	1 error		2 fatal
-//funct is error function. defaults to "Undefined"
-//Pass error string, or error message enum index.
-void errorMsg(unsigned int errLevel, std::string funct, std::string errStr);
-void errorMsg(unsigned int errLevel, std::string funct, int errEnum);
+//binary file dumping Exceptions
+extern PrgExcep cannot_create_bin, cannot_open_bin, allocate_buffer_fail;
 
-//Prompt user if they wish to continue and return status
+//Cue recreation Exceptions
+extern PrgExcep bin_file_not_given, no_bins_in_directory;
+
+//cueHandler Exceptions
+extern PrgExcep file_corrupt, file_unknown_input, line_invalid, 
+push_track_order, push_index_order, file_object_fail, timestamp_fail,
+timestamp_str_invalid, timestamp_overflow;
+
+//main Exceptions
+extern PrgExcep input_path_invalid, cannot_clean_dir, cannot_create_dir,
+combine_dir_not_supported, cue_not_given;
+
+/*** Warning Function *********************************************************/
+void warnMsg(std::string, std::string);
+
+/*** Helper Functions *********************************************************/
+//Prompt user if they wish to continue, and return status
 bool promptContinue();
 
-//Stolen from CLIah :)
+//Convert a string to uppercase
 std::string strToUppercase(std::string input);
 
 //Pads and returns a comma seperate string of bytes.
@@ -40,5 +54,9 @@ std::string padByteStr(size_t bytes, unsigned int pad = 0);
 
 //Pads, sizes and returns a string of how many MiBs are in the value passed
 std::string padMiBStr(size_t bytes, unsigned int pad = 0);
+
+//Get Miliseconds since epoch 
+std::chrono::milliseconds getMillisecs();
+
 
 #endif

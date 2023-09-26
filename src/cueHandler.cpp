@@ -21,13 +21,14 @@
 
 #include "helpers.hpp"
 #include "TeFiEd.hpp"
-#include "CLIah.hpp" //strToUpper function yoinketh
+
+//TODO add flag support (DCP mostly)
 
 /*** Enum mapped strings (only for printFILE) *********************************/
-const std::string t_FILE_str[] = {"UNKNOWN", "BINARY"};   
+const std::string t_FILE_str[] = {"BINARY"};   
 //
 const std::string t_TRACK_str[] = {
-	"UNKNOWN", "AUDIO", "CDG", "MODE1/2048", "MODE1/2352", "MODE2/2336", 
+	"AUDIO", "CDG", "MODE1/2048", "MODE1/2352", "MODE2/2336", 
 	"MODE2/2352", "CDI/2336", "CDI/2352"
 };
 
@@ -101,94 +102,109 @@ t_TRACK CueHandler::TRACKStrToType(const std::string trackStr) {
 	//The TYPE of a TRACK is the 3rd (last) word in the string
 	std::string typeStr = getWord(trackStr, 3);
 	
-	//Exit early if string is blank. This file is very corrupt
-	if(typeStr == "") {
-		errorMsg(2, "TRACKStrToType", 
-		         "File is corrupted or otherwise unsupported");
-	}
+	try {
+		//Exit if string is blank. This file is very corrupt
+		if(typeStr == "") throw file_corrupt;
 	
-	//Get number of strings in t_TRACK_str array.
-	unsigned int TRACKTypes = sizeof(t_TRACK_str)/sizeof(t_TRACK_str[0]);
-	
-	//Go through all elements in t_TRACK_str (current track string)
-	for(unsigned int cType = 0; cType < TRACKTypes; cType++) {
-		//If the input string and the TRACKType string match
-		if(typeStr.compare(t_TRACK_str[cType]) == 0) {
-			//Return the matched type as enum int
-			return (t_TRACK)cType;
+		//Get number of strings in t_TRACK_str array.
+		unsigned int TRACKTypes = sizeof(t_TRACK_str)/sizeof(t_TRACK_str[0]);
+		
+		//Go through all elements in t_TRACK_str (current track string)
+		for(unsigned int cType = 0; cType < TRACKTypes; cType++) {
+			//If the input string and the TRACKType string match
+			if(typeStr.compare(t_TRACK_str[cType]) == 0) {
+				//Return the matched type as enum int
+				return (t_TRACK)cType;
+			}
 		}
+	
+		//If no match is found, throw an exception
+		throw file_unknown_input;
+		
+	} catch(const PrgExcep &e) {
+			std::cerr << e.what() << " in TRACK String" << std::endl;
 	}
 	
-	//If nothing matches, return UNKNOWN
-	return ttUNKNOWN;
+	return ttAUDIO;
 }
 
 t_FILE CueHandler::FILEStrToType(const std::string fileStr) {
-	//The TYPE of a FILE is the last word in the string. Must do manually as
-	//filenames can have spaces.
-	std::string typeStr = fileStr.substr(fileStr.find_last_of(" ") + 1);
+	try {
+		//The TYPE of a FILE is the last word in the string. Must do manually as
+		//filenames can have spaces.
+		std::string typeStr = fileStr.substr(fileStr.find_last_of(" ") + 1);
+		//Exit if string is blank. This file is very corrupt
+		if(typeStr == "") throw file_corrupt;
 	
-	//Exit early if string is blank. This file is very corrupt
-	if(typeStr == "") {
-		errorMsg(2, "FILEStrToType", 
-		         "File is corrupted or otherwise unsupported");
-	}
-	
-	//Get number of strings in t_FILE_str array.
-	unsigned int FILETypes = sizeof(t_FILE_str)/sizeof(t_FILE_str[0]);
-	
-	//Go through all elements in t_FILE_str (current track string)
-	for(unsigned int cType = 0; cType < FILETypes; cType++) {
-		//If the input string and the TRACKType string match
-		if(typeStr.compare(t_FILE_str[cType]) == 0) {
-			//Return the matched type as enum int
-			return (t_FILE)cType;
+		//Get number of strings in t_FILE_str array.
+		unsigned int FILETypes = sizeof(t_FILE_str)/sizeof(t_FILE_str[0]);
+		
+		//Go through all elements in t_FILE_str (current track string)
+		for(unsigned int cType = 0; cType < FILETypes; cType++) {
+			//If the input string and the TRACKType string match
+			if(typeStr.compare(t_FILE_str[cType]) == 0) {
+				//Return the matched type as enum int
+				return (t_FILE)cType;
+			}
 		}
+		
+		//If no match is found, throw an exception
+		throw file_unknown_input;
+		
+	} catch(const PrgExcep &e) {
+			std::cerr << e.what() << " in FILE String" << std::endl;
 	}
 	
-	//If nothing matches, return UNKNOWN
-	return ftUNKNOWN;
+	return ftBINARY;
 }
 
 std::string CueHandler::FILETypeToStr(const t_FILE fileType) {
-	//Get UNKNOWN done early.
-	if(fileType == ftUNKNOWN) return t_FILE_str[ftUNKNOWN];
-	
-	//Get number of strings in t_FILE_str array.
-	unsigned int FILETypes = sizeof(t_FILE_str)/sizeof(t_FILE_str[0]);
-	
-	//Go through all elements in t_FILE_str (current type string)
-	for(unsigned int cType = 0; cType < FILETypes; cType++) {
-		//If the input type matches type in enum 
-		if(fileType == (t_FILE)cType) {
-			//Return the matched type string
-			return t_FILE_str[cType];
+	try {
+		//Get number of strings in t_FILE_str array.
+		unsigned int FILETypes = sizeof(t_FILE_str)/sizeof(t_FILE_str[0]);
+		
+		//Go through all elements in t_FILE_str (current type string)
+		for(unsigned int cType = 0; cType < FILETypes; cType++) {
+			//If the input type matches type in enum 
+			if(fileType == (t_FILE)cType) {
+				//Return the matched type string
+				return t_FILE_str[cType];
+			}
 		}
+	
+		//If no match is found, throw an exception
+		throw file_unknown_input;
+	
+	} catch(const PrgExcep &e) {
+			std::cerr << e.what() << " in FILE type" << std::endl;
 	}
 	
-	//If everything else fails (it shouldn't) return unknown string
-	return t_FILE_str[ftUNKNOWN];
+	return "";
 }
 
 
 std::string CueHandler::TRACKTypeToStr(const t_TRACK trackType) {
-	//Get UNKNOWN done early.
-	if(trackType == ttUNKNOWN) return t_TRACK_str[ttUNKNOWN];
-	
-	//Get number of strings in t_TRACK_str array.
-	unsigned int TRACKTypes = sizeof(t_TRACK_str)/sizeof(t_TRACK_str[0]);
-	
-	//Go through all elements in t_TRACK_str (current type string)
-	for(unsigned int cType = 0; cType < TRACKTypes; cType++) {
-		//If the input type matches type in enum 
-		if(trackType == (t_TRACK)cType) {
-			//Return the matched type string
-			return t_TRACK_str[cType];
+	try {
+		//Get number of strings in t_TRACK_str array.
+		unsigned int TRACKTypes = sizeof(t_TRACK_str)/sizeof(t_TRACK_str[0]);
+		
+		//Go through all elements in t_TRACK_str (current type string)
+		for(unsigned int cType = 0; cType < TRACKTypes; cType++) {
+			//If the input type matches type in enum 
+			if(trackType == (t_TRACK)cType) {
+				//Return the matched type string
+				return t_TRACK_str[cType];
+			}
 		}
+		
+		//If no match is found, throw an exception
+		throw file_unknown_input;
+	
+	} catch(const PrgExcep &e) {
+			std::cerr << e.what() << " in TRACK type" << std::endl;
 	}
 	
-	//If everything else fails (it shouldn't) return unknown string
-	return t_TRACK_str[ttUNKNOWN];
+	return "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -199,33 +215,17 @@ int CueHandler::validateCueFilename(std::string cueStr) {
 
 	//Make sure the file extension is .cue
 	if(cueStr.find(".CUE") == std::string::npos) {
-		errorMsg(1, "validateCueFilename", 
-		         "Input file does not have a .cue extension");
+		warnMsg("validateCueFilename", "Input file is not a .cue file");
 		return 1;
 	}
 	
-	return 0;
-}
-
-int CueHandler::validateFILE(const FileData &refFILE) {
-	if(refFILE.TYPE == ftUNKNOWN) {
-		errorMsg(0, "validateFILE", "FILE TYPE is UNKNOWN");
-		return 1;
-	}
-	
-	//Normal/Valid return
 	return 0;
 }
 
 int CueHandler::validateTRACK(const TrackData &refTRACK) {
 	if(refTRACK.ID > 99) {
-		errorMsg(0, "validateTRACK", "TRACK ID is greater than 99.");
+		warnMsg("validateTRACK", "TRACK ID is greater than 99.");
 		return 1;
-	}
-	
-	if(refTRACK.TYPE == ttUNKNOWN) {
-		errorMsg(0, "validateTRACK", "TRACK TYPE is UNKNOWN.");
-		return 2;
 	}
 
 	//Normal/Valid return
@@ -234,14 +234,13 @@ int CueHandler::validateTRACK(const TrackData &refTRACK) {
 
 int CueHandler::validateINDEX(const IndexData &refINDEX) {
 	if(refINDEX.ID > 99) {
-		errorMsg(0, "validateINDEX", "INDEX ID is greater than 99.");
+		warnMsg("validateINDEX", "INDEX ID is greater than 99.");
 		return 1;
 	}
 
 	//Check if BYTES is divisible by SECTOR size
 	if(refINDEX.BYTES % 2352 != 0) {
-		errorMsg(0, "validateINDEX",
-		         "INDEX BYTES not divisible by SECTOR size");
+		warnMsg("validateINDEX", "INDEX BYTES not divisible by SECTOR size");
 		return 2;
 	}
 
@@ -257,8 +256,6 @@ void CueHandler::pushFILE(const std::string FN, const t_FILE TYPE) {
 	//Set the FILE Parameters
 	tempFILE.FILENAME = FN;
 	tempFILE.TYPE = TYPE;
-	
-	if( validateFILE(tempFILE) != 0) return;
 	
 	//Push tempFILE to the FILE vect
 	FILE.push_back(tempFILE);
@@ -297,8 +294,6 @@ void CueHandler::pushINDEX(const unsigned int ID, const unsigned long BYTES) {
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string CueHandler::generateFILELine(const FileData &refFILE) {
-	if( validateFILE(refFILE) != 0) return "";
-	
 	std::string outputLine = "FILE ";
 	
 	//Add " to the front and back of FILENAME, and a space after the second "
@@ -348,102 +343,63 @@ void CueHandler::getCueData() {
 		//Copy the current line to a new string
 		std::string cLineStr = cueFile->getLine(lineNo);
 		
-		//Get the type of the current line
-		t_LINE cLineType = LINEStrToType(cLineStr);
-		//If the current line is invalid, exit
-		if(cLineType == ltINVALID) {
-			std::string errStr = "Cue file contains invalid command at line: ";
-			errStr.append( std::to_string(lineNo));
-			errorMsg(2, "getCueData", errStr);
-		}
-		
-		//REM (remark) line type
-		if(cLineType == ltREM) {
-			//TODO Decide what to do with REMARKS
-			//std::cout << "REMARK at line: " << lineNo << "\t message: " <<
-			//cLineStr << std::endl;
-		}
-		
-		//FILE line type
-		if(cLineType == ltFILE) {
-			t_FILE fileType = FILEStrToType(cLineStr);
+		try {
+			//Get the type of the current line
+			t_LINE cLineType = LINEStrToType(cLineStr);
 			
-			//Get the FILENAME string (always between quotations)
-			size_t fQuote = cLineStr.find('\"') + 1;
-			size_t lQuote = cLineStr.find('\"', fQuote);
+			//If the current line is invalid, exit
+			if(cLineType == ltINVALID) throw line_invalid;
 			
-			//push new FILE to the stack
-			pushFILE(cLineStr.substr(fQuote, lQuote - fQuote), fileType);
-		}
-		
-		//TRACK line type
-		if(cLineType == ltTRACK) {
-			//Make sure a FILE is availible to push to
-			if(FILE.empty() == true) {
-				errorMsg(2, "getCueData", 
-			      "Attempt to push TRACK before FILE. (Missing FILE line)");
-			}
-		
-			//Get ID (second word), and TYPE
-			unsigned int lineID = std::stoi(getWord(cLineStr, 2));
-			t_TRACK lineTYPE = TRACKStrToType(cLineStr);
-			
-			//Push new TRACK to the FILE vector
-			pushTRACK(lineID, lineTYPE);
-		}
-		
-		//INDEX line type	
-		if(cLineType == ltINDEX) {
-			//Make sure a TRACK is availible to push to
-			if(FILE.back().TRACK.empty() == true) {
-				errorMsg(2, "getCueData", 
-				  "Attempt to push INDEX before TRACK. (Missing TRACK line)");
+			//REM (remark) line type
+			if(cLineType == ltREM) {
+				//TODO Decide what to do with REMARKS
+				//std::cout << "REMARK at line: " << lineNo << "\t message: " <<
+				//cLineStr << std::endl;
 			}
 			
-			//Get ID (second word), and timestamp (third word)
-			unsigned int lineID = std::stoi(getWord(cLineStr, 2));
-			unsigned long lineBytes = timestampToBytes(getWord(cLineStr, 3));
-			
-			//Push new INDEX to TRACK sub-vector
-			pushINDEX(lineID, lineBytes);
-		}
-	}
-}
-
-int CueHandler::combineCueFiles(CueHandler &combined, const std::string outBin,
-                                const std::vector <unsigned long> offsetBytes) {
-	//Clear the pointer object FILE vector RAM
-	combined.cleanFILE();
-		
-	//Push the passed filename (relative, not output) to the FILE Vector
-	combined.pushFILE(outBin, this->FILE[0].TYPE);
-	
-	//Go through all the callers' FILE vector
-	for(size_t cFile = 0; cFile < this->FILE.size(); cFile++) {
-		//Temporary FILE Object
-		FileData pFILE = this->FILE[ cFile ];
-		
-		//Go through all the TRACKs
-		for(size_t cTrack = 0; cTrack < pFILE.TRACK.size(); cTrack++) {
-			//Temporary TRACK Object
-			TrackData pTRACK = pFILE.TRACK[ cTrack ];
-			
-			//Push pTRACKs info to the output file vect
-			combined.pushTRACK(pTRACK.ID, pTRACK.TYPE);
-			
-			//Go through all INDEXs
-			for(size_t cIndex = 0; cIndex < pTRACK.INDEX.size(); cIndex++) {
-				//Temporary INDEX object
-				IndexData pINDEX = pTRACK.INDEX[ cIndex ];
+			//FILE line type
+			if(cLineType == ltFILE) {
+				t_FILE fileType = FILEStrToType(cLineStr);
 				
-				//Push pINDEX info to the combined ref object
-				unsigned long cIndexBytes = pINDEX.BYTES + offsetBytes[cFile];
-				combined.pushINDEX(pINDEX.ID, cIndexBytes);
+				//Get the FILENAME string (always between quotations)
+				size_t fQuote = cLineStr.find('\"') + 1;
+				size_t lQuote = cLineStr.find('\"', fQuote);
+				
+				//push new FILE to the stack
+				pushFILE(cLineStr.substr(fQuote, lQuote - fQuote), fileType);
 			}
+			
+			//TRACK line type
+			if(cLineType == ltTRACK) {
+				//Make sure a FILE is availible to push to
+				if(FILE.empty()) throw push_track_order;
+			
+				//Get ID (second word), and TYPE
+				unsigned int lineID = std::stoi(getWord(cLineStr, 2));
+				t_TRACK lineTYPE = TRACKStrToType(cLineStr);
+				
+				//Push new TRACK to the FILE vector
+				pushTRACK(lineID, lineTYPE);
+			}
+			
+			//INDEX line type	
+			if(cLineType == ltINDEX) {
+				//Make sure a TRACK is availible to push to
+				if(FILE.back().TRACK.empty()) throw push_index_order;
+				
+				//Get ID (second word), and timestamp (third word)
+				unsigned int lineID = std::stoi(getWord(cLineStr, 2));
+				unsigned long lineBytes = timestampToBytes(getWord(cLineStr, 3));
+				
+				//Push new INDEX to TRACK sub-vector
+				pushINDEX(lineID, lineBytes);
+			}
+			
+		} catch(const PrgExcep &e) {
+			std::cerr << "Error in Line number: " << lineNo 
+			          << e.what() << std::endl;
 		}
 	}
-	
-	return 0;
 }
 
 int CueHandler::outputCueData() {
@@ -477,19 +433,18 @@ int CueHandler::outputCueData() {
 	return 0;
 }
 
-
 void CueHandler::printFILE(FileData & pFILE) {
 	//Check if pFILE is empty
 	if(pFILE.FILENAME.empty()) {
-		errorMsg(1, "printFile", "Selected FILE element is not valid.");
-		return;
+		throw file_object_fail;
 	}
 
 	//Print filename and data
 	std::cout << "FILENAME: " << pFILE.FILENAME;
 	std::cout << "\t\tTYPE: " << t_FILE_str[(int)pFILE.TYPE] << std::endl;
 	//Seperator
-	std::cout << "-----------------------------------------------" << std::endl;
+	std::cout << "-----------------------------------------------------"
+	          << std::endl;
 
 	//Print all TRACKs in vector held by FILE
 	for(size_t tIdx = 0; tIdx < pFILE.TRACK.size(); tIdx++) {
@@ -507,9 +462,9 @@ void CueHandler::printFILE(FileData & pFILE) {
 			IndexData pINDEX = pFILE.TRACK[tIdx].INDEX[iIdx];
 			
 			//Print the index number
-			std::cout << "  INDEX " << padIntStr(pINDEX.ID, 2)
+			std::cout << "    INDEX " << padIntStr(pINDEX.ID, 2)
 			//Print the raw BYTES format 
-			<< "    BYTES: " << padIntStr(pINDEX.BYTES, 9, ' ')
+			<< "    OFFSET: " << padIntStr(pINDEX.BYTES, 9, ' ')
 			//Print the timestamp version
 			<< "    TIMESTAMP: " << bytesToTimestamp(pINDEX.BYTES) << std::endl;
 		}
@@ -517,6 +472,8 @@ void CueHandler::printFILE(FileData & pFILE) {
 		//Print a blank line to split the TRACK fields
 		std::cout << std::endl;
 	}
+	
+	//TODO Catch?
 }
 
 /** Writing functions *********************************************************/
@@ -537,9 +494,7 @@ std::string CueHandler::bytesToTimestamp(const unsigned long bytes) {
 	unsigned long sectors = bytes / 2352;
 	
 	//Error check if the input is divisible by a sector. Exit if not
-	if(bytes % 2352 != 0) {
-		errorMsg(2, "bytesToTimestamp", "timestamp is not valid (SECTOR Bytes)");
-	}
+	if(bytes % 2352 != 0) throw timestamp_fail;
 	
 	//75 sectors per second. Frames are the left over sectors from a second
 	unsigned short seconds = sectors / 75;
@@ -550,8 +505,7 @@ std::string CueHandler::bytesToTimestamp(const unsigned long bytes) {
 	seconds = seconds % 60;
 	
 	//If minutes exceeds 99, there is probably an error due to Audio CD Standard
-	if(minutes > 99) errorMsg(1, "bytesToTimestamp", 
-	                          "Total bin file size exceeds 99 minutes");
+	if(minutes > 99) throw timestamp_overflow;
 	
 	std::string timestamp;	
 	
@@ -564,11 +518,7 @@ std::string CueHandler::bytesToTimestamp(const unsigned long bytes) {
 
 unsigned long CueHandler::timestampToBytes(const std::string timestamp) {
 	//Make sure the string input is long enough to have xx:xx:xx timestamp
-	if(timestamp.length() != 8) {
-		errorMsg(1, "timestampToBytes", 
-		         "Timestamp string is an incorrect size.");
-		return 0;
-	}
+	if(timestamp.length() != 8) throw timestamp_str_invalid;
 
 	//Strip values from the timestamp. "MM:SS:ff" ff = sectors
 	unsigned short minutes = std::stoi(timestamp.substr(0, 2));
@@ -585,9 +535,7 @@ unsigned long CueHandler::timestampToBytes(const std::string timestamp) {
 	unsigned long bytes = sectors * 2352;
 	
 	//Error check if the input is divisible by a sector. Exit if not
-	if(bytes % 2352 != 0) {
-		errorMsg(2, "timestampToBytes", "timestamp is not valid (SECTOR Bytes)");
-	}
+	if(bytes % 2352 != 0) throw timestamp_fail;
 	
 	return bytes;
 }

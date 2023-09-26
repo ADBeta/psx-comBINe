@@ -4,7 +4,7 @@ OBJ_DIR := obj
 BIN_DIR := bin
 
 #TARGET
-TARGET := $(BIN_DIR)/psx-comBINe
+TARGET := $(BIN_DIR)/psx-combine
 
 #Source files
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
@@ -12,17 +12,30 @@ SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 #Compiler
-CC := g++
+CC      := g++
+win32CC := i686-w64-mingw32-g++
+win64CC := x86_64-w64-mingw32-g++
 
 #Flags
-CPPFLAGS := -Iinclude -MMD -MP
-CFLAGS   := -Wall -DBOOST_NO_CXX11_SCOPED_ENUMS
-LDFLAGS  := -L/usr/include/boost -lboost_filesystem -lboost_system
-LDLIBS   := -lm 
+CPPFLAGS  := -Iinclude -MMD -MP
+CFLAGS    := -Wall -std=c++17
+LDLIBS    := -lm
+winCFLAGS := -Wall -std=c++17 -static-libgcc -static-libstdc++
+winLDLIBS := -lm -static
 
-.PHONY: all install clean
+
+# Windows needs -static link and static cflags
+
+.PHONY: all win32 win64 install clean
 
 all: $(TARGET)
+
+#Change the compiler and linker flags then run all
+win32:
+	$(MAKE) CC=$(win32CC) CFLAGS="$(winCFLAGS)" LDLIBS="$(winLDLIBS)" all
+	
+win64:
+	$(MAKE) CC=$(win64CC) CFLAGS="$(winCFLAGS)" LDLIBS="$(winLDLIBS)" all
 
 #Make binary
 $(TARGET): $(OBJS) | $(BIN_DIR)
@@ -37,7 +50,7 @@ $(BIN_DIR) $(OBJ_DIR):
 	mkdir -p $@
 
 install: $(TARGET)
-	mv ./$(TARGET) /usr/local/bin
+	mv ./$(TARGET) /usr/local/bin/
 	
 #Remove objects and binary
 clean:

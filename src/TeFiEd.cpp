@@ -1,7 +1,6 @@
 /******************************************************************************* 
 * Te(xt) Fi(le) Ed(itor) TeFiEd 
 * Simple Text File Editor, written be as fast and efficient as possible.
-* -Beta version- 
 * Some simple text editing features aren't built in quite yet, but I plan to
 * impliment some simple search, replace, etc features.
 *

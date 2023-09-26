@@ -2,16 +2,6 @@
 * This file is part of psx-comBINe. Please see the github:
 * https://github.com/ADBeta/psx-comBINe
 *
-* psx-comBINe is a simple program to combine multiple .bin files into a single
-* file, and modified the .cue file indexing, this is ideal for PSX/PS1 CD-ROMs
-* e.g. Rayman to get them ready for cue2pops or some emulators. I also find it 
-* improves reliabilty when buring to a disk to only have one .bin file.
-*
-* Cue File manager. Uses TeFiEd to handle output file cue file track, file and 
-* index text
-* 
-* this might be turned into its own project if I see it useful in future.
-*
 * (c) ADBeta
 *******************************************************************************/
 #include "helpers.hpp"
@@ -19,29 +9,42 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <chrono>
 
-/*** Error message handler ****************************************************/
-//errLevel = 0 = warn, 1 = error (non fatal), 2 = error (fatal)
+/*** Exception Handling *******************************************************/
+//binary dumping Exceptions
+PrgExcep cannot_create_bin("Cannot create binary output binary file.");
+PrgExcep cannot_open_bin("Cannot open binary file.");
+PrgExcep allocate_buffer_fail("Could not allocate the binary copy buffer");
 
-void errorMsg(unsigned int errLevel, std::string funct, std::string errStr) {
-              	
-	if(errLevel == 0) {
-		std::cerr << "Warn: ";
-	} else {
-		std::cerr << "Error: ";
-	}
-	
-	//Print the function, then the user message
-	std::cerr << funct << ": " << errStr << std::endl;
-	
-	//If the errLevel is > 1 then exit the program as a fatal error
-	if(errLevel > 1) exit(EXIT_FAILURE);
+//Cue recreation exceptions
+PrgExcep bin_file_not_given("No Binary file given during a (re)create operation");
+PrgExcep no_bins_in_directory("No Binary files available in the passed directory");
+
+//cueHandler Exceptions
+PrgExcep file_corrupt("File is Corrupted or Unsupported");
+PrgExcep file_unknown_input("File Contains Unknown Input");
+PrgExcep line_invalid("Current Line in .cue File is Invalid");
+PrgExcep push_track_order("Attempt to push TRACK before FILE. (Missing FILE line)");
+PrgExcep push_index_order("Attempt to push INDEX before TRACK. (Missing TRACK line)");
+PrgExcep file_object_fail("Selected FILE Object does is invalid");
+PrgExcep timestamp_fail("cue timestamp and SECTORS do not match (bytes mismatch)");
+PrgExcep timestamp_str_invalid("cue timestamp string is not valid (Wrong length)");
+PrgExcep timestamp_overflow("cue timestamp exceeds 99 Minutes");
+
+//Main Exceptions
+PrgExcep input_path_invalid("The Input Path is invalid");
+PrgExcep cannot_clean_dir("Cannot clean the output directory. Check privelages");
+PrgExcep cannot_create_dir("Cannot create output directory. Check privelages");
+PrgExcep combine_dir_not_supported("Combining .cue files does not support directories as inpt");
+PrgExcep cue_not_given("input .cue file was not given as the first argument");
+
+/*** Warning Function *********************************************************/
+void warnMsg(std::string funct, std::string msg) {
+	std::cerr << "Warning in function: " << funct << ": " << msg << std::endl;
 }
 
-void errorMsg(unsigned int errLevel, std::string funct, int errEnum) {
-}
-
-
+/*** Helper Functions *********************************************************/
 //Prompt user if they wish to continue then return their choice
 bool promptContinue() {
 	//Prompt
@@ -62,16 +65,9 @@ bool promptContinue() {
 	}
 }
 
-
-/***  *************************************************************************/
-//Stolen from CLIah with new name
 std::string strToUppercase(std::string input) {
-	//Transform seems to be the recommended method - causes another include 
-	//and may cause other unknown issues. For practice, this will stay for now,
-	//But may be replaced with a direct index (or iterator) in future.
 	std::transform(input.begin(), input.end(), input.begin(), 
-		//operation is getting the current char and performing toupper
-		[](unsigned char chr){ return std::toupper(chr); } // correct
+		[](unsigned char chr){ return std::toupper(chr); }
 	);
 	
 	//Return the uppercase string
@@ -114,3 +110,9 @@ std::string padMiBStr(size_t bytes, unsigned int pad) {
 	
 	return MiBStr;
 }
+
+std::chrono::milliseconds getMillisecs() {
+	using namespace std::chrono;
+	return duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+}
+
