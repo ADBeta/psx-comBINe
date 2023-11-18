@@ -6,8 +6,8 @@
 * file, and modified the .cue file indexing
 *
 * (c) ADBeta
-* v3.6
-* 26 Sep 2023
+* v3.8
+* 18 Nov 2023
 *******************************************************************************/
 #include <filesystem>
 #include <algorithm>
@@ -464,7 +464,7 @@ void dumpCombinedBins(const SystemVariables &vars, const CueHandler &cueIn,
 	size_t arrBytes = 0, fileBytes = 0, totalBytes = 0;
 	
 	//Create a heap byte array (From defined size in header)
-	char *byteArray;
+	char *byteArray = NULL;
 	
 	try {
 		byteArray = new char[_def_ARR_SIZE];

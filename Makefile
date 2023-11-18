@@ -17,10 +17,10 @@ win32CC := i686-w64-mingw32-g++
 win64CC := x86_64-w64-mingw32-g++
 
 #Flags
-CPPFLAGS  := -Iinclude -MMD -MP
-CFLAGS    := -Wall -std=c++17
+CPPFLAGS  := -Iinclude -MMD -MP -O2 -Wall -Wextra
+CFLAGS    := -Wall
 LDLIBS    := -lm
-winCFLAGS := -Wall -std=c++17 -static-libgcc -static-libstdc++
+winCFLAGS := -Wall -static-libgcc -static-libstdc++ 
 winLDLIBS := -lm -static
 
 

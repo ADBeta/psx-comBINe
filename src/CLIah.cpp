@@ -138,7 +138,7 @@ void analyseArgs(int argc, char *argv[]) {
 	++argv;
 	
 	//Bool flag when a match happens. Used to catch errors
-	bool matchFound;
+	bool matchFound = false;
 
 	//Go through every element in the argv array
 	for(int argStrIdx = 0; argStrIdx < argc; argStrIdx++) {
