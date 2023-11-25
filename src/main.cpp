@@ -520,23 +520,14 @@ void dumpCombinedBins(const SystemVariables &vars, const CueHandler &cueIn,
 		
 		
 		//Get all the bytes from the current input and push them to output.
-		char cByte;
-		while(binFileIn.get(cByte)) {
-			//Put the read byte into the array
-			byteArray[arrBytes] = cByte;
-			++arrBytes;
-			
-			//If the array is full, dump it to the output file, and reset.
-			if(arrBytes == _def_ARR_SIZE) {
-				binFileOut.write(byteArray, _def_ARR_SIZE);
-				arrBytes = 0;
-			}
-			
-			//Keep track of how many bytes read so far, fileByte gets reset at
-			//next loop, totalBytes does not get reset
-			++totalBytes;
-			++fileBytes;
-		}
+		int bytesRead;
+		do {
+			binFileIn.read(byteArray, _def_ARR_SIZE);
+			bytesRead = binFileIn.gcount();
+			totalBytes += bytesRead;
+			fileBytes += bytesRead;
+			binFileOut.write(byteArray, bytesRead);
+		} while (bytesRead == _def_ARR_SIZE);
 		
 		//Close the current file for next loop
 		binFileIn.close();
