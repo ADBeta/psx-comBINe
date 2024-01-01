@@ -1,13 +1,12 @@
 /*******************************************************************************
-* This file is part of psx-comBINe. Please see the github:
-* https://github.com/ADBeta/psx-comBINe
+* This file is part of psx-comBINe. 
+* Please see the github: https://github.com/ADBeta/psx-comBINe
+* This and all other files relating to psx-conBINe are under the GPLv2.0 License
 *
 * psx-comBINe is a simple program to combine multiple .bin files into a single
 * file, and modified the .cue file indexing
 *
-* (c) ADBeta
-* v3.8
-* 18 Nov 2023
+* ADBeta (c)	01 Jan 2024    v4.9.3
 *******************************************************************************/
 #include <filesystem>
 #include <algorithm>
@@ -16,22 +15,21 @@
 #include <string>
 #include <chrono>
 
-#include "helpers.hpp"
-#include "sysVars.hpp"
-#include "TeFiEd.hpp"
-#include "cueHandler.hpp"
-#include "CLIah.hpp"
+#include "cuehandler.hpp"
+#include "clampp.hpp"
 
-/*** Pre-defined output messages **********************************************/
+//Define how large the RAM byte array while dumping should be. (4KB)
+#define _BINARY_ARRAY_SIZE 4096
+
 namespace message {
-std::string copyright = "\npsx-comBINe 3.6 26 Sep 2023 ADBeta(c)";
+const char *copyright = "\npsx-comBINe v4.9.3 01 Jan 2024 ADBeta(c)";
 
-std::string malformed = "Filename (or path in recreate mode) must be the first argument\n";
-
-std::string shortHelp = "Usage: psx-combine [input.cue] [options]\n\
+const char *short_help = 
+"Usage: psx-combine [input.cue or directory] [options]\n\
 use --help for full help information\n";
 
-std::string longHelp = "Usage: psx-comBINe [input.cue] [options]\n\n\
+const char *long_help = 
+"Usage: psx-combine [input.cue or directory] [options]\n\n\
 By default psx-comBINe takes a single input.cue file, creates a directory in\n\
 the .cue's parent directory called \"psx-comBINe\".\n\
 it will then output the combined .bin and .cue file, leaving the original \n\
@@ -43,536 +41,390 @@ Options:\n\
 -d, --directory\t\tChange the output directory\n\
 \t\t\tpsx-combine ./input.cue -d /home/user/games\n\n\
 -f, --filename\t\tSpecify the output .cue filename\n\
-\t\t\tpsx-combine ./input.cue -f combined_game.cue (or combined_game)\n\n\
--c, --create\t\t(re)Creates a .cue file from a .bin file or a directory\n\
-\t\t\tpsx-combine /game/ (or /game/track1.bin for a single bin game) -c\n";
+\t\t\tpsx-combine ./input.cue -f combined_game.cue (or combined_game)\n\n";
+
+//Messages for throw()
+const char *missing_filepath = "Filename or directory was not specified";
+const char *invalid_filepath = "Input path is invalid, or does not exist";
+const char *filepath_bad_extension = "Input file must be a .cue file";
+const char *dir_missing_cue = "Input directory does not contain any .cue files";
+const char *cue_has_no_files = "Input .cue file has no FILEs";
+
+const char *filename_has_dir = "filename argument must only contain a filename";
+const char *filename_bad_extension = "filename extension must be .cue";
+
+const char *input_bin_not_open = "The input file could not be opened";
+const char *output_bin_create_failed = "Output binary file could not be created";
 } //namespace message
 
+
+
+
 /*** Enums & Classes **********************************************************/
-//Create a config structure to set system configuration
-ConfigData Conf;
+enum class FilesystemType {File, Directory, Invalid};
+//clampp Argument handler object
+ClamppClass Args;
+
+
+
 
 /*** Forward Declarations *****************************************************/
-std::string stringToLower(const std::string &);
-int comparePaths(const std::filesystem::path, const std::filesystem::path);
+//Take the input filesystem path and returns its type
+FilesystemType GetPathType(const std::filesystem::path&);
 
-FilesystemType getPathType(std::filesystem::path);
-void createCueFromBinFile(SystemVariables &);
-void createCueFromBinDir(SystemVariables &);
+//Finds the first file with the passed extension and returns its path
+std::filesystem::path FindFileWithExtension(const std::filesystem::path&, 
+                                                            const std::string&);
 
-void combineFiles(SystemVariables &);
-void dumpCombinedBins(const SystemVariables &, const CueHandler &, CueHandler &); 
+//Get and return the current Milliseconds
+std::chrono::milliseconds GetMillisecs();
+
+//Converts an input string to all lowercase
+std::string StringToLower(const std::string&);
+//Converts bytes to a string of its value in MiB, padded with leading spaces
+std::string BytesToPaddedMiBString(const size_t bytes, const size_t pad_len);
+
+//Combines all file inside the original cue sheet to a single .bin file
+void DumpBinFile(const CueSheet &, const std::filesystem::path &input_dir_path,
+                const std::filesystem::path &output_bin_path, const bool timed);
+
+
+
 
 /*** Main *********************************************************************/
-int main(int argc, char *argv[]){
-	/*** Define CLIah Arguments ***********************************************/
-	//CLIah::Config::verbose = true; //Set verbosity when match is found
-	CLIah::Config::stringsEnabled = true; //Set arbitrary strings allowed
+int main(const int argc, const char *argv[]){
+	/*** Local variables for later use ****************************************/
+	//Filesystem variables
+	FilesystemType input_path_type;
+	std::filesystem::path input_cue_path,  input_dir_path,
+						  output_cue_path, output_dir_path, output_bin_path;
+		
+	/*** Define clampp Arguments **********************************************/
+	ClamppConfig::allow_undefined_args = true;
+	int arg_index_help = Args.AddDefinition("--help", "-h", false);
+	int arg_index_dir = Args.AddDefinition("--directory", "-d", true);
+	int arg_index_file = Args.AddDefinition("--filename", "-f", true);
+	int arg_index_timed = Args.AddDefinition("--time", "-t", false);
+	int arg_index_verbose = Args.AddDefinition("--verbose", "-v", false);
 	
-	CLIah::addNewArg(
-		"Help",                 //Reference
-		"--help",               //Primary match string
-		CLIah::ArgType::flag,   //Argument type
-		"-h"                    //Alias match string
-	);
-	//Change output directory
-	CLIah::addNewArg(
-		"Dir",
-		"--directory",
-		CLIah::ArgType::subcommand,
-		"-d"
-	);
-	//Change output filenames
-	CLIah::addNewArg(
-		"Filename",
-		"--filename",
-		CLIah::ArgType::subcommand,
-		"-f"
-	);
-	//Time the execution process
-	 CLIah::addNewArg(
-		"Timed",
-		"--time",
-		CLIah::ArgType::flag,
-		"-t"
-	);
-	//Create a .CUE file from multiple inputs
-	 CLIah::addNewArg(
-		"Create",
-		"--create",
-		CLIah::ArgType::flag,
-		"-c"
-	);
-    //Make psx-comBINe verbose
-    CLIah::addNewArg(
-		"Verbose",
-		"--verbose",
-		CLIah::ArgType::flag,
-		"-v"
-	);
-
 	/** User Argument handling ************************************************/
-	//Get CLIah to scan the CLI Args
-	CLIah::analyseArgs(argc, argv);
+	//Scan the arguments
+	int scan_ret = Args.ScanArgs(argc - 1, argv + 1);
+	
+	//Make sure at least one argument was passed
+	if(scan_ret == CLAMPP_ENOARGS) {
+		std::cerr << message::short_help << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	
+	//If no substring was given when expected, error
+	if(scan_ret == CLAMPP_ENOSUBSTR) {
+		std::cerr << "Argument is missing a parameter. " << message::short_help 
+				  << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	
 	//If help was requested, print the long help message then exit.
-	if( CLIah::isDetected("Help") ) {
-		std::cout << message::longHelp << message::copyright << std::endl;
-		return 0;
+	if(Args.GetDetectedStatus(arg_index_help) == true) {
+		std::cout << message::long_help << message::copyright << std::endl;
+		exit(EXIT_SUCCESS);
 	}
 	
-	//Make sure that at least one string exists and is the first argument passed
-	if( CLIah::stringVector.size() == 0 ) {
-		std::cout << message::shortHelp << message::copyright << std::endl;
-		return 1;
-	}
-	
-	//Compare first string with argv[1] to make sure it is the first arg
-	 if( CLIah::stringVector.at(0).string.compare(argv[1]) != 0 ) {
-	 	std::cout << message::malformed << message::shortHelp 
-	 	          << message::copyright << std::endl;
-		return 1;
-	}
-
-	//Set timed and verbose flags if arguments were passed
-	if(CLIah::isDetected("Timed")) Conf.timed = true;
-	if(CLIah::isDetected("Verbose")) Conf.verbose = true;
-	
-	/** Setup *****************************************************************/
-	SystemVariables SysVars;
-	
-	//Create a path from the first argument, and make sure it is valid
-	std::filesystem::path argPath(CLIah::stringVector.at(0).string);
-	
+	/*** Filesystem handling **************************************************/
 	try {
-		SysVars.inputPathType = getPathType(argPath);
-		
-		//If the input is invalid, throw an error
-		if(SysVars.inputPathType == FilesystemType::invalid) {
-			throw input_path_invalid;
+		//Make sure a filepath string has been passed
+		if(Args.GetUndefinedArg(0).empty()) {
+			throw std::invalid_argument(message::missing_filepath);
 		}
-		
-		//If the input is a file, check the extension
-		if(SysVars.inputPathType == FilesystemType::file) {		
-			//Set the input path to the parent
-			SysVars.inputDir = argPath.parent_path();
-			
-			//Check which file type the input is
-			std::string extension = stringToLower(argPath.extension().string());
-			if(extension == ".bin") {
-				SysVars.inputBin = argPath;
-			} else if(extension == ".cue") {
-				SysVars.inputCue = argPath;
-			}
-		}
-		
-		//If the input is a path set up the inputDir
-		if(SysVars.inputPathType == FilesystemType::directory) {
-			SysVars.inputDir = argPath;
+	
+	/*** Input ***/
+		//Create a path from the first undefined argument input
+		std::filesystem::path arg_filepath(Args.GetUndefinedArg(0));
+		//Get its type and guard against an invalid input
+		input_path_type = GetPathType(arg_filepath);
+		if(input_path_type == FilesystemType::Invalid) {
+			throw std::invalid_argument(message::invalid_filepath);
 		}
 				
-	} catch(const PrgExcep &e) {
-		std::cerr << "Fatal error: " << e.what() << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	
-	//Set up the output path
-	try {
-		//Make sure the input dir is valid
-		if(SysVars.inputDir.empty()) throw input_path_invalid;
-		
-		//If the argument to output to a custom directory 
-		if(CLIah::isDetected("Dir")) {
-			std::filesystem::path temp = CLIah::getSubstring("Dir");
-			SysVars.outputDir = temp / "";
-		} else {		
-		//Otherwise use the input Directory
-			SysVars.outputDir = SysVars.inputDir / "psx-comBINe";
-		}
-		
-		//Set up an empty directory from the output path
-		//If the directory already exists, delete all files in it
-		if(std::filesystem::is_directory(SysVars.outputDir)) {
-			if(!std::filesystem::remove_all(SysVars.outputDir)) {
-				throw cannot_clean_dir;
+		//If the input is a file, check the extension
+		if(input_path_type == FilesystemType::File) {
+			//Make sure the dir_path has a trailing / delim
+			input_dir_path = arg_filepath.parent_path() / "";
+			
+			//Make sure any file input is a .cue file
+			if(StringToLower(arg_filepath.extension().string()) != ".cue") {
+				throw std::invalid_argument(message::filepath_bad_extension);
 			}
-		}	
-	
-		//Create the output directory
-		if(!std::filesystem::create_directory(SysVars.outputDir)) {
-			throw cannot_create_dir;
+			
+			input_cue_path = arg_filepath;
 		}
-	} catch(const PrgExcep &e) {
-		std::cerr << "Fatal error: " << e.what() << std::endl;
+		
+		//If the input is a path set the input_dir
+		if(input_path_type == FilesystemType::Directory) {
+			input_dir_path = arg_filepath / "";
+			
+			//Look for a .cue file in the directory. Error if one is not found
+			input_cue_path = FindFileWithExtension(input_dir_path, ".cue");
+			if(input_cue_path.empty()) {
+				throw std::invalid_argument(message::dir_missing_cue);
+			}
+		}
+		
+	/*** Output ***/
+		//Set the output directory to the -d argument if given; if not, set it
+		//to the input directory + /psx-comBINe/
+		if(Args.GetDetectedStatus(arg_index_dir) == true) {
+			output_dir_path = 
+				   std::filesystem::path(Args.GetSubstring(arg_index_dir)) / "";
+		} else {
+			output_dir_path = input_dir_path / "psx-comBINe" / "";
+		}
+		
+		//If the directory does not already exists, create it
+		if(!std::filesystem::is_directory(output_dir_path)) {
+			std::filesystem::create_directory(output_dir_path);
+			std::cout << "Created Directory: " << output_dir_path << "\n\n";
+		}
+		
+		//Create output binary and cue filename. If override was given use that,
+		//if not, use the input .cue name
+		if(Args.GetDetectedStatus(arg_index_file) == true) {
+			std::filesystem::path out_file_tmp(Args.GetSubstring(arg_index_file));
+			
+			//Make sure the filename is NOT a directory
+			if(out_file_tmp.has_parent_path()) {
+				throw std::invalid_argument(message::filename_has_dir);
+			}
+			//Make sure the extension is .cue
+			if(StringToLower(out_file_tmp.extension().string()) != ".cue") {
+				throw std::invalid_argument(message::filename_bad_extension);
+			}
+			
+			//Append the custom .cue filename to the output .cue and .bin paths
+			output_cue_path = output_dir_path / out_file_tmp;
+			(output_bin_path = output_cue_path).replace_extension("bin");
+			
+		//If no override was passed, use the input .cue filename for output
+		} else {
+			output_cue_path = output_dir_path / input_cue_path.filename();
+			(output_bin_path = output_cue_path).replace_extension("bin");
+		}
+		
+	} catch(const std::exception &e) {
+		std::cerr << "Fatal Error: Filesystem: " << e.what() << "\n\n"
+				  << message::short_help << std::endl;
 		exit(EXIT_FAILURE);
-	}	
-
-	//If success print message to let user know directory has been created
-	std::cout << "Created Directory: " << SysVars.outputDir << std::endl
-	          << std::endl;	
-	
-	/*** Execution Branches ***************************************************/
-	//If the recreation mode was selected
-	if(CLIah::isDetected("Create")) {
-		if(SysVars.inputPathType == FilesystemType::file) {
-			createCueFromBinFile(SysVars);
-		}
-		
-		if(SysVars.inputPathType == FilesystemType::directory) {
-			createCueFromBinDir(SysVars);
-		}
-		
-		return 0;
 	}
 	
-	//If no special execution args were passed, just combine the files
-	combineFiles(SysVars);
+	/*** Cue Handling *********************************************************/
+	//Create a CueSheet object to hold original Sheet data, and one combined
+	//sheet for writing to a file
+	CueSheet cue_original, cue_combined;
+	
+	//Create an input and output .cue file handlers from the filesystem paths
+	CueFile cue_in(input_cue_path.string().c_str());
+	CueFile cue_out(output_cue_path.string().c_str());
+
+	try {
+		//Read the cue sheet data in, make sure there is at least one FILE
+		cue_in.ReadCueData(cue_original);
+		if(cue_original.FileList.empty()) {
+			throw CueException(message::cue_has_no_files);
+		}
+		
+		//Read the FILE sizes. Throws an exception on failure
+		cue_in.GetCueFileSizes(cue_original, input_dir_path.string());
+		
+		//Copy the original sheet info to the combined sheet, then combine.
+		cue_original.CopyTo(cue_combined);
+		cue_combined.Combine(output_bin_path.filename().string(), "BINARY");
+		
+		//If the verbose flag was passed, print the combined sheet
+		if(Args.GetDetectedStatus(arg_index_verbose) == true) {
+			cue_combined.Print();
+		}
+		
+		//Write the combined .cue file out to the cue_out file
+		cue_out.WriteCueData(cue_combined);
+		
+	} catch(const CueException &e) {
+		std::cerr << "Fatal Error: Cue Handler: " << e.what() << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	
+	/*** Binary Handling ******************************************************/
+	//Combine the binary files from input path, to output bin path, and pass
+	//the timed parameter
+	DumpBinFile(cue_original, input_dir_path, output_bin_path, 
+	                                   Args.GetDetectedStatus(arg_index_timed));
+	
+	//Done
 	return 0;
 }
 
+
+
+
 /*** Aux Functions ************************************************************/
-//Convert a string to lowercase
-std::string stringToLower(const std::string &in) {
+//Take the input filesystem path and returns its type
+FilesystemType GetPathType(const std::filesystem::path &path) {
+	FilesystemType type = FilesystemType::Invalid;
+	
+	if(std::filesystem::is_regular_file(path)) {
+		type = FilesystemType::File;	
+	} else if(std::filesystem::is_directory(path)) {
+		type = FilesystemType::Directory;
+	}
+	
+	//Return the invalid signal to signal a failure
+	return type;
+}
+
+//Converts an input string to all lowercase
+std::string StringToLower(const std::string &in) {
 	std::string out;
 	
 	for(std::string::const_iterator it = in.cbegin(); it != in.cend(); ++it) {
 		//NOTE this doesn't support multi-byte chars. fix this later
-		out.push_back(tolower( (char)*it) );
+		out.push_back(static_cast<char>(tolower(*it)));
 	}
 	
-    return out;
+	return out;
 }
 
-int comparePaths(const std::filesystem::path a, const std::filesystem::path b) {
-	return a < b;
-}
-
-//Take the input filesystem path (Argument [0]) and detect if it is a file,
-//directory or invalid
-FilesystemType getPathType(std::filesystem::path path) {
-	if(std::filesystem::is_regular_file(path)) return FilesystemType::file;
+//Finds the first file with the passed extension and returns its path
+std::filesystem::path FindFileWithExtension(const std::filesystem::path &dir, 
+													   const std::string &ext) {	
+	std::filesystem::path found_file;
+	//Scan through all files in the passed directory
+	for(const auto &entry : std::filesystem::directory_iterator(dir)) {
 	
-	if(std::filesystem::is_directory(path)) return FilesystemType::directory;
+		if(entry.is_regular_file() && entry.path().extension() == ext) {
+			found_file = entry.path();
+			break;
+		}
+	}
 	
-	//Return the invalid signal to signal a failure
-	return FilesystemType::invalid;
+	return found_file;
 }
 
-//Takes an input .bin file and creates a .cue file
-void createCueFromBinFile(SystemVariables &vars) {
+//Get and return the current Milliseconds
+std::chrono::milliseconds GetMillisecs() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>
+	                      (std::chrono::system_clock::now().time_since_epoch());
+}
+
+//Converts bytes to a string of its value in MiB, padded with leading spaces
+std::string BytesToPaddedMiBString(const size_t bytes, const size_t pad_len) {
+	//Convert the input bytes to MiB, then create a string from it
+	std::string mib_str = std::to_string((bytes / (1 << 20)));
+	
+	size_t cur_len = mib_str.length();
+	if(pad_len > cur_len) mib_str.insert(0, pad_len - cur_len, ' ');
+	
+	//Append the Unit String then return it
+	mib_str.append(" MiB");
+	return mib_str;
+}
+
+//Combines all file inside the original cue sheet to a single .bin file
+void DumpBinFile(const CueSheet &cs, const std::filesystem::path &in_dir_path,
+               const std::filesystem::path &output_bin_path, const bool timed) {
+	//Define the Begin and End Milliseconds for timed mode. Only use them if
+	//timed mode was selcted
+	std::chrono::milliseconds beg_millis, end_millis;
+	if(timed) beg_millis = GetMillisecs();
+	
+	//Create an output file from the out_bin_path, and a file that will switch
+	//between each of the FILEs inside the cue sheet
+	std::fstream bin_out, bin_in;
+	
+	//Open/Create the output binary file. Make sure it is open, catch errors
 	try {
-		if(vars.inputBin.empty() == true) throw bin_file_not_given;
-	} catch(const PrgExcep &e) {
-		std::cerr << "Fatal error: " << e.what() << std::endl;
+		bin_out.open(output_bin_path, 
+		                    std::ios::out | std::ios::binary | std::ios::trunc);
+		if(!bin_out) throw std::runtime_error(message::output_bin_create_failed);
+
+	} catch(const std::exception &e) {
+		std::cerr << "Fatal Error: Creating " << output_bin_path << ": " 
+		          << e.what() << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	
-	//Create an output .cue file handler
-	if(CLIah::isDetected("Filename")) {
-		vars.outputCue = vars.outputDir / CLIah::getSubstring("Filename");
-	} else {
-		vars.outputCue = vars.outputDir / vars.inputBin.filename();
-	}
-	vars.outputCue.replace_extension("cue");
 	
-	//Open the output cue file and create the file. Exits on failure
-	CueHandler cueOut(vars.outputCue.string());
-	cueOut.create();
+	/*** Runtime ***/
+	//Variables to keep track of total bytes copied to the output file, bytes 
+	//copied just from the current file, and bytes read to the buffer per loop
+	size_t total_output_bytes = 0, current_file_bytes = 0;
+	std::streamsize bytes_read_to_buffer = 0;
 	
-	//Push information to the output .cue
-	cueOut.pushFILE(vars.inputBin.filename().string(), ftBINARY);
+	//Create an array on the heap for the binary copy operations
+	char *bin_array = new char[_BINARY_ARRAY_SIZE];
 	
-	//NOTE This defaults to "MODE2/2352" since that seems common
-	cueOut.pushTRACK(1, ttMODE2_2352);
-	
-	//Pass index, ID 1 and always starts from 00:00:00
-	cueOut.pushINDEX(1, 0);
-	
-	//Print out all of the output CUE data if verbose is enabled
-	if(Conf.verbose == true) cueOut.printFILE(cueOut.FILE[0]);
-	
-	//Write the result of the combination to the cueOut file.
-	cueOut.outputCueData();
-	cueOut.write();
-	
-	std::cout << "Wrote output .cue file to " << vars.outputCue << std::endl;
-}
-
-void createCueFromBinDir(SystemVariables &vars) {
-	//Get all files in the directory passed, ignore any files that are not
-	//.bin files, then sort them alphabetically
-	std::vector<std::filesystem::path> binFiles;
+	//Go through all files in the CueSheet
+	for(const auto &f_itr : cs.FileList) {
+		//Create a filepath from the input directory + the current cue filename
+		std::filesystem::path cur_bin(in_dir_path / f_itr.filename);
+		std::cout << "Dumping File " << cur_bin << std::flush;
 		
-	for(auto const& ent : std::filesystem::directory_iterator(vars.inputDir)) {
-		std::filesystem::path file = ent.path();
-	
-		//Check the file is a .bin file
-		std::string extension = stringToLower(file.extension().string());
-		if(extension == ".bin") {
-			//Add the file path to a vector
-			binFiles.push_back(file);
-		}
-	}
-	
-	try {
-		//Make sure vector is not empty
-		if(binFiles.empty()) throw no_bins_in_directory;
-	} catch(const PrgExcep &e) {
-		std::cerr << "Fatal error: " << e.what() << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	
-	//Sort the file vector alphabetically
-	std::sort(binFiles.begin(), binFiles.end(), comparePaths);
-	
-	//Pre-define a vector iterator and track ID to create the output cue file
-	std::vector<std::filesystem::path>::iterator iter = binFiles.begin();
-	unsigned int currentTrack = 1;
-	
-	//Create an output .cue file handler
-	if(CLIah::isDetected("Filename")) {
-		vars.outputCue = vars.outputDir / CLIah::getSubstring("Filename");
-	} else {
-		vars.outputCue = vars.outputDir / iter->filename();
-	}
-	vars.outputCue.replace_extension("cue");
-	
-	//Open the output cue file and create the file. Exits on failure
-	CueHandler cueOut(vars.outputCue.string());
-	cueOut.create();
-	
-	//Push information of the first binary file to the output .cue
-	cueOut.pushFILE(iter->filename().string(), ftBINARY);
-	cueOut.pushTRACK(currentTrack, ttMODE2_2352);
-	cueOut.pushINDEX(1, 0);
-
-	//Incriment the counters, will loop if more files exist, skips if not
-	++currentTrack;	
-	++iter;
-	
-	//Loop to push information of all the other files to the output cue
-	while(iter < binFiles.end()) {
-		cueOut.pushFILE(iter->filename().string(), ftBINARY);
-		cueOut.pushTRACK(currentTrack, ttAUDIO);
-		cueOut.pushINDEX(0, 0);
-		cueOut.pushINDEX(1, 352800); //00:02:00 timestamp
-		
-		++currentTrack;
-		++iter;
-	}
-	
-	//Print out all of the output CUE data if verbose is enabled
-	if(Conf.verbose == true) {		
-		for(size_t cFile = 0; cFile < cueOut.FILE.size(); cFile++) {
-			cueOut.printFILE(cueOut.FILE[cFile]);
-		}
-	}
-	
-	//Write the result of the combination to the cueOut file.
-	cueOut.outputCueData();
-	cueOut.write();
-	
-	std::cout << "Wrote output .cue file to " << vars.outputCue << std::endl;
-}
-
-//"Normal" mode combine routine
-void combineFiles(SystemVariables &vars) {
-	try {
-		if(vars.inputCue.empty() == true) throw cue_not_given;
-
-		//NOTE Will add support for this later
-		//If the input path is anything but a file, throw an error
-		if(vars.inputPathType != FilesystemType::file) {
-			throw combine_dir_not_supported;
-		}
-	} catch(const PrgExcep &e) {
-		std::cerr << "Fatal error: " << e.what() << std::endl;
-		exit(EXIT_FAILURE);
-	}	
-	
-	//Open a new cueHandler object for the input file, Performs validation.
-	CueHandler cueIn( vars.inputCue.string() );
-	//Read the .cue file into a TeFiEd RAM Vector
-	cueIn.read();
-	
-	
-	//Create an output .cue file handler
-	if(CLIah::isDetected("Filename")) {
-		vars.outputCue = vars.outputDir / CLIah::getSubstring("Filename");
-		vars.outputCue.replace_extension("cue");
-	} else {
-		vars.outputCue = vars.outputDir / vars.inputCue.filename();
-	}
-	
-	//Set output binary file name
-	vars.outputBin = vars.outputDir / vars.inputCue.filename();
-	vars.outputBin.replace_extension("bin");
-	
-	//Read the cue file into the FILE.TRACK.INDEX structure.
-	std::cout << "Getting Input CUE Data... " << std::flush;
-	cueIn.getCueData();
-	std::cout << "Done" << std::endl << std::endl;
-	
-	//Print out all of the input CUE data if verbose is enabled
-	if(Conf.verbose == true) {		
-		for(size_t cFile = 0; cFile < cueIn.FILE.size(); cFile++) {
-			cueIn.printFILE(cueIn.FILE[cFile]);
-		}
-	}
-	
-	//Open the output cue file and create the file. Exits on failure
-	CueHandler cueOut(vars.outputCue.string());
-	cueOut.create();
-	
-	//Dump the binary files in cueIn to the system var output bin
-	dumpCombinedBins(vars, cueIn, cueOut);
-	
-	//Write the result of the combination to the cueOut file.
-	cueOut.outputCueData();
-	cueOut.write();
-	
-	std::cout << "Wrote output .cue file to " << vars.outputCue << std::endl;
-}
-
-//Combines input .cue and .bin files into a single .cue and .bin output
-void dumpCombinedBins(const SystemVariables &vars, const CueHandler &cueIn, 
-                      CueHandler &cueOut) {
-	/** Setup *****************************************************************/
-	//Clear the output cue data, then set the filename to the sysvar
-	cueOut.cleanFILE();
-	cueOut.pushFILE(vars.outputBin.filename().string(), cueIn.FILE[0].TYPE);
-		
-	//Input and output .bin files.
-	std::fstream binFileOut, binFileIn;
-	
-	//Start and End milliseconds
-	std::chrono::milliseconds startMillis, endMillis;
-	if(Conf.timed == true) startMillis = getMillisecs();
-
-	//Create the output binary file and check it is open
-	try {
-		binFileOut.open(vars.outputBin, std::ios::out | std::ios::binary);
-		std::cout << "Creating " << vars.outputBin << std::endl;
-		
-		if(!binFileOut) throw cannot_create_bin;
-	
-	} catch(const PrgExcep &e) {
-		std::cerr << vars.outputBin << ": " << e.what() << std::endl;
-	}
-	
-	//Current byte in array, bytes in each file, and total bytes from all files
-	size_t arrBytes = 0, fileBytes = 0, totalBytes = 0;
-	
-	//Create a heap byte array (From defined size in header)
-	char *byteArray = NULL;
-	
-	try {
-		byteArray = new char[_def_ARR_SIZE];
-	} catch(const std::bad_alloc &e) {
-		std::cerr << allocate_buffer_fail.what() << std::endl;
-	}
-	
-	/** Runtime ***************************************************************/
-	//Go through all bin files in the input cueObject
-	for(size_t cueFile = 0; cueFile < cueIn.FILE.size(); cueFile++) {
-		std::string binFilename = cueIn.FILE[cueFile].FILENAME;
-		std::filesystem::path inputBinPath = vars.inputDir / binFilename;
-		
-		//Print message about file (flush to ensure the text is printed first)
-		std::cout << "Dumping: " << binFilename << "    " << std::flush;
-		
-		//Open the input bin file
+		//Try to open the file
 		try {
-			//Open input binary file to the current string in the vecor.
-			binFileIn.open(inputBinPath, std::ios::in | std::ios::binary);
-		
-			//error check
-			if(!binFileIn) throw cannot_open_bin;
-		} catch(const PrgExcep &e) {
-			std::cerr << inputBinPath << ": " << e.what() << std::endl;
+			bin_in.open(cur_bin, std::ios::in | std::ios::binary);
+			if(!bin_in) std::runtime_error(message::input_bin_not_open);
+			
+		} catch(const std::exception &e) {
+			std::cerr << "Fatal Error: Opening input binary file " << cur_bin 
+			          << ": " << e.what() << std::endl;
+			exit(EXIT_FAILURE);
 		}
 		
-		//Seek to the beginning of the in file to clear flags. Belt and braces
-		binFileIn.seekg(0, std::ios::beg);
+		//Reset the file flags and go to the beginning
+		bin_in.clear();
+		bin_in.seekg(0, std::ios::beg);
 		
+		//Reset bytes read and current file variables each loop
+		current_file_bytes = 0;
+		bytes_read_to_buffer = 0;
 		
-		//Create a temporary FILE object from cueIn, to copy data over
-		CueHandler::FileData pFILE = cueIn.FILE[ cueFile ];
-		
-		//Go through all the TRACKs
-		for(size_t cTrack = 0; cTrack < pFILE.TRACK.size(); cTrack++) {
-			//Temporary TRACK Object
-			CueHandler::TrackData pTRACK = pFILE.TRACK[ cTrack ];
+		//Copy binary_array sized chunks to the output file until there is
+		//nothing left to copy
+		do {
+			//Read up to buffer_size bytes, and keep track of number of bytes
+			bin_in.read(bin_array, _BINARY_ARRAY_SIZE);
+			bytes_read_to_buffer = bin_in.gcount();
 			
-			//Push pTRACKs info to the output file vect
-			cueOut.pushTRACK(pTRACK.ID, pTRACK.TYPE);
+			//Write the data array to the output binary file
+			bin_out.write(bin_array, bytes_read_to_buffer);
 			
-			//Go through all INDEXs
-			for(size_t cIndex = 0; cIndex < pTRACK.INDEX.size(); cIndex++) {
-				//Temporary INDEX object
-				CueHandler::IndexData pINDEX = pTRACK.INDEX[ cIndex ];
-				
-				//Push pINDEX info to the combined ref object, offset to the 
-				//current byte position
-				cueOut.pushINDEX(pINDEX.ID, pINDEX.BYTES + totalBytes);
-			}
-		}
+			//Add the bytes read this loop to the current file bytes
+			current_file_bytes += static_cast<size_t>(bytes_read_to_buffer);
+		} while (bytes_read_to_buffer);
 		
-		
-		//Get all the bytes from the current input and push them to output.
-		char cByte;
-		while(binFileIn.get(cByte)) {
-			//Put the read byte into the array
-			byteArray[arrBytes] = cByte;
-			++arrBytes;
-			
-			//If the array is full, dump it to the output file, and reset.
-			if(arrBytes == _def_ARR_SIZE) {
-				binFileOut.write(byteArray, _def_ARR_SIZE);
-				arrBytes = 0;
-			}
-			
-			//Keep track of how many bytes read so far, fileByte gets reset at
-			//next loop, totalBytes does not get reset
-			++totalBytes;
-			++fileBytes;
-		}
-		
-		//Close the current file for next loop
-		binFileIn.close();
-		
-		//Report how many megabytes the file is, that it is done, then reset.
-		std::cout << padMiBStr(fileBytes, 3) << std::endl;
-		fileBytes = 0;
+		//Add this files bytes to the total
+		total_output_bytes += current_file_bytes;
+		//Report how many MiB was successfully copied on this file
+		std::cout << BytesToPaddedMiBString(current_file_bytes, 6) << std::endl;
+		//Close this file for the next loop
+		bin_in.close();
 	}
 	
-	//Flush what is left of the byte array to the output file
-	if(arrBytes != 0) binFileOut.write(byteArray, arrBytes);
-
-	//Delete heap byte array
-	delete[] byteArray;
 	
-	//Print message that the outfile is waiting to finish wiring
-	std::cout << "\nFinishing write to file ... " << std::flush;
+	//Clear the RAM Buffer and close the output file
+	delete[] bin_array;
+	bin_out.close();
 	
-	//Close the output file
-	binFileOut.close();
-	
-	//If program is being timed, finish timing and print the mesage
-	if(Conf.timed == true) {
-		endMillis = getMillisecs();
-		
+	//Print sats messages - if the timed flag was set, print that info first
+	if(timed == true) {
+		end_millis = GetMillisecs();
 		//Work out difference in millis from start to finish
-		float deltaSecs = (endMillis - startMillis).count();
-		//Then divide by 1000 to set seconds in float format
-		deltaSecs /= 1000;
+		float delta_time = static_cast<float>((end_millis - beg_millis).count())
+		                                                              / 1000.0f;
 		
 		//Use printf instead of cout for native float length settings
-		printf("Finished in %.2f Seconds", deltaSecs);
+		printf("\nFinished in %.2f Seconds", delta_time);
 	}
 	
-	//Report completion and bytes written to the output bin file
-	std::cout << "\nSuccessfully dumped " << padByteStr(totalBytes) << " to " 
-	          << vars.outputBin << std::endl;
+	std::cout << "\nSuccessfully dumped " 
+	          << BytesToPaddedMiBString(total_output_bytes, 0)
+	          << " to " << output_bin_path << std::endl;
 }
-
