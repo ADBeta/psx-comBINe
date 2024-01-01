@@ -2,18 +2,16 @@
 ## What's new?
 * Improved Command Line handler library
 * Improved Cue Handler Library
-* Increased speed around 10x (Thanks to [@mark-dark](https://github.com/mark-dawn))
+* Increased speed around 10x - Thanks to [@mark-dawn](https://github.com/mark-dawn)
 * Multiple bug fixes - mainly bug that deleted all files in parent directory
 * Program can now handle taking a directory as input, finding a .cue file on its own
 * Removed recreate mode - was not very useful
 * Program is now compiled in -O2 mode, and is stress tested and profiled for efficiency
 * Modernised the codebase to be easier to read and maintain
 
-**What's next?**
+## What's next?
 I want to create a GUI version of this program using wxWidgets so it can be 
 easily ported to Windows and Linux. This will be included in Version 5
-
-**32bit and 64bit exes for Windows Systems are in the release files.**
 
 ![logo](https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
 
@@ -28,6 +26,8 @@ information in this README until I make a new video)
 **psx-comBINe** combines a multi-bin CD-ROM PSX Game into a single .CUE and .BIN
 pair and supports all CUE MODES, Remarks, 99 TRACKS, with 99 INDEXS each, 
 support for multi-session dumps, and more.  
+
+**32bit and 64bit exes for Windows Systems are in the release files.**
 
 psx-comBINe is designed to be lightweight and fast; one of the main design goals
 with this CLI version is to allow it to be ported into other projects - such as 
@@ -93,6 +93,40 @@ for detailed usage notes and instructions
 Alternatively, use the inbuilt help  
 `psx-combine --help`
 
+## Speed Tests
+```
+Test Game    Size         Tracks
+-----------------------------------
+Rayman       701,881 KB   51 Tracks
+WipEout      505,151 KB   9 Tracks
+-----------------------------------
+
+PSX Game      Average time     Data Speed
+-------------------------------------------
+Windows 10
+64bit, AMD Ryzen 7 5700X:
+-------------------------------------------
+Rayman                         61,246 KiB/s TODO
+WipEout       05.91s           85,473 KiB/s
+
+Arch Linux
+64bit, AMD Ryzen 7 5700X:
+-------------------------------------------
+Rayman        00.85s          825,742 KiB/s
+WipEout       00.85s          594,295 KiB/s
+
+Debian 8 (jessie)
+32bit, 1.6GHz, Single core Atom CPU:
+-------------------------------------------
+Rayman        45.33s           15,483 KiB/s
+WipEout       31.55s           16,011 KiB/s
+
+Windows 7
+32bit, 1.6GHz, Single core Atom CPU:
+-------------------------------------------
+Rayman        18.94s           37,058 KiB/s
+WipEout       18.20s           27,755 KiB/s
+```
 ----
-<b> 2023-2014 ADBeta </b>  
+<b> 2023-2024 ADBeta </b>  
 This software is under the GPL 2.0 Licence, please see LICENCE for information
