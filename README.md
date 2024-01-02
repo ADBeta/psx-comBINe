@@ -15,17 +15,10 @@ easily ported to Windows and Linux. This will be included in Version 5
 
 ![logo](https://github.com/ADBeta/psx-comBINe/blob/main/psx-comBINe.jpg)
 
-I have made a [YouTube video](https://www.youtube.com/watch?v=gBMUwBJaiMM) about
-psx-comBINe  
-(**NOTE** This video is outdated and doesn't cover all
-of the available functions. Use the 
-[Usage file](https://github.com/ADBeta/psx-comBINe/blob/main/Usage.md) and the 
-information in this README until I make a new video)
-
 ## Decription
-**psx-comBINe** combines a multi-bin CD-ROM PSX Game into a single .CUE and .BIN
-pair and supports all CUE MODES, Remarks, 99 TRACKS, with 99 INDEXS each, 
-support for multi-session dumps, and more.  
+**psx-comBINe** is a cross platform program to combine a multi-bin CD-ROM 
+PSX Game into a single .CUE and .BIN pair. It supports all CUE MODES, Remarks, 
+99 TRACKS, with 99 INDEXS each, support for multi-session dumps, and more.  
 
 **32bit and 64bit exes for Windows Systems are in the release files.**
 
@@ -106,8 +99,8 @@ PSX Game      Average time     Data Speed
 Windows 10
 64bit, AMD Ryzen 7 5700X:
 -------------------------------------------
-Rayman                         61,246 KiB/s TODO
-WipEout       05.91s           85,473 KiB/s
+Rayman        01.51s          464,821 KiB/s
+WipEout       01.44s          350,799 KiB/s
 
 Arch Linux
 64bit, AMD Ryzen 7 5700X:
@@ -118,8 +111,8 @@ WipEout       00.85s          594,295 KiB/s
 Debian 8 (jessie)
 32bit, 1.6GHz, Single core Atom CPU:
 -------------------------------------------
-Rayman        45.33s           15,483 KiB/s
-WipEout       31.55s           16,011 KiB/s
+Rayman        10.14s           69,219 KiB/s
+WipEout       16.55s           30,522 KiB/s
 
 Windows 7
 32bit, 1.6GHz, Single core Atom CPU:

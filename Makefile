@@ -18,8 +18,8 @@ win64CC := x86_64-w64-mingw32-g++
 
 #Flags
 CPPFLAGS  := -Iinclude -O2 -MMD -MP -Wall -Wextra -Wsign-conversion -Wmissing-declarations -Wconversion -Wshadow -Wlogical-op -Wfloat-equal -Wunused -Wuninitialized -Wformat -Wunused-result -Wtype-limits
-CFLAGS    := -Wall
-LDLIBS    := -lm
+CFLAGS    := -Wall -std=c++17 #-static-libgcc -static-libstdc++ -m32 -march=i686 #32bit arch
+LDLIBS    := -lm #-m32 -static #32-bit arch
 winCFLAGS := -O2 -Wall -static-libgcc -static-libstdc++ 
 winLDLIBS := -lm -static
 
