@@ -1,7 +1,7 @@
 #include <iostream>
 
 // Disable all the warnings JUST for wx-widgets
-// Editor note: fix your shit wx. That many errors is a joke
+// Editor note: fix your shit wx. That many warnings is a joke
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wextra"
@@ -103,7 +103,7 @@ MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, "psx-comBINe") {
 
 	// Create Window Sizer Flags defaults TODO: Move this
 	wxSizerFlags SizerMainDefault(1);
-    SizerMainDefault.Border(wxALL, 10).CenterHorizontal();
+	SizerMainDefault.Border(wxALL, 10).CenterHorizontal();
 
 
 

@@ -8,8 +8,19 @@
 *
 * ADBeta (c)	01 Jan 2024	v4.9.3
 *******************************************************************************/
+#include <filesystem>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <chrono>
+
+#include "cuehandler.hpp"
+#include "clampp.hpp"
+
+/*** wx-widgets guff *********************************************************/
 // Disable all the warnings JUST for wx-widgets
-// Editor note: fix your shit wx. That many errors is a joke
+// Editor note: fix your shit wx. That many warnings is a joke
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wextra"
@@ -25,16 +36,7 @@ extern wxAppConsole *wxCreateApp();
 extern wxAppInitializer wxTheAppInitializer;
 
 
-#include <filesystem>
-#include <algorithm>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <chrono>
-
-#include "cuehandler.hpp"
-#include "clampp.hpp"
-
+/*** Globals *****************************************************************/
 //Define how large the RAM byte array while dumping should be. (4KB)
 #define _BINARY_ARRAY_SIZE 4096
 
@@ -75,14 +77,10 @@ const char *output_bin_create_failed = "Output binary file could not be created"
 } //namespace message
 
 
-
-
 /*** Enums & Classes **********************************************************/
 enum class FilesystemType {File, Directory, Invalid};
 //clampp Argument handler object
 ClamppClass Args;
-
-
 
 
 /*** Forward Declarations *****************************************************/
@@ -96,17 +94,16 @@ std::filesystem::path FindFileWithExtension(const std::filesystem::path&,
 //Get and return the current Milliseconds
 std::chrono::milliseconds GetMillisecs();
 
+
 //Converts an input string to all lowercase
 std::string StringToLower(const std::string&);
 //Converts bytes to a string of its value in MiB, padded with leading spaces
 std::string BytesToPaddedMiBString(const size_t bytes, const size_t pad_len);
 
+
 //Combines all file inside the original cue sheet to a single .bin file
 void DumpBinFile(const CueSheet &, const std::filesystem::path &input_dir_path,
 				const std::filesystem::path &output_bin_path, const bool timed);
-
-
-
 
 /*** Main *********************************************************************/
 int main(const int argc, const char *argv[]) {
@@ -125,6 +122,8 @@ int main(const int argc, const char *argv[]) {
 	wxEntryCleanup();
 
 
+	// TODO: Only run wx when gui specified.
+	// convert main to function for duming bin file. call from wx or cli
 	while(true);;
 
 	/*** Local variables for later use ****************************************/
