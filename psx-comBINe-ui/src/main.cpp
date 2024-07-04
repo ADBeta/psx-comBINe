@@ -6,7 +6,7 @@
 * psx-comBINe is a simple program to combine multiple .bin files into a single
 * file, and modified the .cue file indexing
 *
-* ADBeta (c)	01 Jan 2024    v4.9.3
+* ADBeta (c)	01 Jan 2024	v4.9.3
 *******************************************************************************/
 // Disable all the warnings JUST for wx-widgets
 // Editor note: fix your shit wx. That many errors is a joke
@@ -15,12 +15,15 @@
 #pragma GCC diagnostic ignored "-Wextra"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-	#include <wx/wx.h>
-#endif
-
+////
+#include <wx/wx.h>
+////
 #pragma GCC diagnostic pop
+
+// Forward declare the wxWidgets app initialization
+extern wxAppConsole *wxCreateApp();
+extern wxAppInitializer wxTheAppInitializer;
+
 
 #include <filesystem>
 #include <algorithm>
@@ -88,7 +91,7 @@ FilesystemType GetPathType(const std::filesystem::path&);
 
 //Finds the first file with the passed extension and returns its path
 std::filesystem::path FindFileWithExtension(const std::filesystem::path&, 
-                                                            const std::string&);
+															const std::string&);
 
 //Get and return the current Milliseconds
 std::chrono::milliseconds GetMillisecs();
@@ -100,13 +103,30 @@ std::string BytesToPaddedMiBString(const size_t bytes, const size_t pad_len);
 
 //Combines all file inside the original cue sheet to a single .bin file
 void DumpBinFile(const CueSheet &, const std::filesystem::path &input_dir_path,
-                const std::filesystem::path &output_bin_path, const bool timed);
+				const std::filesystem::path &output_bin_path, const bool timed);
 
 
 
 
 /*** Main *********************************************************************/
-int main(const int argc, const char *argv[]){
+int main(const int argc, const char *argv[]) {
+
+	// Initialize wxWidgets
+	wxDISABLE_DEBUG_SUPPORT();
+	wxApp::SetInstance(wxCreateApp());
+	wxEntryStart(const_cast<int&>(argc), const_cast<char**>(argv));
+	wxTheApp->CallOnInit();
+	
+	// Start the wxWidgets main loop
+	wxTheApp->OnRun();
+	
+	// Clean up wxWidgets
+	wxTheApp->OnExit();
+	wxEntryCleanup();
+
+
+	while(true);;
+
 	/*** Local variables for later use ****************************************/
 	//Filesystem variables
 	FilesystemType input_path_type;
@@ -270,7 +290,7 @@ int main(const int argc, const char *argv[]){
 	//Combine the binary files from input path, to output bin path, and pass
 	//the timed parameter
 	DumpBinFile(cue_original, input_dir_path, output_bin_path, 
-	                                   Args.GetDetectedStatus(arg_index_timed));
+									   Args.GetDetectedStatus(arg_index_timed));
 	
 	//Done
 	return 0;
@@ -325,7 +345,7 @@ std::filesystem::path FindFileWithExtension(const std::filesystem::path &dir,
 //Get and return the current Milliseconds
 std::chrono::milliseconds GetMillisecs() {
 	return std::chrono::duration_cast<std::chrono::milliseconds>
-	                      (std::chrono::system_clock::now().time_since_epoch());
+						  (std::chrono::system_clock::now().time_since_epoch());
 }
 
 //Converts bytes to a string of its value in MiB, padded with leading spaces
@@ -343,7 +363,7 @@ std::string BytesToPaddedMiBString(const size_t bytes, const size_t pad_len) {
 
 //Combines all file inside the original cue sheet to a single .bin file
 void DumpBinFile(const CueSheet &cs, const std::filesystem::path &in_dir_path,
-               const std::filesystem::path &output_bin_path, const bool timed) {
+			   const std::filesystem::path &output_bin_path, const bool timed) {
 	//Define the Begin and End Milliseconds for timed mode. Only use them if
 	//timed mode was selcted
 	std::chrono::milliseconds beg_millis, end_millis;
@@ -356,12 +376,12 @@ void DumpBinFile(const CueSheet &cs, const std::filesystem::path &in_dir_path,
 	//Open/Create the output binary file. Make sure it is open, catch errors
 	try {
 		bin_out.open(output_bin_path, 
-		                    std::ios::out | std::ios::binary | std::ios::trunc);
+							std::ios::out | std::ios::binary | std::ios::trunc);
 		if(!bin_out) throw std::runtime_error(message::output_bin_create_failed);
 
 	} catch(const std::exception &e) {
 		std::cerr << "Fatal Error: Creating " << output_bin_path << ": " 
-		          << e.what() << std::endl;
+				  << e.what() << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	
@@ -388,7 +408,7 @@ void DumpBinFile(const CueSheet &cs, const std::filesystem::path &in_dir_path,
 			
 		} catch(const std::exception &e) {
 			std::cerr << "Fatal Error: Opening input binary file " << cur_bin 
-			          << ": " << e.what() << std::endl;
+					  << ": " << e.what() << std::endl;
 			exit(EXIT_FAILURE);
 		}
 		
@@ -432,13 +452,13 @@ void DumpBinFile(const CueSheet &cs, const std::filesystem::path &in_dir_path,
 		end_millis = GetMillisecs();
 		//Work out difference in millis from start to finish
 		float delta_time = static_cast<float>((end_millis - beg_millis).count())
-		                                                              / 1000.0f;
+																	  / 1000.0f;
 		
 		//Use printf instead of cout for native float length settings
 		printf("\nFinished in %.2f Seconds", delta_time);
 	}
 	
 	std::cout << "\nSuccessfully dumped " 
-	          << BytesToPaddedMiBString(total_output_bytes, 0)
-	          << " to " << output_bin_path << std::endl;
+			  << BytesToPaddedMiBString(total_output_bytes, 0)
+			  << " to " << output_bin_path << std::endl;
 }
