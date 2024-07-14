@@ -6,7 +6,7 @@
 * psx-comBINe is a simple program to combine multiple .bin files into a single
 * file, and modified the .cue file indexing
 *
-* ADBeta (c)	Ver 5.0.1    13 Jul 2024
+* ADBeta (c)	Ver 5.1.0    14 Jul 2024
 *******************************************************************************/
 #include <filesystem>
 #include <algorithm>
@@ -254,6 +254,11 @@ bool MainApp::OnInit() {
 	MainFrame *frame = new MainFrame();
 	frame->Show(true);
 	frame->SetMinSize(wxSize(550, 350));
+
+	// Set background colour to pure white
+	frame->SetBackgroundColour(wxColour(255, 255, 255));
+    // Make sure frame's client area (child controls) is also colored
+    frame->ClearBackground();
 	return true;
 }
 
