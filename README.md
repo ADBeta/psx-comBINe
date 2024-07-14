@@ -1,9 +1,11 @@
 ﻿# psx-comBINe V5!!
-![logo](/psx-comBINe.jpg?raw=true)
+![logo](/images/psx-comBINe.jpg?raw=true)
 
 ## What's new?
 * New Cross Platform GUI!
 * Small improvements to the binary dumping routine
+
+![ui](/images/UI.jpg?raw=true)
 
 ## Decription
 **psx-comBINe** is a lightweight and fast, cross-platform program to combine
