@@ -18,13 +18,13 @@ win64CC := x86_64-w64-mingw32-g++
 
 #Flags
 CPPFLAGS  := -Iinclude -O2 -MMD -MP -Wall -Wextra -Wsign-conversion -Wmissing-declarations -Wconversion -Wshadow -Wlogical-op -Wfloat-equal -Wunused -Wuninitialized -Wformat -Wunused-result -Wtype-limits
-CFLAGS    := -Wall -std=c++17 #-static-libgcc -static-libstdc++ -m32 -march=i686 #32bit arch
-LDLIBS    := -lm #-m32 -static #32-bit arch
-winCFLAGS := -O2 -Wall -static-libgcc -static-libstdc++ 
-winLDLIBS := -lm -static
+CFLAGS    := -Wall -std=c++17 `wx-config --cxxflags` #-static-libgcc -static-libstdc++ -m32 -march=i686 #32bit arch
+LDLIBS    := -lm `wx-config --libs` #-m32 -static #32-bit arch
 
-
-# Windows needs -static link and static cflags
+# Compiler flags for Windows 
+winCFLAGS := -O2 -Wall -static-libgcc -static-libstdc++ `/usr/x86_64-w64-mingw32/bin/wx-config --cxxflags`
+# Linker flags for Windows
+winLDLIBS := -lm -static `/usr/x86_64-w64-mingw32/bin/wx-config --libs`
 
 .PHONY: all win32 win64 install clean
 

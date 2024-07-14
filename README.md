@@ -1,30 +1,17 @@
-﻿# psx-comBINe V4!
+﻿# psx-comBINe V5!!
 ![logo](/psx-comBINe.jpg?raw=true)
 
 ## What's new?
-* Improved Command Line handler library
-* Improved Cue Handler Library
-* Increased speed around 10x - Thanks to [@mark-dawn](https://github.com/mark-dawn)
-* Multiple bug fixes - mainly bug that deleted all files in parent directory
-* Program can now handle taking a directory as input, finding a .cue file on its own
-* Removed recreate mode - was not very useful
-* Program is now compiled in -O2 mode, and is stress tested and profiled for efficiency
-* Modernised the codebase to be easier to read and maintain
-
-## What's next?
-I want to create a GUI version of this program using wxWidgets so it can be 
-easily ported to Windows and Linux. This will be included in Version 5
+* New Cross Platform GUI!
+* Small improvements to the binary dumping routine
 
 ## Decription
-**psx-comBINe** is a cross-platform program to combine multi-bin CD-ROM
-PSX Games into a single `.CUE` and `.BIN` pair. It supports all CUE `MODES`,
-`Remarks,` 99 `TRACKS`, with 99 `INDEX`s each, support for multi-session dumps, and more.  
+**psx-comBINe** is a lightweight and fast, cross-platform program to combine
+multi-bin CD-ROM PSX Games into a single `.CUE` and `.BIN` pair. It supports
+all CUE `MODES`, `Remarks,` 99 `TRACKS`, with 99 `INDEX`s each, support for 
+multi-session dumps, and more.  
 
 **32-bit and 64-bit exes for Windows Systems are in the release files.**
-
-psx-comBINe is designed to be lightweight and fast, with considerations to 
-support the use of this program inside other projects - like emulators.  
-Simplicity is also a main goal of psx-comBINe.  
 
 psx-comBINe supports the CUE sheet specifications;
 * Supports all of the GNU approved CUE `TYPE`s
@@ -38,10 +25,15 @@ This program should only be used with legitimately acquired backups of disks
 you own **LEGALLY**  
 
 ## Minimum Requirments  
-* C++17 or higher Compiler
+* 4KB Free RAM
 * 32-bit or higher architecture
 
 ## Compilation
+### Requirments
+To Compile this project you will need:
+* wxWidgets
+* mingw (If using Linux to compile for Windows)
+* wxWidgets for mingw (If using Linux to compile for Windows)
 ### Linux
 The easiest way to install psx-comBINe is to use git clone:
 ``` sh
@@ -73,46 +65,6 @@ make win32
 make win64
 ```
 
-## Usage
-See the [Usage file](/Usage.md) 
-for detailed usage notes and instructions  
-Alternatively, use the inbuilt help  
-`psx-combine --help`
-
-## Speed Tests
-```
-Test Game    Size         Tracks
------------------------------------
-Rayman       701,881 KB   51 Tracks
-WipEout      505,151 KB   9 Tracks
------------------------------------
-
-PSX Game      Average time     Data Speed
--------------------------------------------
-Windows 10
-64bit, AMD Ryzen 7 5700X:
--------------------------------------------
-Rayman        01.51s          464,821 KiB/s
-WipEout       01.44s          350,799 KiB/s
-
-Arch Linux
-64bit, AMD Ryzen 7 5700X:
--------------------------------------------
-Rayman        00.85s          825,742 KiB/s
-WipEout       00.85s          594,295 KiB/s
-
-Debian 8 (jessie)
-32bit, 1.6GHz, Single core Atom CPU:
--------------------------------------------
-Rayman        10.14s           69,219 KiB/s
-WipEout       16.55s           30,522 KiB/s
-
-Windows 7
-32bit, 1.6GHz, Single core Atom CPU:
--------------------------------------------
-Rayman        18.94s           37,058 KiB/s
-WipEout       18.20s           27,755 KiB/s
-```
 ----
 **ADBeta (c) 2023-2024**  
 This software is under the GPL 2.0 Licence, please see LICENCE for information
