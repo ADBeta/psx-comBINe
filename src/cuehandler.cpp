@@ -251,8 +251,14 @@ int CueFile::WriteCueData(const CueSheet &cs) {
 	this->cue_file.clear();
 	this->cue_file.seekg(0, std::ios::beg);
 	
-	this->cue_file << cs.ToString();
-	
+	//this->cue_file << cs.ToString();
+	// Write the CueSheet data with Windows-style line endings (\r\n)
+	std::string cueData = cs.ToString();
+	this->cue_file.write(
+		cueData.c_str(), 
+		static_cast<std::streamsize>(cueData.length())
+	);
+
 	//Close the File and return success
 	this->Close();
 	return 0;
@@ -285,15 +291,24 @@ uint32_t CueFile::GetFileBytes(const std::string &fname) {
 int CueFile::OpenRead() {
 	int errcode = 0;
 	
-	this->cue_file.open(this->filename, std::ios::in);
+	this->cue_file.open(
+		this->filename, 
+		std::ios::in
+	);
+
 	if(this->cue_file.is_open() == false) errcode = -1;
 	return errcode;
 }
 
 int CueFile::OpenWrite() {
 	int errcode = 0;
-	
-	this->cue_file.open(this->filename, std::ios::out | std::ios::trunc);
+
+	// Open file in Binary Mode to avoid extra \r's from being added
+	this->cue_file.open(
+		this->filename, 
+		std::ios::out | std::ios::binary | std::ios::trunc
+	);
+
 	if(this->cue_file.is_open() == false) errcode = -1;
 	return errcode;
 }

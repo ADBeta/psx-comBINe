@@ -6,7 +6,9 @@
 * psx-comBINe is a simple program to combine multiple .bin files into a single
 * file, and modified the .cue file indexing
 *
-* ADBeta (c)	Ver 5.1.0    14 Jul 2024
+* TODO: Windows mode .cue adds extra lines
+*
+* ADBeta (c)	Ver 5.2.0    14 Jul 2024
 *******************************************************************************/
 #include <filesystem>
 #include <algorithm>

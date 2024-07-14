@@ -35,7 +35,9 @@ To Compile this project you will need:
 * mingw (If using Linux to compile for Windows)
 * wxWidgets for mingw (If using Linux to compile for Windows)
 ### Linux
-The easiest way to install psx-comBINe is to use git clone:
+**A linux binary, for x86, is available in the release files**  
+The easiest way to install psx-comBINe for other architectures is to use 
+git clone:
 ``` sh
 git clone https://github.com/ADBeta/psx-comBINe
 cd ./psx-comBINe
