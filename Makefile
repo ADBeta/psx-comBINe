@@ -18,8 +18,8 @@ WIN64CC := x86_64-w64-mingw32-g++
 
 #Flags
 CPPFLAGS  := -Iinclude -O2 -MMD -MP -Wall -Wextra -Wsign-conversion -Wmissing-declarations -Wconversion -Wshadow -Wlogical-op -Wfloat-equal -Wunused -Wuninitialized -Wformat -Wunused-result -Wtype-limits
-CFLAGS    := -Wall -std=c++17 `wx-config --cxxflags` #-static-libgcc -static-libstdc++ -m32 -march=i686 #32bit arch
-LDLIBS    := -lm `wx-config --libs` #-m32 -static #32-bit arch
+CFLAGS    := -Wall -std=c++17 `wx-config --cxxflags` #-static-libgcc -static-libstdc++ #-m32 -march=i686
+LDLIBS    := -lm `wx-config --libs` #-static #-m32
 
 WIN32CFLAGS := -O2 -Wall -static-libgcc -static-libstdc++ `/usr/i686-w64-mingw32/bin/wx-config --cxxflags`
 WIN64CFLAGS := -O2 -Wall -static-libgcc -static-libstdc++ `/usr/x86_64-w64-mingw32/bin/wx-config --cxxflags`
