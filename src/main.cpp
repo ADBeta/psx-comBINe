@@ -257,8 +257,11 @@ bool MainApp::OnInit() {
 	frame->Show(true);
 	frame->SetMinSize(wxSize(550, 350));
 
+	// Detect if program is running in Windows
+	#ifdef __WXMSW__
 	// Set background colour to pure white
 	frame->SetBackgroundColour(wxColour(255, 255, 255));
+	#endif
     // Make sure frame's client area (child controls) is also colored
     frame->ClearBackground();
 	return true;
