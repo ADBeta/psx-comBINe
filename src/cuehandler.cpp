@@ -316,6 +316,7 @@ int CueFile::OpenWrite() {
 int CueFile::Close() {
 	int errcode = 0;
 	
+	this->cue_file.flush();
 	this->cue_file.close();
 	if(this->cue_file.fail()) errcode = -1;
 	return errcode;
@@ -651,8 +652,9 @@ uint32_t CueSheet::TimestampToBytes(const std::string &timestamp,
     uint32_t total_bytes = timestamp_nval;
         
 	if(type != TrackType::Invalid && IsValidTimestamp(timestamp)) {
-		//Strip values from the timestamp. "MM:SS:ff" NOTE: Minutes are already
-    	//guarded from being over 99 because of IsValidTimestamp
+		//Strip values from the timestamp. "MM:SS:ff"
+		//NOTE: Minutes are already guarded from being over 99 because 
+		//of IsValidTimestamp
 		uint32_t minutes, seconds, frames;
 		minutes = static_cast<uint32_t>(std::stoul(timestamp.substr(0, 2)));
 		seconds = static_cast<uint32_t>(std::stoul(timestamp.substr(3, 2)));
@@ -681,7 +683,7 @@ std::string CueSheet::TrackToStr(const FileObj::TrackObj *track_ptr) {
 	std::string output;
 	if(track_ptr != nullptr) {
 		output = "  TRACK " + NumToStrPad(track_ptr->id, 2) + " " 
-		                                      + TrackTypeToStr(track_ptr->type);
+							+ TrackTypeToStr(track_ptr->type);
 	}
 	
 	return output;
@@ -692,7 +694,7 @@ std::string CueSheet::IndexToStr(const FileObj::TrackObj::IndexObj *index_ptr,
 	std::string output;
 	if(index_ptr != nullptr) {
 		output = "    INDEX " + NumToStrPad(index_ptr->id, 2) + " " 
-		                            + BytesToTimestamp(index_ptr->offset, type);
+		            		  + BytesToTimestamp(index_ptr->offset, type);
 	}
 	
 	return output;
